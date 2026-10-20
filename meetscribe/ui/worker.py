@@ -213,7 +213,15 @@ class CaptureWorker(QObject):
         self._corrector = Corrector(
             OllamaClient(base, timeout=float(self.settings.get("llm.timeout", 60))), model, hotwords
         )
-        threading.Thread(target=self._llm_loop, name="llmfix", daemon=True).start()
+        threading.Thread(target=self._prepare_llm, name="llmprep", daemon=True).start()
+
+    def _prepare_llm(self) -> None:
+        """后台确认服务可用（必要时拉起 ollama serve），再开始周期纠错。"""
+        try:
+            self._corrector.client.ensure_server()
+        except Exception:  # noqa: BLE001
+            pass
+        self._llm_loop()
 
     def _stop_llm(self) -> None:
         ev = getattr(self, "_llm_stop", None)
@@ -228,7 +236,7 @@ class CaptureWorker(QObject):
                 pending = [
                     r for r in self._records
                     if not r.get("llm") and len(_normalize(r["text"])) >= 4
-                ][-8:]
+                ][:8]  # 按时间顺序处理，保证早晚能追上
             if not pending or self._corrector is None:
                 continue
             items = [FixRequest((r["track"], r["start_ms"]), r["text"]) for r in pending]

@@ -14,6 +14,7 @@ class ChatResult:
     prompt_tokens: int = 0
     eval_tokens: int = 0
     seconds: float = 0.0
+    thinking: str = ""
 
 
 class OllamaError(RuntimeError):
@@ -47,9 +48,48 @@ class OllamaClient:
         except OllamaError:
             return False
 
+    @staticmethod
+    def locate_exe() -> str | None:
+        import os
+        import shutil
+
+        found = shutil.which("ollama")
+        if found:
+            return found
+        cand = os.path.join(os.environ.get("LOCALAPPDATA", ""), "Programs", "Ollama", "ollama.exe")
+        return cand if os.path.exists(cand) else None
+
+    def ensure_server(self, wait: float = 12.0) -> bool:
+        """服务没起来就自己拉一个（Ollama 桌面版开机自启，但被关掉时会连不上）。"""
+        import subprocess
+        import time
+
+        if self.alive():
+            return True
+        exe = self.locate_exe()
+        if not exe:
+            return False
+        try:
+            flags = 0
+            if hasattr(subprocess, "CREATE_NO_WINDOW"):
+                flags = subprocess.CREATE_NO_WINDOW
+            subprocess.Popen(
+                [exe, "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                creationflags=flags,
+            )
+        except Exception:  # noqa: BLE001
+            return False
+        deadline = time.time() + wait
+        while time.time() < deadline:
+            if self.alive():
+                return True
+            time.sleep(0.6)
+        return False
+
     def chat(
         self, model: str, system: str, user: str,
         temperature: float = 0.0, num_predict: int = 512, timeout: float | None = None,
+        think: bool = False,
     ) -> ChatResult:
         import time
 
@@ -60,7 +100,9 @@ class OllamaClient:
                 {"role": "user", "content": user},
             ],
             "stream": False,
-            "think": False,  # qwen3 关掉思考链，纠错不需要推理过程
+            # 思考链默认关闭；部分 qwen3 版本不认这个开关，此时思考会进 thinking 字段或混进正文，
+            # 由调用方（Corrector/摘要）用 _clean 兜底。
+            "think": think,
             "options": {"temperature": temperature, "num_predict": num_predict},
         }
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
@@ -83,6 +125,7 @@ class OllamaClient:
             prompt_tokens=int(data.get("prompt_eval_count", 0)),
             eval_tokens=int(data.get("eval_count", 0)),
             seconds=time.perf_counter() - t0,
+            thinking=str(msg.get("thinking", "") or ""),
         )
 
     def pull(self, model: str) -> None:

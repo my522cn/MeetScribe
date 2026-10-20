@@ -32,21 +32,27 @@ def content_length(url: str) -> int:
 
 
 def fetch(idx: int, start: int, end: int, url: str) -> tuple[int, int]:
+    """按"缺多少补多少"的方式续下：每次都从已有长度处再要剩余区间，追加写入。
+
+    注意不能同时用 -r 和 -C -（curl 会同时按两者算偏移，结果错位）。
+    """
     PARTS.mkdir(parents=True, exist_ok=True)
     part = PARTS / f"p{idx:02d}"
+    tmp = PARTS / f"p{idx:02d}.part"
     want = end - start + 1
-    for attempt in range(6):
+    for _ in range(8):
         have = part.stat().st_size if part.exists() else 0
-        if have == want:
-            return idx, have
-        if have > want:
-            part.unlink()
-            have = 0
-        cmd = ["curl", "-sL", "--fail", "--max-time", "900",
-               "-r", f"{start + have}-{end}", "-o", str(part)]
-        if have:
-            cmd += ["-C", "-"]  # 追加续传
-        subprocess.run(cmd + [url], capture_output=True)
+        if have >= want:
+            break
+        subprocess.run(
+            ["curl", "-sL", "--fail", "--max-time", "900",
+             "-r", f"{start + have}-{end}", "-o", str(tmp), url],
+            capture_output=True,
+        )
+        if tmp.exists() and tmp.stat().st_size:
+            with open(part, "ab") as f:
+                f.write(tmp.read_bytes())
+            tmp.unlink()
         time.sleep(1)
     return idx, part.stat().st_size if part.exists() else 0
 

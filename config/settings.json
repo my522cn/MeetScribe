@@ -21,11 +21,11 @@
     "session_root": "data/sessions"
   },
   "llm": {
-    "enabled": false,
+    "enabled": true,
     "base_url": "http://127.0.0.1:11434",
-    "fix_model": "qwen3:4b",
-    "summary_model": "qwen3:8b",
-    "timeout": 60
+    "fix_model": "qwen2.5:3b-instruct",
+    "summary_model": "qwen2.5:7b-instruct",
+    "timeout": 90
   },
   "ui": {
     "float_margin": 24,

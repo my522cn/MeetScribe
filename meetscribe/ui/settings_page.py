@@ -364,8 +364,8 @@ class SettingsPage(QWidget):
         self.cmb_sum_model = QComboBox()
         self.cmb_sum_model.setEditable(True)
         for box, items in (
-            (self.cmb_fix_model, ["qwen3:4b", "qwen3:1.7b", "qwen3:8b"]),
-            (self.cmb_sum_model, ["qwen3:8b", "qwen3:4b"]),
+            (self.cmb_fix_model, ["qwen2.5:3b-instruct", "qwen2.5:7b-instruct", "qwen3:4b"]),
+            (self.cmb_sum_model, ["qwen2.5:7b-instruct", "qwen2.5:3b-instruct", "qwen3:8b"]),
         ):
             box.addItems(items)
         lay.addWidget(_row("纠错模型", self.cmb_fix_model))
@@ -603,16 +603,22 @@ class SettingsPage(QWidget):
         self.llm_status.setText("检测中…")
 
         def work() -> None:
-            import json
-            from urllib.request import urlopen
+            from ..llm import OllamaClient
 
-            url = self.edit_llm_url.text().strip().rstrip("/") + "/api/tags"
+            url = self.edit_llm_url.text().strip() or "http://127.0.0.1:11434"
             fix_name = self.cmb_fix_model.currentText().strip()
             sum_name = self.cmb_sum_model.currentText().strip()
+            client = OllamaClient(url, timeout=8)
             try:
-                with urlopen(url, timeout=4) as r:  # noqa: S310
-                    data = json.loads(r.read().decode("utf-8"))
-                names = [m.get("name", "") for m in data.get("models", [])]
+                if not client.alive():
+                    self.llm_result.emit("服务未运行，正在尝试启动 ollama serve…", "Warn")
+                    if not client.ensure_server():
+                        self.llm_result.emit(
+                            "连不上 Ollama。请确认已安装并运行（开始菜单里启动 Ollama，或执行 ollama serve）",
+                            "Bad",
+                        )
+                        return
+                names = client.models()
                 msg = f"已连接，本机有 {len(names)} 个模型"
                 if names:
                     msg += "：" + "、".join(names[:5])
@@ -621,9 +627,7 @@ class SettingsPage(QWidget):
                     msg += "\n未下载：" + "、".join(missing) + f"（执行 ollama pull {missing[0]}）"
                 self.llm_result.emit(msg, "Warn" if missing else "Good")
             except Exception as exc:  # noqa: BLE001
-                self.llm_result.emit(
-                    f"连接失败：{exc}\n请确认 Ollama 正在运行（ollama serve）", "Bad"
-                )
+                self.llm_result.emit(f"连接失败：{exc}", "Bad")
 
         threading.Thread(target=work, name="llmtest", daemon=True).start()
 

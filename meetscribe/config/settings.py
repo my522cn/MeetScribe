@@ -40,11 +40,14 @@ DEFAULTS: dict[str, Any] = {
         "session_root": "data/sessions",
     },
     "llm": {
-        "enabled": False,
+        # 默认开启：只做"纠错"这一件事，服务没装/没开时自动跳过，不会影响录音
+        "enabled": True,
         "base_url": "http://127.0.0.1:11434",
-        "fix_model": "qwen3:4b",     # 错别字上下文纠错
-        "summary_model": "qwen3:8b",  # 会议纪要
-        "timeout": 60,
+        # 纠错要快：qwen2.5:3b-instruct 不做思考链，8 句约 9 秒，实测 0 误改
+        "fix_model": "qwen2.5:3b-instruct",
+        # 纪要要质量：7b 能压住长会议，CPU 上一份纪要 1~2 分钟，后台跑不抢实时资源
+        "summary_model": "qwen2.5:7b-instruct",
+        "timeout": 90,
     },
     "ui": {
         "float_margin": 24,
