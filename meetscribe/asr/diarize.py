@@ -33,7 +33,7 @@ def sentence_features(audio: np.ndarray, sr: int = SR) -> tuple[float, float] | 
     if x.ndim > 1:
         x = x.mean(axis=1)
     rms = float(np.sqrt(np.mean(x * x) + 1e-9))
-    if rms < 0.004:  # 与 probe.empty 同一阈值：静音句不参与聚类
+    if rms < 0.0012:  # 门限只挡纯底噪；低电平麦克风由录音端 AGC 归一，这里不再误杀
         return None
 
     n_frames = (len(x) - FRAME) // HOP + 1

@@ -38,6 +38,12 @@ QPushButton#Danger {
 }
 QPushButton#Danger:hover { background: #D93840; }
 QPushButton#Danger:disabled { background: #EFD3D4; color: #FFFFFF; }
+QPushButton#Success {
+    background: #17A673; color: #FFFFFF; border: none; border-radius: 9px;
+    padding: 9px 24px; font-weight: 600; min-height: 18px;
+}
+QPushButton#Success:hover { background: #128F63; }
+QPushButton#Success:disabled { background: #CBE7DD; color: #FFFFFF; }
 QPushButton#Ghost {
     background: #FFFFFF; border: 1px solid #D9DDE3; border-radius: 9px;
     padding: 8px 18px; color: #40464F; min-height: 18px;

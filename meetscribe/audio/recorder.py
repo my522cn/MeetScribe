@@ -18,6 +18,7 @@ import numpy as np
 import sounddevice as sd
 import soundfile as sf
 
+from .agc import AGC
 from .devices import default_input_device, find_loopback_source, open_mic_stream
 from .manifest import Segment, SessionManifest, new_session_id
 from .resample import StreamingResampler
@@ -70,6 +71,8 @@ class DualTrackRecorder:
         self._live: dict[str, int] = {"mic": 0, "loop": 0}
         self._seg_index: dict[str, int] = {"mic": 0, "loop": 0}
         self._level: dict[str, float] = {"mic": 0.0, "loop": 0.0}
+        # 每轨独立 AGC：低电平麦克风自动增益，写盘与实时识别同一条放大后信号
+        self._agc: dict[str, AGC] = {"mic": AGC(), "loop": AGC()}
         self._errors: list[str] = []
         self._mic_resampler: StreamingResampler | None = None
         self._running = False
@@ -198,6 +201,7 @@ class DualTrackRecorder:
     def _push(self, track: str, block: np.ndarray) -> None:
         if self._paused or not self._running:
             return
+        block = self._agc[track].process(block)  # 低电平麦克风自动增益
         try:
             self._queues[track].put_nowait(block)
             self._live[track] += len(block)

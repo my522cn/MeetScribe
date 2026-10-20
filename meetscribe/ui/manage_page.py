@@ -167,7 +167,7 @@ class ManagePage(QWidget):
         # ---------- 回放控制 ----------
         pb = QHBoxLayout()
         self.btn_play = QPushButton("▶ 播放")
-        self.btn_play.setObjectName("Primary")
+        self.btn_play.setObjectName("Success")  # 绿=开始/继续；播放中变 Ghost 白底"暂停"
         self.btn_play.setFixedWidth(110)
         self.btn_play.clicked.connect(self._toggle_play)
         self.btn_stop = QPushButton("停止")
@@ -279,6 +279,7 @@ class ManagePage(QWidget):
         )
         for b in (self.btn_minutes, self.btn_folder):
             b.setEnabled(True)
+        self.btn_delete.setEnabled(True)  # 有会话即可删（列表多选决定删哪些）
         self._apply_minute_ui()
         # 回放控件
         has_audio = info.n_segments > 0
@@ -421,7 +422,7 @@ class ManagePage(QWidget):
         if self._player is not None:
             self._player.stop()
             self._player = None
-        self.btn_play.setText("▶ 播放")
+        self._set_play_btn("▶ 播放", "Success")
         self.btn_stop.setEnabled(False)
         # 停止 = 回到起始位置（与暂停不同：暂停保留进度，停止归零）
         self.slider.setValue(0)
@@ -438,16 +439,29 @@ class ManagePage(QWidget):
         if p is None:
             return
         if not p.active:
-            self.btn_play.setText("▶ 播放")
+            self._set_play_btn("▶ 播放", "Success")
             self.btn_stop.setEnabled(False)
             return
         self.btn_stop.setEnabled(True)
-        self.btn_play.setText("⏸ 暂停" if not p.paused else "▶ 继续")
+        if p.paused:
+            self._set_play_btn("▶ 继续", "Success")
+        else:
+            self._set_play_btn("⏸ 暂停", "Ghost")
         if not self._slider_drag:
             self.slider.setValue(p.position_ms())
         self.lbl_playpos.setText(
             f"{fmt_duration(p.position_ms())} / {fmt_duration(p.duration_ms)}"
         )
+
+    def _set_play_btn(self, text: str, style: str) -> None:
+        """播放按钮三态换装：绿=开始/继续，白=播放中(再点是暂停)。
+        生成纪要按钮固定靛蓝 Primary，三者颜色互不相同。"""
+        if self.btn_play.text() == text and self.btn_play.objectName() == style:
+            return
+        self.btn_play.setText(text)
+        self.btn_play.setObjectName(style)
+        self.btn_play.style().unpolish(self.btn_play)
+        self.btn_play.style().polish(self.btn_play)
 
     # ---------- 操作 ----------
     def _open_folder(self) -> None:

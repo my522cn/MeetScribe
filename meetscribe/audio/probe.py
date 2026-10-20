@@ -10,6 +10,7 @@ from typing import Callable
 
 import numpy as np
 
+from .agc import AGC
 from .devices import open_mic_stream
 from .resample import StreamingResampler
 
@@ -56,6 +57,7 @@ def record_mic(
     """录一段麦克风音频（16k 单声道）。on_progress(已录秒数, 当前RMS)。"""
     stream, native, channels = open_mic_stream(dev_index, SR)
     rs = StreamingResampler(native, SR)
+    agc = AGC()  # 与正式录音一致的增益，测试识别的结果才有代表性
     chunks: list[np.ndarray] = []
     peak = 0.0
     block = int(native * 0.1)
@@ -65,8 +67,8 @@ def record_mic(
             data, _ = stream.read(block)
             mono = data.mean(axis=1) if data.ndim > 1 else data
             mono = np.asarray(mono, dtype=np.float32).reshape(-1)
-            peak = max(peak, float(np.max(np.abs(mono))) if mono.size else 0.0)
-            out = rs.process(mono.copy())
+            out = agc.process(rs.process(mono.copy()))
+            peak = max(peak, float(np.max(np.abs(out))) if out.size else 0.0)
             if out.size:
                 chunks.append(out)
             if on_progress:

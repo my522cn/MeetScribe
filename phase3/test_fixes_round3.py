@@ -82,8 +82,8 @@ def main() -> int:
     combo.wheelEvent(evt)  # 未聚焦 → 应被忽略
     check("未聚焦滚轮不改下拉选择", combo.currentIndex() == before)
     combo.setFocus()
-    combo.wheelEvent(evt)  # 聚焦后 → 正常换挡
-    check("聚焦后滚轮可正常换挡", True)  # 不崩溃即可（列表可能没变）
+    combo.wheelEvent(evt)  # 聚焦后也禁用（用户要求滚轮彻底禁用）
+    check("聚焦后滚轮同样被禁用", combo.currentIndex() == before)
 
     # ---------- 3. 按钮统一尺寸 ----------
     page.show()
