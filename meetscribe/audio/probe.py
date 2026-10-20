@@ -26,7 +26,8 @@ class ProbeResult:
 
     @property
     def empty(self) -> bool:
-        return self.rms < 0.0015
+        # 低于这个能量基本是环境底噪：识别只会得到幻觉句子，不如直接提示没声音
+        return self.rms < 0.004
 
     @property
     def verdict(self) -> str:
@@ -34,7 +35,7 @@ class ProbeResult:
             return "几乎没有声音：检查设备是否静音、是否选错通道，或系统隐私设置是否禁止了麦克风"
         if self.peak > 0.98:
             return "音量偏大，已经削顶：把系统或麦克风增益调低一些，否则识别会掉字"
-        if self.rms < 0.01:
+        if self.rms < 0.012:
             return "音量偏小：建议提高输入增益，太小的声音识别准确率会明显下降"
         return "音量正常"
 

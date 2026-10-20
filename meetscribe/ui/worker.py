@@ -69,6 +69,8 @@ class CaptureWorker(QObject):
         self._transcript = None
         self._records: list[dict] = []
         self._lock = threading.Lock()
+        self._corrector = None
+        self._llm_stop: threading.Event | None = None
 
     def _make_refiner(self) -> RefineService:
         """按配置挑精修模型；prefer=off 或没有模型时返回不可用实例（submit 会被丢弃）。"""
@@ -134,6 +136,7 @@ class CaptureWorker(QObject):
             self.recorder.start()
             if s.two_pass:
                 self.refiner.start()
+            self._start_llm()
             # 目录由 recorder.start() 创建，转写文件必须在之后再打开
             self._records = []
             self._transcript = open(  # noqa: SIM115
@@ -181,6 +184,7 @@ class CaptureWorker(QObject):
             if self.pipeline:
                 self.pipeline.stop()
             self.refiner.stop()
+            self._stop_llm()
         except Exception as exc:  # noqa: BLE001
             self.error.emit(f"停止录音时出错: {exc}")
         finally:
@@ -188,6 +192,58 @@ class CaptureWorker(QObject):
             if self.manifest:
                 self.session_saved.emit(session_dir)
             self._teardown()
+
+    # ---------- 大模型纠错 ----------
+    def _start_llm(self) -> None:
+        """启用时每 25 秒用本地小模型把最近几句过一遍，改同音错字。"""
+        self._llm_stop = threading.Event()
+        self._corrector = None
+        if not self.settings.get("llm.enabled", False):
+            return
+        try:
+            from ..llm import Corrector, OllamaClient
+        except Exception:  # noqa: BLE001
+            return
+        base = str(self.settings.get("llm.base_url", "http://127.0.0.1:11434"))
+        model = str(self.settings.get("llm.fix_model", "qwen3:4b"))
+        hotwords = []
+        hw_file = self.settings.path.parent / "hotwords.txt"
+        if hw_file.exists():
+            hotwords = [ln.strip() for ln in hw_file.read_text(encoding="utf-8").splitlines() if ln.strip()]
+        self._corrector = Corrector(
+            OllamaClient(base, timeout=float(self.settings.get("llm.timeout", 60))), model, hotwords
+        )
+        threading.Thread(target=self._llm_loop, name="llmfix", daemon=True).start()
+
+    def _stop_llm(self) -> None:
+        ev = getattr(self, "_llm_stop", None)
+        if ev is not None:
+            ev.set()
+
+    def _llm_loop(self) -> None:
+        from ..llm import FixRequest
+
+        while not self._llm_stop.wait(25):
+            with self._lock:
+                pending = [
+                    r for r in self._records
+                    if not r.get("llm") and len(_normalize(r["text"])) >= 4
+                ][-8:]
+            if not pending or self._corrector is None:
+                continue
+            items = [FixRequest((r["track"], r["start_ms"]), r["text"]) for r in pending]
+            fixed = self._corrector.fix(items)
+            with self._lock:
+                for r in pending:
+                    r["llm"] = True
+                for rec in self._records:
+                    key = (rec["track"], rec["start_ms"])
+                    if key in fixed:
+                        rec["llm_from"] = rec["text"]
+                        rec["text"] = fixed[key]
+                self._flush_transcript()
+            for (track, start), new in fixed.items():
+                self.refined.emit(track, start, new)
 
     # ---------- 内部 ----------
     def _on_final(self, cap: Caption) -> None:
@@ -277,7 +333,8 @@ class CaptureWorker(QObject):
             self._transcript.seek(0)
             self._transcript.truncate()
             for rec in self._records:
-                out = {k: v for k, v in rec.items() if not k.startswith("refine_")}
+                out = {k: v for k, v in rec.items()
+                       if k not in ("refine_from", "refine_rejected", "llm_from", "llm")}
                 self._transcript.write(json.dumps(out, ensure_ascii=False) + "\n")
             self._transcript.flush()
         except Exception:  # noqa: BLE001
