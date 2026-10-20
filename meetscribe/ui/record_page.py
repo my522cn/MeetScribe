@@ -189,7 +189,8 @@ class RecordPage(QWidget):
             self.pause_btn.setText("继续")
             self.caption_hint.setText("已暂停 · 后台仍在校对已识别的文字")
         elif state == "stopped":
-            self.status_pill.setText("已保存")
+            # 已保存不占状态标签（改用系统托盘通知），页面回到待机观感
+            self.status_pill.setText("待机")
             self.status_pill.setObjectName("PillOff")
             self.start_btn.setEnabled(True)
             self.pause_btn.setEnabled(False)

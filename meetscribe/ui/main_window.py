@@ -57,6 +57,7 @@ class MainWindow(QMainWindow):
         self.auto_record = bool(self.settings.get("ui.auto_record", True))
         self._tray_hinted = False
         self._source = "manual"
+        self._draining = False
 
         self._build_ui()
         self._build_tray()
@@ -190,6 +191,7 @@ class MainWindow(QMainWindow):
             lambda p: rp.footer.setText(f"已保存到 {p}")
         )
         self.worker.session_saved.connect(lambda _p: self.manage_page.refresh())
+        self.worker.session_saved.connect(self._notify_saved)
 
         self.float_bar.pause_clicked.connect(self._toggle_pause)
         self.float_bar.stop_clicked.connect(self._stop)
@@ -238,6 +240,14 @@ class MainWindow(QMainWindow):
             self.float_bar.set_paused(state == "paused")
             self.act_pause.setText("继续录音" if state == "paused" else "暂停录音")
 
+    def _notify_saved(self, path: str) -> None:
+        """录音结束用系统托盘气泡通知，不再挤在页面状态标签里。"""
+        self.tray.showMessage(
+            "录音已保存",
+            f"会议文件在 {path}，错别字正在后台继续校对。",
+            QSystemTrayIcon.MessageIcon.Information, 5000,
+        )
+
     def _on_error(self, msg: str) -> None:
         self.record_page.set_state("idle")
         self.float_bar.hide()
@@ -246,6 +256,15 @@ class MainWindow(QMainWindow):
     # ---------- 定时刷新 ----------
     def _tick(self) -> None:
         if not self.worker.is_active:
+            # 录音已结束但精修队列还没跑完：显示后台校对进度
+            if self.record_page._state == "stopped" and self.worker.refiner is not None:
+                n = self.worker.refiner.pending
+                if n > 0:
+                    self._draining = True
+                    self.record_page.set_caption_hint(f"后台校对错别字中… 还剩 {n} 句")
+                elif self._draining:
+                    self._draining = False
+                    self.record_page.set_caption_hint("后台校对完成，全部句子已用离线模型修正")
             return
         ms = self.worker.elapsed_ms
         self.record_page.set_elapsed(ms)
@@ -257,9 +276,10 @@ class MainWindow(QMainWindow):
         if self.record_page._state == "paused":
             self.record_page.set_caption_hint(f"已暂停 · 后台仍在校对，已修订 {n} 句")
         elif self.record_page._state == "recording":
-            self.record_page.set_caption_hint(
-                f"实时识别中 · 已二次校对 {n} 句" if n else "实时识别中 · 后台正在校对错别字"
-            )
+            hint = f"实时识别中 · 已二次校对 {n} 句" if n else "实时识别中 · 后台正在校对错别字"
+            if self.worker.diarizer is not None:
+                hint += f" · 已区分 {self.worker.diarizer.n_speakers} 位说话人"
+            self.record_page.set_caption_hint(hint)
 
     def _poll_meetings(self) -> None:
         app = self.detector.poll()

@@ -110,6 +110,7 @@ class CaptureWorker(QObject):
         self.mode = mode
         # 线下模式对麦克风轨做轻量声纹聚类，区分房间里的不同说话人
         self.diarizer = SpeakerRegistry() if mode == "offline" else None
+        self._diarize_log = None  # 特征调试日志（写入会话目录 diarize.log）
         s = self.settings
         try:
             self._ensure_engine()
@@ -146,6 +147,10 @@ class CaptureWorker(QObject):
             self._transcript = open(  # noqa: SIM115
                 self.recorder.session_dir / "transcript.jsonl", "a", encoding="utf-8"
             )
+            if self.diarizer is not None:
+                self._diarize_log = open(  # noqa: SIM115
+                    self.recorder.session_dir / "diarize.log", "a", encoding="utf-8"
+                )
             self.state_changed.emit("recording")
         except Exception as exc:  # noqa: BLE001
             self.error.emit(f"启动录音失败: {exc}")
@@ -193,7 +198,6 @@ class CaptureWorker(QObject):
             self.manifest = self.recorder.stop()
             if self.pipeline:
                 self.pipeline.stop()
-            self.refiner.stop()
             self._stop_llm()
         except Exception as exc:  # noqa: BLE001
             self.error.emit(f"停止录音时出错: {exc}")
@@ -202,6 +206,29 @@ class CaptureWorker(QObject):
             if self.manifest:
                 self.session_saved.emit(session_dir)
             self._teardown()
+            # 队列里没精修完的句子一句不丢：后台继续跑，全部完成后才关转写文件
+            if self.refiner.running:
+                self.refiner.drain(on_done=self._finish_session)
+            else:
+                self._finish_session()
+
+    def _finish_session(self) -> None:
+        """所有精修完成后的收尾：把最终结果刷盘、关闭文件、释放精修线程。"""
+        with self._lock:
+            self._flush_transcript()
+        if self._transcript is not None:
+            try:
+                self._transcript.close()
+            except Exception:  # noqa: BLE001
+                pass
+            self._transcript = None
+        if self._diarize_log is not None:
+            try:
+                self._diarize_log.close()
+            except Exception:  # noqa: BLE001
+                pass
+            self._diarize_log = None
+        self.refiner.stop()
 
     # ---------- 大模型纠错 ----------
     def _start_llm(self) -> None:
@@ -280,6 +307,18 @@ class CaptureWorker(QObject):
             feat = sentence_features(cap.audio)
             if feat is not None:
                 speaker = self.diarizer.assign(feat)
+            else:
+                # 句子太短/太轻提不出特征：归入当前说话最多的人，而不是笼统的"本地"
+                speaker = self.diarizer.majority_label()
+            if self._diarize_log is not None:
+                try:
+                    f0s, cents = feat if feat is not None else (-1, -1)
+                    self._diarize_log.write(
+                        f"{cap.start_ms}\t{f0s:.1f}\t{cents:.1f}\t{speaker}\n"
+                    )
+                    self._diarize_log.flush()
+                except Exception:  # noqa: BLE001
+                    pass
         record = {
             "track": cap.track,
             "speaker": speaker,
@@ -365,12 +404,7 @@ class CaptureWorker(QObject):
         self.segment_count.emit(self._segment_total)
 
     def _teardown(self) -> None:
-        if self._transcript is not None:
-            try:
-                self._transcript.close()
-            except Exception:  # noqa: BLE001
-                pass
-            self._transcript = None
+        # 注意：transcript 在 _finish_session 里关闭（精修全部完成后才落盘收尾）
         self.pipeline = None
         self.recorder = None
         # 识别模型保留复用，避免二次加载

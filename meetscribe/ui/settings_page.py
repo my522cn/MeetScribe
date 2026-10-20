@@ -22,6 +22,7 @@ from ..audio import probe
 from ..audio.devices import list_input_devices, list_speakers
 from ..config import PROJECT_ROOT, Settings
 from ..system import hardware
+from .widgets import NoWheelComboBox, NoWheelDoubleSpinBox, NoWheelSpinBox
 
 
 # ---------------------------------------------------------------- 后台探测
@@ -194,6 +195,7 @@ class SettingsPage(QWidget):
         head.addStretch(1)
         # 一键检测 + 推荐设置：检测硬件后直接把推荐参数填进来（放在"恢复默认"前面）
         self.btn_auto = QPushButton("一键检测 · 推荐设置")
+        self.btn_auto.setObjectName("Ghost")  # 与"恢复默认"同尺寸同风格，保存配置保持 Primary
         self.btn_auto.clicked.connect(self._auto_recommend)
         head.addWidget(self.btn_auto)
         self.btn_reset = QPushButton("恢复默认")
@@ -246,10 +248,10 @@ class SettingsPage(QWidget):
         h = QHBoxLayout(row)
         h.setContentsMargins(0, 0, 0, 0)
         h.setSpacing(10)
-        self.spin_threads = QSpinBox()
+        self.spin_threads = NoWheelSpinBox()
         self.spin_threads.setRange(1, 16)
         self.spin_threads.setFixedWidth(110)
-        self.spin_refine_threads = QSpinBox()
+        self.spin_refine_threads = NoWheelSpinBox()
         self.spin_refine_threads.setRange(1, 16)
         self.spin_refine_threads.setFixedWidth(110)
         h.addWidget(QLabel("流式识别线程"))
@@ -269,8 +271,8 @@ class SettingsPage(QWidget):
 
     def _build_audio(self) -> QFrame:
         card, lay = _card("音频设备")
-        self.cmb_mic = QComboBox()
-        self.cmb_loop = QComboBox()
+        self.cmb_mic = NoWheelComboBox()
+        self.cmb_loop = NoWheelComboBox()
         # 默认策略会按最长设备名把框撑长（测试/刷新后突然变长、两框不一致），
         # 改为固定内容长度策略：宽度交给布局，两个下拉永远等宽
         for box in (self.cmb_mic, self.cmb_loop):
@@ -312,13 +314,13 @@ class SettingsPage(QWidget):
         lv_l.addWidget(self.level_status)
         lay.addWidget(_row("电平", lv))
 
-        self.spin_segment = QSpinBox()
+        self.spin_segment = NoWheelSpinBox()
         self.spin_segment.setRange(1, 60)
         self.spin_segment.setSuffix(" 分钟")
         self.spin_segment.setFixedWidth(150)
         lay.addWidget(_row("分段时长", self.spin_segment, "崩溃最多丢一段", stretch=False))
 
-        self.cmb_format = QComboBox()
+        self.cmb_format = NoWheelComboBox()
         self.cmb_format.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
         self.cmb_format.setMinimumContentsLength(16)
         self.cmb_format.addItem("FLAC 无损 · 约 30 MB/小时", "flac")
@@ -333,7 +335,7 @@ class SettingsPage(QWidget):
         self.chk_two_pass.setChecked(True)
         lay.addWidget(self.chk_two_pass)
 
-        self.cmb_refine = QComboBox()
+        self.cmb_refine = NoWheelComboBox()
         self.cmb_refine.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
         self.cmb_refine.setMinimumContentsLength(16)
         self.cmb_refine.addItem("自动（推荐：离线 Paraformer）", "auto")
@@ -346,14 +348,14 @@ class SettingsPage(QWidget):
         self.chk_live_refine = QCheckBox("长句滑窗预校正：说话超过 6 秒后，遇到句中停顿就提前校正一次（不必等断句）")
         lay.addWidget(self.chk_live_refine)
 
-        self.spin_live_after = QDoubleSpinBox()
+        self.spin_live_after = NoWheelDoubleSpinBox()
         self.spin_live_after.setRange(3.0, 30.0)
         self.spin_live_after.setSingleStep(0.5)
         self.spin_live_after.setSuffix(" 秒")
         self.spin_live_after.setFixedWidth(150)
         lay.addWidget(_row("触发时机", self.spin_live_after, "本句说满多少秒后，句中停顿 ≥0.6 秒时校正", stretch=False))
 
-        self.spin_endpoint = QDoubleSpinBox()
+        self.spin_endpoint = NoWheelDoubleSpinBox()
         self.spin_endpoint.setRange(0.6, 4.0)
         self.spin_endpoint.setSingleStep(0.1)
         self.spin_endpoint.setSuffix(" 秒")
@@ -412,9 +414,9 @@ class SettingsPage(QWidget):
         self.edit_llm_url = QLineEdit()
         lay.addWidget(_row("Ollama 地址", self.edit_llm_url))
 
-        self.cmb_fix_model = QComboBox()
+        self.cmb_fix_model = NoWheelComboBox()
         self.cmb_fix_model.setEditable(True)
-        self.cmb_sum_model = QComboBox()
+        self.cmb_sum_model = NoWheelComboBox()
         self.cmb_sum_model.setEditable(True)
         for box, items in (
             (self.cmb_fix_model, ["qwen2.5:3b-instruct", "qwen2.5:7b-instruct", "qwen3:4b"]),

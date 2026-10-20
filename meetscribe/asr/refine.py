@@ -90,6 +90,26 @@ class RefineService:
         if self._thread:
             self._thread.join(timeout=4)
 
+    def drain(self, timeout: float = 600.0, on_done=None) -> None:
+        """录音结束后用：队列里的句子一句不丢，全部精修完再收尾。
+
+        stop() 只等 8 秒，积压多时会把没跑的句子全部扔掉——这就是
+        "录音结束后半天不精修"的原因。drain 起一个看护线程等队列清空
+        （默认上限 10 分钟），然后才真正 stop 并回调 on_done。
+        """
+        def watcher() -> None:
+            deadline = time.time() + timeout
+            while self._running and not self._queue.empty() and time.time() < deadline:
+                time.sleep(0.1)
+            self.stop()
+            if on_done is not None:
+                try:
+                    on_done()
+                except Exception:  # noqa: BLE001
+                    pass
+
+        threading.Thread(target=watcher, name="refine-drain", daemon=True).start()
+
     def submit(self, job: RefineJob) -> None:
         if not self._running:
             return

@@ -88,6 +88,12 @@ class SpeakerRegistry:
     def n_speakers(self) -> int:
         return len(self._centroids)
 
+    def majority_label(self) -> str:
+        """特征提取失败（太短/太轻）的句子归入当前说话最多的人。"""
+        if not self._counts:
+            return LABELS[0]
+        return LABELS[int(np.argmax(self._counts))]
+
     def assign(self, feat: tuple[float, float]) -> str:
         """把一句的特征归到某个说话人，返回"说话人A"式标签。"""
         if not self._centroids:

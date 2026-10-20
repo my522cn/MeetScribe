@@ -10,8 +10,8 @@
   "asr": {
     "two_pass": true,
     "refine_model": "auto",
-    "num_threads": 2,
-    "refine_threads": 2,
+    "num_threads": 4,
+    "refine_threads": 4,
     "endpoint_silence": 1.2,
     "live_refine": true,
     "live_refine_after": 6.0,
