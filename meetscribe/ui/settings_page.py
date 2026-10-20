@@ -164,6 +164,7 @@ def _row(label: str, widget: QWidget, hint: str = "", stretch: bool = True,
 class SettingsPage(QWidget):
     saved = Signal()
     hw_ready = Signal()            # 后台线程探测完硬件
+    auto_ready = Signal()          # 后台线程完成"一键检测·推荐设置"
     llm_result = Signal(str, str)  # 文本, 样式名（Good/Warn/Bad）
 
     def __init__(self, settings: Settings, worker=None, parent=None) -> None:
@@ -191,6 +192,10 @@ class SettingsPage(QWidget):
         title.setObjectName("PageTitle")
         head.addWidget(title)
         head.addStretch(1)
+        # 一键检测 + 推荐设置：检测硬件后直接把推荐参数填进来（放在"恢复默认"前面）
+        self.btn_auto = QPushButton("一键检测 · 推荐设置")
+        self.btn_auto.clicked.connect(self._auto_recommend)
+        head.addWidget(self.btn_auto)
         self.btn_reset = QPushButton("恢复默认")
         self.btn_reset.setObjectName("Ghost")
         self.btn_save = QPushButton("保存配置")
@@ -451,6 +456,7 @@ class SettingsPage(QWidget):
         self.probe.failed.connect(self._on_probe_failed)
         self.probe.stage.connect(self._on_stage)
         self.hw_ready.connect(self._apply_hw_ui)
+        self.auto_ready.connect(self._apply_auto)
         self.llm_result.connect(self._on_llm_result)
 
     # ---------- 数据加载 ----------
@@ -533,6 +539,42 @@ class SettingsPage(QWidget):
         self.spin_refine_threads.setValue(hw.refine_threads)
         self.chk_two_pass.setChecked(hw.can_two_pass)
         self.chk_live_refine.setChecked(hw.can_live_refine)
+
+    # ---------- 一键检测 · 推荐设置 ----------
+    def _auto_recommend(self) -> None:
+        """一键完成硬件检测并把推荐参数填到各控件（点"保存配置"后生效）。"""
+        self.btn_auto.setEnabled(False)
+        self.btn_auto.setText("检测中…")
+        self.level_status.setText("正在检测本机硬件并计算推荐设置…")
+
+        def work() -> None:
+            self._hw = hardware.profile(force=True)
+            self.auto_ready.emit()
+
+        threading.Thread(target=work, name="autorec", daemon=True).start()
+
+    def _apply_auto(self) -> None:
+        hw = self._hw
+        self.btn_auto.setEnabled(True)
+        self.btn_auto.setText("一键检测 · 推荐设置")
+        if hw is None:
+            self.level_status.setText("检测失败，请重试。")
+            return
+        # 应用推荐参数
+        self.spin_threads.setValue(hw.asr_threads)
+        self.spin_refine_threads.setValue(hw.refine_threads)
+        self.chk_two_pass.setChecked(hw.can_two_pass)
+        self.chk_live_refine.setChecked(hw.can_live_refine and hw.can_two_pass)
+        self.spin_live_after.setValue(6.0 if hw.can_live_refine else 8.0)
+        self.spin_endpoint.setValue(1.2)
+        self.level_status.setObjectName("Good" if hw.can_two_pass else "Warn")
+        self.level_status.style().unpolish(self.level_status)
+        self.level_status.style().polish(self.level_status)
+        self.level_status.setText(
+            f"已按推荐填充：流式 {hw.asr_threads} 线程 / 精修 {hw.refine_threads} 线程 / "
+            f"二次精修 {'开' if hw.can_two_pass else '关'} / 滑窗预校正 {'开' if hw.can_live_refine else '关'}。"
+            "检查无误后点右上角「保存配置」生效。"
+        )
 
     # ---------- 设备测试 ----------
     def _selected_mic_index(self) -> int | None:

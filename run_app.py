@@ -25,21 +25,21 @@ def _light_palette() -> QPalette:
     background 支持有缺陷，所以这里强制 Fusion + 浅色 palette 双保险。
     """
     pal = QPalette()
-    pal.setColor(QPalette.ColorRole.Window, QColor("#F7F6F3"))
-    pal.setColor(QPalette.ColorRole.WindowText, QColor("#2C2C2A"))
+    pal.setColor(QPalette.ColorRole.Window, QColor("#F5F6F8"))
+    pal.setColor(QPalette.ColorRole.WindowText, QColor("#1F2329"))
     pal.setColor(QPalette.ColorRole.Base, QColor("#FFFFFF"))
-    pal.setColor(QPalette.ColorRole.AlternateBase, QColor("#F1EFE8"))
-    pal.setColor(QPalette.ColorRole.Text, QColor("#2C2C2A"))
+    pal.setColor(QPalette.ColorRole.AlternateBase, QColor("#F2F3F7"))
+    pal.setColor(QPalette.ColorRole.Text, QColor("#1F2329"))
     pal.setColor(QPalette.ColorRole.Button, QColor("#FFFFFF"))
-    pal.setColor(QPalette.ColorRole.ButtonText, QColor("#2C2C2A"))
-    pal.setColor(QPalette.ColorRole.Highlight, QColor("#534AB7"))
+    pal.setColor(QPalette.ColorRole.ButtonText, QColor("#1F2329"))
+    pal.setColor(QPalette.ColorRole.Highlight, QColor("#4F46E5"))
     pal.setColor(QPalette.ColorRole.HighlightedText, QColor("#FFFFFF"))
-    pal.setColor(QPalette.ColorRole.PlaceholderText, QColor("#B4B2A9"))
-    pal.setColor(QPalette.ColorRole.ToolTipBase, QColor("#2C2C2A"))
+    pal.setColor(QPalette.ColorRole.PlaceholderText, QColor("#B3B8C0"))
+    pal.setColor(QPalette.ColorRole.ToolTipBase, QColor("#23262D"))
     pal.setColor(QPalette.ColorRole.ToolTipText, QColor("#FFFFFF"))
-    pal.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Text, QColor("#B4B2A9"))
-    pal.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText, QColor("#B4B2A9"))
-    pal.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Base, QColor("#F1EFE8"))
+    pal.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Text, QColor("#B3B8C0"))
+    pal.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.ButtonText, QColor("#B3B8C0"))
+    pal.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Base, QColor("#F2F3F5"))
     return pal
 
 

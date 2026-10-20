@@ -91,6 +91,13 @@ def main() -> int:
     print(f"[{'OK ' if ok else 'FAIL'}] 待机中可正常切换到线下={ok}")
     if not ok:
         failures.append("待机时无法切换模式")
+    # 结束录音后（stopped 状态）也必须能切换模式（修复"录过一次就选不了模式"）
+    rp.set_state("stopped")
+    rp.online_btn.click()
+    ok = rp.online_btn.isChecked() and not rp.offline_btn.isChecked()
+    print(f"[{'OK ' if ok else 'FAIL'}] 录音结束后可切回线上={ok}")
+    if not ok:
+        failures.append("结束后无法切换模式")
 
     # ---------- 4/5. 字幕行时间前置 + 说话人更新 ----------
     cv = rp.captions

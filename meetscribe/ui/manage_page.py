@@ -101,6 +101,12 @@ class ManagePage(QWidget):
         title.setObjectName("PageTitle")
         head.addWidget(title)
         head.addStretch(1)
+        # 删除放列表旁边（对选中项操作，支持多选批量），离列表近更好找
+        self.btn_delete = QPushButton("删除会议")
+        self.btn_delete.setObjectName("Danger")
+        self.btn_delete.setEnabled(False)
+        self.btn_delete.clicked.connect(self._delete_sessions)
+        head.addWidget(self.btn_delete)
         self.btn_refresh = QPushButton("刷新列表")
         self.btn_refresh.setObjectName("Ghost")
         self.btn_refresh.clicked.connect(self.refresh)
@@ -147,10 +153,8 @@ class ManagePage(QWidget):
         self.btn_delete.clicked.connect(self._delete_sessions)
         self.btn_minutes.setEnabled(False)
         self.btn_folder.setEnabled(False)
-        self.btn_delete.setEnabled(False)
         btns.addWidget(self.btn_minutes)
         btns.addWidget(self.btn_folder)
-        btns.addWidget(self.btn_delete)
         btns.addStretch(1)
         cl.addLayout(btns)
 
@@ -227,6 +231,7 @@ class ManagePage(QWidget):
                 item.setSelected(True)
                 restore_row = n
         self.list.blockSignals(False)
+        self.btn_delete.setEnabled(bool(self._sessions))
         if self._sessions:
             self.list.setCurrentRow(restore_row)
         else:
@@ -250,8 +255,9 @@ class ManagePage(QWidget):
         self.lbl_title.setText("还没有会议记录")
         self.lbl_meta.setText("回到「录音」页开始第一次录音，结束后会自动出现在这里。")
         self.txt.clear()
-        for b in (self.btn_minutes, self.btn_folder, self.btn_delete):
+        for b in (self.btn_minutes, self.btn_folder):
             b.setEnabled(False)
+        self.btn_delete.setEnabled(False)
         self.btn_play.setEnabled(False)
         self.slider.setEnabled(False)
 
@@ -271,7 +277,7 @@ class ManagePage(QWidget):
             f"{info.started}　·　{mode}　·　时长 {fmt_duration(info.duration_ms)}　·　"
             f"{info.n_segments} 个音频分段　·　{info.n_lines} 句转写　·　{st}"
         )
-        for b in (self.btn_minutes, self.btn_folder, self.btn_delete):
+        for b in (self.btn_minutes, self.btn_folder):
             b.setEnabled(True)
         self._apply_minute_ui()
         # 回放控件

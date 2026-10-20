@@ -57,7 +57,7 @@ class RecordPage(QWidget):
         top = QHBoxLayout()
         top.setSpacing(10)
         self.start_btn = QPushButton("● 开始录音")
-        self.start_btn.setObjectName("Primary")
+        self.start_btn.setObjectName("Danger")  # 红色=录音语义；Primary 靛蓝留给普通主操作
         self.start_btn.clicked.connect(lambda: self.start_requested.emit(self._mode))
         self.pause_btn = QPushButton("暂停")
         self.pause_btn.setObjectName("Ghost")
@@ -154,9 +154,9 @@ class RecordPage(QWidget):
 
     # ---------- 交互 ----------
     def _set_mode(self, mode: str) -> None:
-        if self._state != "idle":
-            # 录音/暂停中不允许切换模式。此时 Qt 已经把刚点的按钮置为选中，
-            # 必须把它弹回去，否则会出现"两个模式同时选中"的假象。
+        # 只有正在录音/暂停时不允许切换；"已结束(stopped)"和待机一样可以随意选
+        if self._state in ("recording", "paused"):
+            # 此时 Qt 已经把刚点的按钮置为选中，必须弹回去，否则出现双选中
             self.online_btn.setChecked(self._mode == "online")
             self.offline_btn.setChecked(self._mode == "offline")
             return
