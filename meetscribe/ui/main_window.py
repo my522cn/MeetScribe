@@ -15,6 +15,7 @@ from ..config import Settings
 from ..system.detect import MeetingDetector, capability
 from .caption_view import fmt_ms
 from .float_bar import FloatBar
+from .manage_page import ManagePage
 from .record_page import RecordPage
 from .settings_page import SettingsPage
 from .worker import CaptureWorker
@@ -113,17 +114,8 @@ class MainWindow(QMainWindow):
         self.record_page = RecordPage()
         self.stack.addWidget(self.record_page)
 
-        manage = QWidget()
-        ml = QVBoxLayout(manage)
-        ml.setContentsMargins(28, 22, 28, 18)
-        title = QLabel("会议管理")
-        title.setStyleSheet("font-size:19px; font-weight:500;")
-        hint = QLabel("会议列表、回放、字幕编辑与纪要将在此页实现（阶段四至六）")
-        hint.setObjectName("Hint")
-        ml.addWidget(title)
-        ml.addWidget(hint)
-        ml.addStretch(1)
-        self.stack.addWidget(manage)
+        self.manage_page = ManagePage(self.settings)
+        self.stack.addWidget(self.manage_page)
 
         self.settings_page = SettingsPage(self.settings, self.worker)
         self.stack.addWidget(self.settings_page)
@@ -146,6 +138,8 @@ class MainWindow(QMainWindow):
         for i, btn in enumerate(self._navs):
             if btn.isChecked():
                 self.stack.setCurrentIndex(i)
+                if i == 1:  # 切到会议管理页时重扫会话列表
+                    self.manage_page.refresh()
                 return
 
     def _build_tray(self) -> None:
@@ -195,6 +189,7 @@ class MainWindow(QMainWindow):
         self.worker.session_saved.connect(
             lambda p: rp.footer.setText(f"已保存到 {p}")
         )
+        self.worker.session_saved.connect(lambda _p: self.manage_page.refresh())
 
         self.float_bar.pause_clicked.connect(self._toggle_pause)
         self.float_bar.stop_clicked.connect(self._stop)
