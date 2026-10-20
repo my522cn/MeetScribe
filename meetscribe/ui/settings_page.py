@@ -124,7 +124,13 @@ def _card(title: str) -> tuple[QFrame, QVBoxLayout]:
     return card, lay
 
 
-def _row(label: str, widget: QWidget, hint: str = "") -> QWidget:
+def _row(label: str, widget: QWidget, hint: str = "", stretch: bool = True) -> QWidget:
+    """一行 = 标签 + 控件 [+ 提示]。
+
+    stretch=True：控件随窗口拉宽（设备下拉、路径输入这类长文本）；
+    stretch=False：控件保持固有宽度（数字框这类短内容），剩余空间留白，
+    否则一个 4 位数的数字框会被拉到 600px 宽，窗口一大就很难看。
+    """
     w = QWidget()
     h = QHBoxLayout(w)
     h.setContentsMargins(0, 0, 0, 0)
@@ -133,7 +139,10 @@ def _row(label: str, widget: QWidget, hint: str = "") -> QWidget:
     lab.setObjectName("FieldLabel")
     lab.setFixedWidth(96)
     h.addWidget(lab, 0, Qt.AlignmentFlag.AlignVCenter)
-    h.addWidget(widget, 1)
+    h.addWidget(widget, 1 if stretch else 0)
+    if not stretch:
+        h.addSpacing(8)
+        h.addStretch(1)
     if hint:
         hh = QLabel(hint)
         hh.setObjectName("Hint")
@@ -213,8 +222,10 @@ class SettingsPage(QWidget):
         h.setSpacing(10)
         self.spin_threads = QSpinBox()
         self.spin_threads.setRange(1, 16)
+        self.spin_threads.setFixedWidth(110)
         self.spin_refine_threads = QSpinBox()
         self.spin_refine_threads.setRange(1, 16)
+        self.spin_refine_threads.setFixedWidth(110)
         h.addWidget(QLabel("流式识别线程"))
         h.addWidget(self.spin_threads)
         h.addSpacing(16)
@@ -273,12 +284,14 @@ class SettingsPage(QWidget):
         self.spin_segment = QSpinBox()
         self.spin_segment.setRange(1, 60)
         self.spin_segment.setSuffix(" 分钟")
-        lay.addWidget(_row("分段时长", self.spin_segment, "崩溃最多丢一段"))
+        self.spin_segment.setFixedWidth(150)
+        lay.addWidget(_row("分段时长", self.spin_segment, "崩溃最多丢一段", stretch=False))
 
         self.cmb_format = QComboBox()
         self.cmb_format.addItem("FLAC 无损 · 约 30 MB/小时", "flac")
         self.cmb_format.addItem("OPUS 压缩 · 约 13 MB/小时（识别同样可用）", "opus")
-        lay.addWidget(_row("录音格式", self.cmb_format))
+        self.cmb_format.setMaximumWidth(430)
+        lay.addWidget(_row("录音格式", self.cmb_format, stretch=False))
         return card
 
     def _build_asr(self) -> QFrame:
@@ -292,7 +305,8 @@ class SettingsPage(QWidget):
         self.cmb_refine.addItem("强制离线 Paraformer", "paraformer")
         self.cmb_refine.addItem("SenseVoice（多语种，英文术语较弱）", "sense_voice")
         self.cmb_refine.addItem("关闭精修（省内存）", "off")
-        lay.addWidget(_row("精修模型", self.cmb_refine))
+        self.cmb_refine.setMaximumWidth(430)
+        lay.addWidget(_row("精修模型", self.cmb_refine, stretch=False))
 
         self.chk_live_refine = QCheckBox("长句滑窗预校正：说话超过 6 秒后，遇到句中停顿就提前校正一次（不必等断句）")
         lay.addWidget(self.chk_live_refine)
@@ -301,13 +315,15 @@ class SettingsPage(QWidget):
         self.spin_live_after.setRange(3.0, 30.0)
         self.spin_live_after.setSingleStep(0.5)
         self.spin_live_after.setSuffix(" 秒")
-        lay.addWidget(_row("触发时机", self.spin_live_after, "本句说满多少秒后，句中停顿 ≥0.6 秒时校正"))
+        self.spin_live_after.setFixedWidth(150)
+        lay.addWidget(_row("触发时机", self.spin_live_after, "本句说满多少秒后，句中停顿 ≥0.6 秒时校正", stretch=False))
 
         self.spin_endpoint = QDoubleSpinBox()
         self.spin_endpoint.setRange(0.6, 4.0)
         self.spin_endpoint.setSingleStep(0.1)
         self.spin_endpoint.setSuffix(" 秒")
-        lay.addWidget(_row("断句静音", self.spin_endpoint, "越小断句越碎，越大整段越长"))
+        self.spin_endpoint.setFixedWidth(150)
+        lay.addWidget(_row("断句静音", self.spin_endpoint, "越小断句越碎，越大整段越长", stretch=False))
         return card
 
     def _build_test(self) -> QFrame:
@@ -368,8 +384,10 @@ class SettingsPage(QWidget):
             (self.cmb_sum_model, ["qwen2.5:7b-instruct", "qwen2.5:3b-instruct", "qwen3:8b"]),
         ):
             box.addItems(items)
-        lay.addWidget(_row("纠错模型", self.cmb_fix_model))
-        lay.addWidget(_row("纪要模型", self.cmb_sum_model))
+        for box in (self.cmb_fix_model, self.cmb_sum_model):
+            box.setFixedWidth(260)
+        lay.addWidget(_row("纠错模型", self.cmb_fix_model, stretch=False))
+        lay.addWidget(_row("纪要模型", self.cmb_sum_model, stretch=False))
 
         self.btn_llm_test = QPushButton("检测连接与模型")
         self.btn_llm_test.setObjectName("Ghost")
@@ -484,6 +502,16 @@ class SettingsPage(QWidget):
         self.chk_live_refine.setChecked(hw.can_live_refine)
 
     # ---------- 设备测试 ----------
+    def _selected_mic_index(self) -> int | None:
+        """下拉里存的是设备名（索引会随插拔变化），测试与录音统一走名字解析。"""
+        name = self.cmb_mic.currentData()
+        if not name:
+            return None
+        for d in self._mic_devices:
+            if d.name == name:
+                return d.index
+        return None
+
     def _busy_guard(self) -> bool:
         if self.worker is not None and getattr(self.worker, "is_active", False):
             QMessageBox.information(self, "正在录音", "录音过程中不能测试设备，请先结束当前录音。")
@@ -500,7 +528,7 @@ class SettingsPage(QWidget):
         if not self._busy_guard():
             return
         if kind == "mic":
-            self.probe.start_mic(self.cmb_mic.currentData(), 5.0)
+            self.probe.start_mic(self._selected_mic_index(), 5.0)
         else:
             self.probe.start_loopback(self.cmb_loop.currentData(), 5.0)
 
@@ -510,7 +538,7 @@ class SettingsPage(QWidget):
         self.txt_stream.setPlainText("")
         self.txt_offline.setPlainText("")
         self.test_meta.setText("请对着麦克风连续说一句话…")
-        self.probe.start_mic(self.cmb_mic.currentData(), 5.0)
+        self.probe.start_mic(self._selected_mic_index(), 5.0)
 
     def _release(self) -> None:
         self.btn_test_mic.setEnabled(True)
@@ -521,7 +549,6 @@ class SettingsPage(QWidget):
         self.level_bar.setValue(min(100, int(rms * 400)))
 
     def _on_probe_done(self, result) -> None:
-        self._release()
         self.level_bar.setValue(min(100, int(result.rms * 400)))
         cls = "Good" if not result.empty else "Bad"
         self.level_status.setObjectName(cls)
@@ -530,6 +557,12 @@ class SettingsPage(QWidget):
         self.level_status.setText(
             f"{result.device} · 录到 {result.seconds:.1f}s · 峰值 {result.peak:.2f} · 均值 {result.rms:.3f} —— {result.verdict}"
         )
+        if result.empty:
+            # 没声音就不做识别（识别出来也是幻觉），但要把原因写进结果框，不能看起来像"没反应"
+            self.txt_stream.setPlainText("（没有识别：没听到声音）")
+            self.txt_offline.setPlainText("（没有识别：没听到声音）")
+            self.test_meta.setText("请检查麦克风是否选对、系统设置里是否允许应用使用麦克风，然后再试一次。")
+            self._release()
 
     def _on_recognized(self, stream_text: str, off_text: str, rtf: float, load_s: float) -> None:
         self.txt_stream.setPlainText(stream_text or "（无输出）")

@@ -168,7 +168,13 @@ class CaptureWorker(QObject):
     def pause(self) -> None:
         if self.recorder:
             self.recorder.pause()
+            if self.pipeline:
+                # 先把没说完的半句定稿，精修/纠错才能继续处理它
+                self.pipeline.pause()
             self.state_changed.emit("paused")
+            ev = getattr(self, "_llm_wake", None)
+            if ev is not None:
+                ev.set()  # 立即跑一轮大模型纠错，不必等 25 秒
 
     def resume(self) -> None:
         if self.recorder:
@@ -211,8 +217,9 @@ class CaptureWorker(QObject):
         if hw_file.exists():
             hotwords = [ln.strip() for ln in hw_file.read_text(encoding="utf-8").splitlines() if ln.strip()]
         self._corrector = Corrector(
-            OllamaClient(base, timeout=float(self.settings.get("llm.timeout", 60))), model, hotwords
+            OllamaClient(base, timeout=float(self.settings.get("llm.timeout", 90))), model, hotwords
         )
+        self._llm_wake = threading.Event()
         threading.Thread(target=self._prepare_llm, name="llmprep", daemon=True).start()
 
     def _prepare_llm(self) -> None:
@@ -231,7 +238,11 @@ class CaptureWorker(QObject):
     def _llm_loop(self) -> None:
         from ..llm import FixRequest
 
-        while not self._llm_stop.wait(25):
+        while True:
+            self._llm_wake.wait(25)  # 录音中每 25 秒一轮；暂停/新句定稿会被提前唤醒
+            if self._llm_stop.is_set():
+                return
+            self._llm_wake.clear()
             with self._lock:
                 pending = [
                     r for r in self._records
@@ -272,6 +283,9 @@ class CaptureWorker(QObject):
             self._records.append(record)
             self._flush_transcript()
         self.final.emit(cap.track, text, cap.start_ms, cap.end_ms)
+        ev = getattr(self, "_llm_wake", None)
+        if ev is not None:
+            ev.set()  # 有新句子，尽快安排一轮纠错
 
         # 交给后台用离线模型重识别同一句音频（两遍识别）
         if cap.audio is not None and len(cap.audio) > 8000:  # 至少 0.5 秒

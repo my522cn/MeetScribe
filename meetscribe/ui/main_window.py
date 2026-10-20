@@ -259,9 +259,12 @@ class MainWindow(QMainWindow):
         self.record_page.set_levels(mic, loop)
         # 已二次校对（离线模型重识别）的句数，让用户看到纠错在后台跑
         n = self.record_page.captions.refined_count
-        self.record_page.set_caption_hint(
-            f"实时识别中 · 已二次校对 {n} 句" if n else "实时识别中 · 后台正在校对错别字"
-        )
+        if self.record_page._state == "paused":
+            self.record_page.set_caption_hint(f"已暂停 · 后台仍在校对，已修订 {n} 句")
+        elif self.record_page._state == "recording":
+            self.record_page.set_caption_hint(
+                f"实时识别中 · 已二次校对 {n} 句" if n else "实时识别中 · 后台正在校对错别字"
+            )
 
     def _poll_meetings(self) -> None:
         app = self.detector.poll()

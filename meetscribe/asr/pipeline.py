@@ -104,6 +104,25 @@ class LivePipeline:
         except queue.Full:
             pass
 
+    def pause(self) -> None:
+        """暂停收尾：把没说完的半句立即定稿并送去精修。
+
+        否则暂停后不再有音频流入，端点永远不会触发，这半句就一直停在
+        "临时文本"状态——不进转写、不精修、不纠错。
+        """
+        for track in TRACKS:
+            if self._sentence_start[track] is None or self._spoken[track] <= 0:
+                continue
+            text = self.engine.flush(track, 1.2)  # 补静音让模型吐出尾音
+            if text and text.strip():
+                audio = self._slice_audio(track, self._sentence_sample[track], self._consumed[track])
+                self._emit_final(
+                    track, text.strip(), audio, self._sentence_start[track]
+                )
+            self._sentence_start[track] = None
+            self.last_text[track] = ""
+            self._spoken[track] = 0
+
     # ---------- 消费线程 ----------
     def _loop(self) -> None:
         while self._running:

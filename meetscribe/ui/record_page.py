@@ -183,7 +183,7 @@ class RecordPage(QWidget):
             self.status_pill.setText("已暂停")
             self.status_pill.setObjectName("PillOff")
             self.pause_btn.setText("继续")
-            self.caption_hint.setText("已暂停识别")
+            self.caption_hint.setText("已暂停 · 后台仍在校对已识别的文字")
         elif state == "stopped":
             self.status_pill.setText("已保存")
             self.status_pill.setObjectName("PillOff")
