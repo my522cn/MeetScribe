@@ -15,12 +15,13 @@ import subprocess  # noqa: S404
 import threading
 from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
     QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QMessageBox, QPushButton,
-    QTextEdit, QVBoxLayout, QWidget,
+    QSlider, QTextEdit, QVBoxLayout, QWidget,
 )
 
+from ..audio.playback import SessionPlayer
 from ..config import Settings
 
 
@@ -75,7 +76,13 @@ class ManagePage(QWidget):
         self._sessions: list[SessionInfo] = []
         self._current: SessionInfo | None = None
         self._generating = False
+        self._player: SessionPlayer | None = None
+        self._slider_drag = False
         self._build()
+        self._poll = QTimer(self)
+        self._poll.setInterval(200)
+        self._poll.timeout.connect(self._tick_player)
+        self._poll.start()
 
     # ---------- 构建 ----------
     def _build(self) -> None:
@@ -144,6 +151,31 @@ class ManagePage(QWidget):
         self.status.setWordWrap(True)
         cl.addWidget(self.status)
 
+        # ---------- 回放控制 ----------
+        pb = QHBoxLayout()
+        self.btn_play = QPushButton("▶ 播放")
+        self.btn_play.setObjectName("Primary")
+        self.btn_play.setFixedWidth(110)
+        self.btn_play.clicked.connect(self._toggle_play)
+        self.btn_stop = QPushButton("停止")
+        self.btn_stop.setObjectName("Ghost")
+        self.btn_stop.clicked.connect(self._stop_play)
+        self.slider = QSlider(Qt.Orientation.Horizontal)
+        self.slider.setRange(0, 0)
+        self.slider.sliderPressed.connect(lambda: setattr(self, "_slider_drag", True))
+        self.slider.sliderReleased.connect(self._on_seek)
+        self.lbl_playpos = QLabel("00:00 / 00:00")
+        self.lbl_playpos.setObjectName("Mono")
+        pb.addWidget(self.btn_play)
+        pb.addWidget(self.btn_stop)
+        pb.addSpacing(8)
+        pb.addWidget(self.slider, 1)
+        pb.addWidget(self.lbl_playpos)
+        cl.addLayout(pb)
+        self.btn_play.setEnabled(False)
+        self.btn_stop.setEnabled(False)
+        self.slider.setEnabled(False)
+
         self.txt = QTextEdit()
         self.txt.setReadOnly(True)
         self.txt.setPlaceholderText("会议转写内容（说话人 · 时间 · 内容）")
@@ -182,6 +214,7 @@ class ManagePage(QWidget):
 
     def _show_empty(self) -> None:
         self._current = None
+        self._stop_play()
         self.lbl_title.setText("还没有会议记录")
         self.lbl_meta.setText("回到「录音」页开始第一次录音，结束后会自动出现在这里。")
         self.txt.clear()
@@ -194,6 +227,8 @@ class ManagePage(QWidget):
             self._show_empty()
             return
         info: SessionInfo = cur.data(Qt.ItemDataRole.UserRole)
+        if self._current is not info:
+            self._stop_play()  # 换会话先停掉旧回放
         self._current = info
         mode = "线上会议" if info.mode == "online" else "线下会议"
         st = {"completed": "已完成", "recording": "录音中/未正常收尾"}.get(info.status, info.status)
@@ -205,6 +240,13 @@ class ManagePage(QWidget):
         self.txt.setPlainText(self._load_transcript(info))
         for b in (self.btn_minutes, self.btn_folder, self.btn_delete):
             b.setEnabled(True)
+        # 回放控件
+        has_audio = info.n_segments > 0
+        self.btn_play.setEnabled(has_audio)
+        self.slider.setEnabled(has_audio)
+        self.slider.setRange(0, info.duration_ms)
+        self.slider.setValue(0)
+        self.lbl_playpos.setText(f"00:00 / {fmt_duration(info.duration_ms)}")
 
     @staticmethod
     def _load_transcript(info: SessionInfo) -> str:
@@ -224,6 +266,45 @@ class ManagePage(QWidget):
             return f"（读取转写失败：{exc}）"
         return "\n".join(lines) if lines else "（该会议没有可显示的转写内容）"
 
+    # ---------- 回放 ----------
+    def _toggle_play(self) -> None:
+        if not self._current:
+            return
+        if self._player is None or self._player.session_dir != self._current.path:
+            self._player = SessionPlayer(self._current.path)
+        if self._player.active and not self._player.paused:
+            self._player.pause()
+        else:
+            self._player.play(self.slider.value())
+
+    def _stop_play(self) -> None:
+        if self._player is not None:
+            self._player.stop()
+            self._player = None
+        self.btn_play.setText("▶ 播放")
+        self.btn_stop.setEnabled(False)
+
+    def _on_seek(self) -> None:
+        self._slider_drag = False
+        if self._player is not None and self._player.active:
+            self._player.play(self.slider.value())
+
+    def _tick_player(self) -> None:
+        p = self._player
+        if p is None:
+            return
+        if not p.active:
+            self.btn_play.setText("▶ 播放")
+            self.btn_stop.setEnabled(False)
+            return
+        self.btn_stop.setEnabled(True)
+        self.btn_play.setText("⏸ 暂停" if not p.paused else "▶ 继续")
+        if not self._slider_drag:
+            self.slider.setValue(p.position_ms())
+        self.lbl_playpos.setText(
+            f"{fmt_duration(p.position_ms())} / {fmt_duration(p.duration_ms)}"
+        )
+
     # ---------- 操作 ----------
     def _open_folder(self) -> None:
         if not self._current:
@@ -241,6 +322,8 @@ class ManagePage(QWidget):
             QMessageBox.StandardButton.No,
         ) != QMessageBox.StandardButton.Yes:
             return
+        if self._player is not None and self._player.session_dir == info.path:
+            self._stop_play()
         try:
             shutil.rmtree(info.path)
         except Exception as exc:  # noqa: BLE001
