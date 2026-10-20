@@ -1,0 +1,7 @@
+# 精确替换：错词=>正确词
+# 适用于英文短语、专有名词（中文同音字请写到 hotwords.txt）
+# 英文按整词匹配，不会误伤其他单词
+time mine=>timeline
+time line=>timeline
+time life=>timeline
+dem=>demo

@@ -1,0 +1,6 @@
+.venv/
+models/
+data/
+__pycache__/
+*.pyc
+phase3/*.png
