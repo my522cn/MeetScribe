@@ -15,6 +15,20 @@ def fmt_ms(ms: int) -> str:
     return f"{total // 3600:02d}:{total % 3600 // 60:02d}:{total % 60:02d}"
 
 
+def _speaker_chip(speaker: str) -> str:
+    """按说话人身份挑 chip 颜色：线下分出的角色 A/B/C/D 各一色。"""
+    if speaker == "我":
+        return "ChipMic"
+    if speaker == "对方" or speaker == "远端":
+        return "ChipLoop"
+    if speaker == "本地":
+        return "ChipOffline"
+    for i in "ABCD":
+        if speaker.endswith(i):
+            return ["ChipMic", "ChipLoop", "ChipSpkC", "ChipSpkD"]["ABCD".index(i)]
+    return "ChipMic"
+
+
 class CaptionRow(QFrame):
     def __init__(self, speaker: str, chip_style: str, time_text: str, parent=None) -> None:
         super().__init__(parent)
@@ -29,14 +43,15 @@ class CaptionRow(QFrame):
         self.chip.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.chip.setFixedWidth(64)
 
+        # 句子开始时间放在行首（chip 之后、内容之前），扫一眼就能对上时间轴
+        self.time = QLabel(time_text)
+        self.time.setObjectName("CaptionTime")
+        self.time.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.time.setFixedWidth(58)
+
         self.text = QLabel("")
         self.text.setObjectName("CaptionText")
         self.text.setWordWrap(True)
-
-        self.time = QLabel(time_text)
-        self.time.setObjectName("CaptionTime")
-        self.time.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
-        self.time.setFixedWidth(58)
 
         # 离线模型精修过的句子打个小勾，让用户看得见"错别字已被二次校正"
         self.mark = QLabel("✓")
@@ -45,9 +60,9 @@ class CaptionRow(QFrame):
         self.mark.setToolTip("已用离线模型二次识别校正")
 
         layout.addWidget(self.chip, 0, Qt.AlignmentFlag.AlignTop)
+        layout.addWidget(self.time, 0, Qt.AlignmentFlag.AlignTop)
         layout.addWidget(self.text, 1)
         layout.addWidget(self.mark, 0, Qt.AlignmentFlag.AlignTop)
-        layout.addWidget(self.time, 0, Qt.AlignmentFlag.AlignTop)
 
     def set_text(self, text: str, final: bool) -> None:
         self.text.setText(text)
@@ -73,7 +88,9 @@ class CaptionView(QScrollArea):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         self._body = QWidget()
-        self._body.setStyleSheet("background: transparent;")
+        # 同 settings_page：透明规则必须限定在自身，否则会覆盖后代输入控件的白底
+        self._body.setObjectName("CapBody")
+        self._body.setStyleSheet("QWidget#CapBody { background: transparent; }")
         self._layout = QVBoxLayout(self._body)
         self._layout.setContentsMargins(0, 0, 6, 0)
         self._layout.setSpacing(8)
@@ -107,12 +124,15 @@ class CaptionView(QScrollArea):
             row.set_text(text, final=False)
             self._scroll_bottom()
 
-    def finalize(self, track: str, text: str, start_ms: int, end_ms: int) -> None:
+    def finalize(self, track: str, text: str, start_ms: int, end_ms: int,
+                 speaker: str | None = None) -> None:
         row = self._live.pop(track, None)
         if row is None:
             row = self._new_row(track, start_ms)
         row.set_text(text, final=True)
         row.time.setText(fmt_ms(start_ms)[3:])
+        if speaker is not None and speaker != row.chip.text():
+            row.set_speaker(speaker, _speaker_chip(speaker))
         self._finals[(track, start_ms)] = row
         self._scroll_bottom()
 

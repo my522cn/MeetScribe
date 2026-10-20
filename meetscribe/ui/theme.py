@@ -48,6 +48,8 @@ QFrame#CaptionRow { background: #FFFFFF; border: 1px solid #EEEDE8; border-radiu
 QLabel#ChipMic { background: #E6F1FB; color: #185FA5; border-radius: 9px; padding: 2px 10px; font-size: 12px; }
 QLabel#ChipLoop { background: #E1F5EE; color: #0F6E56; border-radius: 9px; padding: 2px 10px; font-size: 12px; }
 QLabel#ChipOffline { background: #FAEEDA; color: #854F0B; border-radius: 9px; padding: 2px 10px; font-size: 12px; }
+QLabel#ChipSpkC { background: #F3EFFB; color: #534AB7; border-radius: 9px; padding: 2px 10px; font-size: 12px; }
+QLabel#ChipSpkD { background: #FBE9F0; color: #A32D6B; border-radius: 9px; padding: 2px 10px; font-size: 12px; }
 QLabel#CaptionText { font-size: 14px; }
 QLabel#CaptionTime { color: #B4B2A9; font-size: 11px; }
 QLabel#RefineMark { color: #0F6E56; font-size: 11px; }
@@ -85,18 +87,27 @@ QLabel#Good { color: #0F6E56; }
 QLabel#Warn { color: #A15C00; }
 QLabel#Bad { color: #A32D2D; }
 
-QComboBox, QSpinBox, QDoubleSpinBox, QLineEdit {
+QComboBox, QAbstractSpinBox, QLineEdit {
     background: #FFFFFF; border: 1px solid #D3D1C7; border-radius: 8px;
-    padding: 6px 10px; min-height: 20px;
+    padding: 6px 10px; min-height: 20px; color: #2C2C2A;
+    selection-background-color: #AFA9EC; selection-color: #FFFFFF;
 }
-QComboBox:focus, QSpinBox:focus, QDoubleSpinBox:focus, QLineEdit:focus { border-color: #AFA9EC; }
+QSpinBox, QDoubleSpinBox {
+    background: #FFFFFF; border: 1px solid #D3D1C7; border-radius: 8px;
+    padding: 6px 10px; min-height: 20px; color: #2C2C2A;
+    selection-background-color: #AFA9EC; selection-color: #FFFFFF;
+}
+QComboBox:focus, QAbstractSpinBox:focus, QLineEdit:focus,
+QSpinBox:focus, QDoubleSpinBox:focus { border-color: #AFA9EC; }
 QComboBox::drop-down { border: none; width: 22px; }
+QComboBox QLineEdit { background: transparent; border: none; padding: 0; min-height: 0; }
 QComboBox QAbstractItemView {
     background: #FFFFFF; border: 1px solid #E4E2DC; selection-background-color: #EEEDFE;
     selection-color: #534AB7; padding: 4px;
 }
-QComboBox:disabled, QSpinBox:disabled, QDoubleSpinBox:disabled, QLineEdit:disabled {
-    background: #F7F6F3; color: #B4B2A9;
+QComboBox:disabled, QAbstractSpinBox:disabled, QLineEdit:disabled,
+QSpinBox:disabled, QDoubleSpinBox:disabled {
+    background: #F1EFE8; color: #B4B2A9; border-color: #E4E2DC;
 }
 QCheckBox { spacing: 8px; }
 QCheckBox::indicator {

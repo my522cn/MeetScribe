@@ -8,6 +8,7 @@ from pathlib import Path
 from PySide6.QtCore import QObject, Signal
 
 from ..asr.engine import ASRConfig, StreamingASR
+from ..asr.diarize import SpeakerRegistry, sentence_features
 from ..asr.pipeline import Caption, LivePipeline
 from ..asr.refine import RefineJob, RefineService
 from ..audio.devices import resolve_input_index
@@ -30,7 +31,7 @@ def _normalize(text: str) -> str:
 
 class CaptureWorker(QObject):
     partial = Signal(str, str, int)          # track, text, start_ms
-    final = Signal(str, str, int, int)       # track, text, start_ms, end_ms
+    final = Signal(str, str, int, int, str)  # track, text, start_ms, end_ms, speaker
     refined = Signal(str, int, str)          # track, start_ms, 精修后文本
     live_refined = Signal(str, int, str)     # track, start_ms, 句中滑窗校正文本
     overlap = Signal(bool)
@@ -71,6 +72,7 @@ class CaptureWorker(QObject):
         self._lock = threading.Lock()
         self._corrector = None
         self._llm_stop: threading.Event | None = None
+        self.diarizer: SpeakerRegistry | None = None
 
     def _make_refiner(self) -> RefineService:
         """按配置挑精修模型；prefer=off 或没有模型时返回不可用实例（submit 会被丢弃）。"""
@@ -106,6 +108,8 @@ class CaptureWorker(QObject):
         if self.recorder is not None:
             return
         self.mode = mode
+        # 线下模式对麦克风轨做轻量声纹聚类，区分房间里的不同说话人
+        self.diarizer = SpeakerRegistry() if mode == "offline" else None
         s = self.settings
         try:
             self._ensure_engine()
@@ -269,7 +273,13 @@ class CaptureWorker(QObject):
         text = self.post.process(cap.text)
         if not text:
             return
-        speaker = (SPEAKER_ONLINE if self.mode == "online" else SPEAKER_OFFLINE).get(cap.track, cap.track)
+        base = SPEAKER_ONLINE if self.mode == "online" else SPEAKER_OFFLINE
+        speaker = base.get(cap.track, cap.track)
+        # 线下模式：麦克风轨不分"本地"，按声纹聚类拆成说话人A/B/C/D
+        if self.mode == "offline" and cap.track == "mic" and self.diarizer is not None:
+            feat = sentence_features(cap.audio)
+            if feat is not None:
+                speaker = self.diarizer.assign(feat)
         record = {
             "track": cap.track,
             "speaker": speaker,
@@ -282,7 +292,7 @@ class CaptureWorker(QObject):
         with self._lock:
             self._records.append(record)
             self._flush_transcript()
-        self.final.emit(cap.track, text, cap.start_ms, cap.end_ms)
+        self.final.emit(cap.track, text, cap.start_ms, cap.end_ms, speaker)
         ev = getattr(self, "_llm_wake", None)
         if ev is not None:
             ev.set()  # 有新句子，尽快安排一轮纠错
@@ -323,18 +333,6 @@ class CaptureWorker(QObject):
             else:
                 return
         self.refined.emit(job.track, job.start_ms, polished)
-
-    @staticmethod
-    def _worth_replacing(old: str, new: str) -> bool:
-        """离线结果明显偏离流式结果时（多半是切音频切歪了），宁可保留原文。"""
-        a, b = _normalize(old), _normalize(new)
-        if not a or not b:
-            return False
-        if len(b) < 0.65 * len(a) or len(b) > 1.8 * len(a):
-            return False
-        from difflib import SequenceMatcher
-
-        return SequenceMatcher(None, a, b).ratio() >= 0.55
 
     @staticmethod
     def _worth_replacing(old: str, new: str) -> bool:

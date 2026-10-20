@@ -155,6 +155,10 @@ class RecordPage(QWidget):
     # ---------- 交互 ----------
     def _set_mode(self, mode: str) -> None:
         if self._state != "idle":
+            # 录音/暂停中不允许切换模式。此时 Qt 已经把刚点的按钮置为选中，
+            # 必须把它弹回去，否则会出现"两个模式同时选中"的假象。
+            self.online_btn.setChecked(self._mode == "online")
+            self.offline_btn.setChecked(self._mode == "offline")
             return
         self._mode = mode
         self.online_btn.setChecked(mode == "online")

@@ -124,12 +124,16 @@ def _card(title: str) -> tuple[QFrame, QVBoxLayout]:
     return card, lay
 
 
-def _row(label: str, widget: QWidget, hint: str = "", stretch: bool = True) -> QWidget:
+def _row(label: str, widget: QWidget, hint: str = "", stretch: bool = True,
+         hint_width: int | None = None) -> QWidget:
     """一行 = 标签 + 控件 [+ 提示]。
 
     stretch=True：控件随窗口拉宽（设备下拉、路径输入这类长文本）；
     stretch=False：控件保持固有宽度（数字框这类短内容），剩余空间留白，
     否则一个 4 位数的数字框会被拉到 600px 宽，窗口一大就很难看。
+    hint_width：给提示标签固定宽度。两个设备行的提示一长一短时会把
+    两个下拉挤得不一样宽（用户反馈"麦克风框和系统声音框不一样长"），
+    固定宽度后两行完全对称。
     """
     w = QWidget()
     h = QHBoxLayout(w)
@@ -146,6 +150,8 @@ def _row(label: str, widget: QWidget, hint: str = "", stretch: bool = True) -> Q
     if hint:
         hh = QLabel(hint)
         hh.setObjectName("Hint")
+        if hint_width:
+            hh.setFixedWidth(hint_width)
         h.addWidget(hh, 0)
     return w
 
@@ -191,7 +197,12 @@ class SettingsPage(QWidget):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         body = QWidget()
-        body.setStyleSheet("background: transparent;")
+        # 注意：直接写 setStyleSheet("background: transparent") 会作用于所有后代，
+        # 把应用级样式表里输入框的白底也覆盖掉（离控件越近的样式表优先级越高），
+        # 输入框就变成透明灰底、看起来像禁用——这是"设置页输入框发灰"的根因。
+        # 这里用 objectName 选择器把规则限定在容器自身。
+        body.setObjectName("SettingsBody")
+        body.setStyleSheet("QWidget#SettingsBody { background: transparent; }")
         lay = QVBoxLayout(body)
         lay.setContentsMargins(0, 0, 8, 0)
         lay.setSpacing(14)
@@ -245,6 +256,11 @@ class SettingsPage(QWidget):
         card, lay = _card("音频设备")
         self.cmb_mic = QComboBox()
         self.cmb_loop = QComboBox()
+        # 默认策略会按最长设备名把框撑长（测试/刷新后突然变长、两框不一致），
+        # 改为固定内容长度策略：宽度交给布局，两个下拉永远等宽
+        for box in (self.cmb_mic, self.cmb_loop):
+            box.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+            box.setMinimumContentsLength(16)
         self.btn_test_mic = QPushButton("测试 5 秒")
         self.btn_test_mic.setObjectName("Ghost")
         self.btn_test_loop = QPushButton("测试 5 秒")
@@ -263,8 +279,8 @@ class SettingsPage(QWidget):
         lh.addWidget(self.cmb_loop, 1)
         lh.addWidget(self.btn_test_loop)
 
-        lay.addWidget(_row("麦克风", mic_row, "录你的声音"))
-        lay.addWidget(_row("系统声音", loop_row, "录会议里对方的声音"))
+        lay.addWidget(_row("麦克风", mic_row, "录你的声音", hint_width=170))
+        lay.addWidget(_row("系统声音", loop_row, "录会议里对方的声音", hint_width=170))
 
         self.level_bar = QProgressBar()
         self.level_bar.setObjectName("LevelBar")
@@ -288,6 +304,8 @@ class SettingsPage(QWidget):
         lay.addWidget(_row("分段时长", self.spin_segment, "崩溃最多丢一段", stretch=False))
 
         self.cmb_format = QComboBox()
+        self.cmb_format.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+        self.cmb_format.setMinimumContentsLength(16)
         self.cmb_format.addItem("FLAC 无损 · 约 30 MB/小时", "flac")
         self.cmb_format.addItem("OPUS 压缩 · 约 13 MB/小时（识别同样可用）", "opus")
         self.cmb_format.setMaximumWidth(430)
@@ -301,6 +319,8 @@ class SettingsPage(QWidget):
         lay.addWidget(self.chk_two_pass)
 
         self.cmb_refine = QComboBox()
+        self.cmb_refine.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+        self.cmb_refine.setMinimumContentsLength(16)
         self.cmb_refine.addItem("自动（推荐：离线 Paraformer）", "auto")
         self.cmb_refine.addItem("强制离线 Paraformer", "paraformer")
         self.cmb_refine.addItem("SenseVoice（多语种，英文术语较弱）", "sense_voice")
