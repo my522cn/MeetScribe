@@ -100,6 +100,13 @@ class CaptionView(QScrollArea):
         row.set_text(text, final=False)
         self._scroll_bottom()
 
+    def update_live_text(self, track: str, start_ms: int, text: str) -> None:
+        """句中滑窗预校正结果：替换临时字幕（保持"未定稿"的灰色样式）。"""
+        row = self._live.get(track)
+        if row is not None:
+            row.set_text(text, final=False)
+            self._scroll_bottom()
+
     def finalize(self, track: str, text: str, start_ms: int, end_ms: int) -> None:
         row = self._live.pop(track, None)
         if row is None:

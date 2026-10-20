@@ -17,6 +17,7 @@ from typing import Callable
 import numpy as np
 
 from .engine import StreamingASR
+from .refine import RefineJob
 
 TRACKS = ("mic", "loop")
 
@@ -25,6 +26,8 @@ TRACKS = ("mic", "loop")
 NOISE_FLOOR_MIN = 0.002
 SPEECH_RATIO = 1.8
 SILENCE_HANGOVER_MS = 2500
+# 句中滑窗预校正：停顿达到这个时长就触发一次离线重识别（在端点断句之前）
+LIVE_PAUSE_MS = 600
 
 
 @dataclass
@@ -45,6 +48,8 @@ class LivePipeline:
         on_partial: Callable[[Caption], None] | None = None,
         on_final: Callable[[Caption], None] | None = None,
         on_overlap: Callable[[bool], None] | None = None,
+        on_live_job: Callable[[RefineJob], None] | None = None,
+        live_refine_after: float = 6.0,
         samplerate: int = 16000,
         max_queue: int = 200,
     ) -> None:
@@ -52,6 +57,8 @@ class LivePipeline:
         self.on_partial = on_partial
         self.on_final = on_final
         self.on_overlap = on_overlap
+        self.on_live_job = on_live_job
+        self.live_after_ms = int(live_refine_after * 1000)
         self.samplerate = samplerate
         self._queues = {t: queue.Queue(maxsize=max_queue) for t in TRACKS}
         self._consumed = {t: 0 for t in TRACKS}      # 已消费样本数（= 会议时间）
@@ -65,6 +72,8 @@ class LivePipeline:
         self._audio_samples = {t: 0 for t in TRACKS}
         self._max_cache_samples = 180 * samplerate
         self._spoken = {t: 0 for t in TRACKS}        # 本句已送入的有声块数
+        self._silence_start = {t: 0 for t in TRACKS}  # 本段静音从何时开始（0=在说话）
+        self._live_done = {t: False for t in TRACKS}  # 本句已做过滑窗预校正
         self._last_final = {t: "" for t in TRACKS}
         self._running = False
         self._thread: threading.Thread | None = None
@@ -122,6 +131,8 @@ class LivePipeline:
 
         if speaking:
             self._last_speech_ms[track] = now_ms
+            self._silence_start[track] = 0
+            self._live_done[track] = False
             if self._sentence_start[track] is None:
                 # 用"第一块语音"的起点作为本句音频起点，比按文本出现时间倒推更准
                 self._sentence_start[track] = max(0, int(start_sample / self.samplerate * 1000))
@@ -132,6 +143,8 @@ class LivePipeline:
                 self._noise[track] = 0.9 * floor + 0.1 * rms
         elif rms < floor * 1.2:
             self._noise[track] = 0.95 * floor + 0.05 * rms
+            if self._silence_start[track] == 0:
+                self._silence_start[track] = now_ms
 
         # 说完了并且静音超过 hangover：停止喂模型（端点检测已在 1.2s 静音时触发）
         if not speaking and (now_ms - self._last_speech_ms[track]) > SILENCE_HANGOVER_MS:
@@ -158,6 +171,28 @@ class LivePipeline:
             self._sentence_start[track] = None
             self.last_text[track] = ""
             self._spoken[track] = 0
+            self._live_done[track] = False
+            return
+
+        # 长句滑窗预校正：本句说了很久还没断句，遇到 ≥0.6s 的句中停顿就提前校正一次。
+        # 只在停顿里触发，说话中途不动字幕，避免文字来回跳。
+        if (
+            self.on_live_job is not None
+            and self._sentence_start[track] is not None
+            and not self._live_done[track]
+            and not speaking
+            and self._spoken[track] >= 4
+            and now_ms - self._sentence_start[track] >= self.live_after_ms
+            and self._silence_start[track] > 0
+            and now_ms - self._silence_start[track] >= LIVE_PAUSE_MS
+        ):
+            self._live_done[track] = True
+            audio = self._slice_audio(track, self._sentence_sample[track], self._consumed[track])
+            if audio is not None and len(audio) > self.samplerate:  # 至少 1 秒
+                self.on_live_job(
+                    RefineJob(track=track, audio=audio, raw_text="",
+                              start_ms=self._sentence_start[track], end_ms=now_ms, live=True)
+                )
 
     def _remember_audio(self, track: str, start_sample: int, block: np.ndarray) -> None:
         self._audio_buf[track].append((start_sample, block))

@@ -11,10 +11,12 @@ from PySide6.QtWidgets import (
 )
 
 from ..audio.devices import default_input_device, find_loopback_source
+from ..config import Settings
 from ..system.detect import MeetingDetector, capability
 from .caption_view import fmt_ms
 from .float_bar import FloatBar
 from .record_page import RecordPage
+from .settings_page import SettingsPage
 from .worker import CaptureWorker
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -48,9 +50,10 @@ class MainWindow(QMainWindow):
         self.resize(1180, 780)
         self.setMinimumSize(980, 640)
 
-        self.worker = CaptureWorker(MODEL_DIR, SESSION_ROOT)
+        self.settings = Settings()
+        self.worker = CaptureWorker(MODEL_DIR, SESSION_ROOT, settings=self.settings)
         self.detector = MeetingDetector()
-        self.auto_record = True
+        self.auto_record = bool(self.settings.get("ui.auto_record", True))
         self._tray_hinted = False
         self._source = "manual"
 
@@ -93,9 +96,11 @@ class MainWindow(QMainWindow):
         self.nav_group = QButtonGroup(self)
         self.btn_record = self._nav_button("录音")
         self.btn_manage = self._nav_button("会议管理")
+        self.btn_settings = self._nav_button("设置")
         self.btn_record.setChecked(True)
         sl.addWidget(self.btn_record)
         sl.addWidget(self.btn_manage)
+        sl.addWidget(self.btn_settings)
         sl.addStretch(1)
 
         self.detect_label = QLabel(f"会议检测\n{capability()}")
@@ -119,10 +124,14 @@ class MainWindow(QMainWindow):
         ml.addWidget(hint)
         ml.addStretch(1)
         self.stack.addWidget(manage)
+
+        self.settings_page = SettingsPage(self.settings, self.worker)
+        self.stack.addWidget(self.settings_page)
         layout.addWidget(self.stack, 1)
 
         self.setCentralWidget(root)
         self.float_bar = FloatBar()
+        self._navs = [self.btn_record, self.btn_manage, self.btn_settings]
 
     def _nav_button(self, text: str) -> QPushButton:
         btn = QPushButton(text)
@@ -134,7 +143,10 @@ class MainWindow(QMainWindow):
         return btn
 
     def _on_nav(self) -> None:
-        self.stack.setCurrentIndex(0 if self.btn_record.isChecked() else 1)
+        for i, btn in enumerate(self._navs):
+            if btn.isChecked():
+                self.stack.setCurrentIndex(i)
+                return
 
     def _build_tray(self) -> None:
         self.tray = QSystemTrayIcon(make_icon(), self)
@@ -173,6 +185,7 @@ class MainWindow(QMainWindow):
         self.worker.partial.connect(rp.captions.update_partial)
         self.worker.final.connect(rp.captions.finalize)
         self.worker.refined.connect(rp.captions.update_final_text)
+        self.worker.live_refined.connect(rp.captions.update_live_text)
         self.worker.overlap.connect(rp.captions.set_overlap)
         self.worker.state_changed.connect(self._on_state)
         self.worker.error.connect(self._on_error)
@@ -186,6 +199,14 @@ class MainWindow(QMainWindow):
         self.float_bar.pause_clicked.connect(self._toggle_pause)
         self.float_bar.stop_clicked.connect(self._stop)
         self.float_bar.expand_clicked.connect(self._restore)
+
+        self.settings_page.saved.connect(self._on_settings_saved)
+
+    def _on_settings_saved(self) -> None:
+        """配置改了以后：精修模型可能换了，重建服务；识别器参数由 _ensure_engine 自己判断。"""
+        if not self.worker.is_active:
+            self.worker.refiner = self.worker._make_refiner()
+            self.record_page.footer.setText("配置已更新，下次录音生效")
 
     # ---------- 录音控制 ----------
     def _start(self, mode: str, source: str = "manual", title: str = "") -> None:

@@ -90,7 +90,15 @@ def main() -> None:
 
     engine = StreamingASR(ASRConfig(model_dir=str(ROOT / "models" / "paraformer_zh_en"), num_threads=2))
     finals: list = []
-    pipeline = LivePipeline(engine, on_final=finals.append, samplerate=SR)
+    live_jobs: list = []
+    live_results: dict[int, str] = {}
+    pipeline = LivePipeline(
+        engine,
+        on_final=finals.append,
+        on_live_job=live_jobs.append,
+        live_refine_after=1.0,   # 测试里把阈值调低，让 2 秒左右的短句也能触发
+        samplerate=SR,
+    )
     pipeline.start()
 
     block = 1600
@@ -111,10 +119,16 @@ def main() -> None:
         replacements_file=ROOT / "config" / "replacements.txt",
         punct_model=ROOT / "models" / "punct_zh_en" / "model.int8.onnx",
     )
-    svc = RefineService(ROOT / "models" / "paraformer_offline", on_result=lambda j, t: None, kind="paraformer")
+    from meetscribe.asr.offline import get_offline
+
+    asr = get_offline(ROOT / "models" / "paraformer_offline", "paraformer", 2)
     t_build = time.perf_counter()
-    svc._recognizer = svc._build()
+    asr.load()
     print(f"精修模型加载 {time.perf_counter()-t_build:.2f}s")
+
+    # 滑窗预校正：模拟 worker 的行为，逐个解码 live 任务
+    for job in live_jobs:
+        live_results[job.start_ms] = asr.transcribe(job.audio)
 
     sum_first = sum_ref = 0.0
     n = 0
@@ -125,7 +139,7 @@ def main() -> None:
         ref = PIECES[i][2] if i < len(PIECES) else ""
         refined = ""
         if cap.audio is not None and len(cap.audio) > 4000:
-            refined = post.process(svc._decode(cap.audio))
+            refined = post.process(asr.transcribe(cap.audio))
         c1, c2 = cer(ref, first), cer(ref, refined) if refined else c1
         sum_first += c1
         sum_ref += c2
@@ -136,7 +150,10 @@ def main() -> None:
     if n:
         print("-" * 78)
         print(f"平均 CER：首遍 {sum_first/n*100:.1f}% → 精修 {sum_ref/n*100:.1f}%")
-        print(f"精修单句 RTF：{svc.last_rtf:.3f}")
+        print(f"精修单句 RTF：{asr.last_rtf:.3f}")
+    print(f"\n滑窗预校正任务：{len(live_jobs)} 个")
+    for start_ms, text in sorted(live_results.items()):
+        print(f"  @ {start_ms/1000:6.2f}s  {text}")
 
 
 if __name__ == "__main__":

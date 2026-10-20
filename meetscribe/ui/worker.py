@@ -10,8 +10,10 @@ from PySide6.QtCore import QObject, Signal
 from ..asr.engine import ASRConfig, StreamingASR
 from ..asr.pipeline import Caption, LivePipeline
 from ..asr.refine import RefineJob, RefineService
+from ..audio.devices import resolve_input_index
 from ..audio.manifest import SessionManifest
 from ..audio.recorder import DualTrackRecorder
+from ..config import Settings
 from ..text.postprocess import TextPostProcessor, has_punctuation
 
 SPEAKER_ONLINE = {"mic": "我", "loop": "对方"}
@@ -30,26 +32,36 @@ class CaptureWorker(QObject):
     partial = Signal(str, str, int)          # track, text, start_ms
     final = Signal(str, str, int, int)       # track, text, start_ms, end_ms
     refined = Signal(str, int, str)          # track, start_ms, 精修后文本
+    live_refined = Signal(str, int, str)     # track, start_ms, 句中滑窗校正文本
     overlap = Signal(bool)
     state_changed = Signal(str)              # recording / paused / stopped
     error = Signal(str)
     session_saved = Signal(str)
     segment_count = Signal(int)
 
-    def __init__(self, model_dir: Path, session_root: Path, config_dir: Path | None = None) -> None:
+    def __init__(
+        self,
+        model_dir: Path,
+        session_root: Path,
+        config_dir: Path | None = None,
+        settings: Settings | None = None,
+    ) -> None:
         super().__init__()
         self.model_dir = Path(model_dir)
         self.session_root = Path(session_root)
         root = Path(__file__).resolve().parents[2]
         cfg = Path(config_dir) if config_dir else root / "config"
+        self.settings = settings or Settings(cfg / "settings.json")
+        self._models_root = root / "models"
         self.post = TextPostProcessor(
             hotwords_file=cfg / "hotwords.txt",
             replacements_file=cfg / "replacements.txt",
             punct_model=root / "models" / "punct_zh_en" / "model.int8.onnx",
         )
-        self.refiner = self._make_refiner(root / "models")
+        self.refiner = self._make_refiner()
         self.mode = "online"
         self.engine: StreamingASR | None = None
+        self._engine_sig: tuple | None = None
         self.pipeline: LivePipeline | None = None
         self.recorder: DualTrackRecorder | None = None
         self.manifest: SessionManifest | None = None
@@ -58,13 +70,20 @@ class CaptureWorker(QObject):
         self._records: list[dict] = []
         self._lock = threading.Lock()
 
-    def _make_refiner(self, models_root: Path) -> RefineService:
-        for folder, kind in REFINE_CANDIDATES:
-            d = models_root / folder
+    def _make_refiner(self) -> RefineService:
+        """按配置挑精修模型；prefer=off 或没有模型时返回不可用实例（submit 会被丢弃）。"""
+        prefer = self.settings.refine_model
+        order = list(REFINE_CANDIDATES)
+        if prefer == "sense_voice":
+            order.reverse()
+        for folder, kind in order:
+            d = self._models_root / folder
             if (d / "model.int8.onnx").exists() and (d / "tokens.txt").exists():
-                return RefineService(d, on_result=self._on_refined, kind=kind)
-        # 一个都没有：返回一个不可用的服务，submit 会被静默丢弃
-        return RefineService(models_root / "paraformer_offline", on_result=self._on_refined)
+                return RefineService(
+                    d, on_result=self._on_refined, kind=kind,
+                    num_threads=int(self.settings.get("asr.refine_threads", 2)),
+                )
+        return RefineService(self._models_root / "paraformer_offline", on_result=self._on_refined)
 
     # ---------- 对外 ----------
     @property
@@ -85,28 +104,36 @@ class CaptureWorker(QObject):
         if self.recorder is not None:
             return
         self.mode = mode
+        s = self.settings
         try:
-            if self.engine is None:
-                self.engine = StreamingASR(ASRConfig(model_dir=self.model_dir, num_threads=2))
+            self._ensure_engine()
+            live_refine = bool(s.get("asr.live_refine", True)) and s.two_pass
             self.pipeline = LivePipeline(
                 self.engine,
                 on_partial=lambda c: self.partial.emit(c.track, c.text, c.start_ms),
                 on_final=self._on_final,
                 on_overlap=lambda b: self.overlap.emit(b),
+                on_live_job=self._on_live_job if live_refine else None,
+                live_refine_after=float(s.get("asr.live_refine_after", 6.0)),
             )
             self._segment_total = 0
+            mic_name = str(s.get("audio.mic_name", "") or "")
             self.recorder = DualTrackRecorder(
-                self.session_root,
-                segment_seconds=300,
+                s.session_root,
+                segment_seconds=s.segment_seconds,
                 mode=mode,
                 title=title,
                 source=source,
+                mic_device=resolve_input_index(mic_name, s.get("audio.mic_index")),
+                loopback_name=s.get("audio.loopback_name"),
+                audio_format=str(s.get("audio.format", "flac")),
                 on_audio=lambda t, b: self.pipeline.push(t, b),
                 on_segment=self._on_segment,
             )
             self.pipeline.start()
             self.recorder.start()
-            self.refiner.start()
+            if s.two_pass:
+                self.refiner.start()
             # 目录由 recorder.start() 创建，转写文件必须在之后再打开
             self._records = []
             self._transcript = open(  # noqa: SIM115
@@ -116,6 +143,24 @@ class CaptureWorker(QObject):
         except Exception as exc:  # noqa: BLE001
             self.error.emit(f"启动录音失败: {exc}")
             self._teardown()
+
+    def _ensure_engine(self) -> None:
+        """识别器只在参数变化时重建，避免每次录音都重新加载 237MB 模型。"""
+        sig = (
+            int(self.settings.get("asr.num_threads", 2)),
+            float(self.settings.get("asr.endpoint_silence", 1.2)),
+        )
+        if self.engine is not None and self._engine_sig == sig:
+            return
+        self.engine = StreamingASR(
+            ASRConfig(
+                model_dir=self.model_dir,
+                num_threads=sig[0],
+                rule2_min_trailing_silence=sig[1],
+                rule1_min_trailing_silence=max(2.4, sig[1] * 2),
+            )
+        )
+        self._engine_sig = sig
 
     def pause(self) -> None:
         if self.recorder:
@@ -171,9 +216,18 @@ class CaptureWorker(QObject):
                           start_ms=cap.start_ms, end_ms=cap.end_ms)
             )
 
+    def _on_live_job(self, job: RefineJob) -> None:
+        """句中滑窗预校正：结果只更新临时字幕，不进转写记录（定稿时还会再精修一次）。"""
+        if self.refiner.running:
+            self.refiner.submit(job)
+
     def _on_refined(self, job: RefineJob, text: str) -> None:
         polished = self.post.process(text, punctuate=not has_punctuation(text))
         if not polished:
+            return
+        if job.live:
+            # 滑窗结果：比流式长才值得替换（离线模型常把没说完的部分补全）
+            self.live_refined.emit(job.track, job.start_ms, polished)
             return
         with self._lock:
             for rec in reversed(self._records):

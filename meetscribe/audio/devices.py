@@ -73,6 +73,71 @@ def find_loopback_source() -> tuple[str, str] | None:
     return speaker.name, str(speaker.id)
 
 
+def list_input_devices() -> list[DeviceInfo]:
+    """可作为"麦克风"的设备：WASAPI 且有输入通道。"""
+    return [d for d in list_devices() if d.is_wasapi and d.max_input > 0]
+
+
+def list_speakers() -> list[tuple[str, str]]:
+    """可作为回环源的扬声器（soundcard 视角，name/id）。"""
+    try:
+        import soundcard as sc
+    except Exception:  # noqa: BLE001
+        return []
+    out: list[tuple[str, str]] = []
+    try:
+        for sp in sc.all_speakers():
+            out.append((sp.name, str(sp.id)))
+    except Exception:  # noqa: BLE001
+        pass
+    return out
+
+
+def resolve_input_index(mic_name: str, mic_index: int | None) -> int | None:
+    """设备索引会随插拔变化，先按名字找，找不到再用索引。"""
+    devs = list_input_devices()
+    if mic_name:
+        for d in devs:
+            if d.name == mic_name:
+                return d.index
+    if mic_index is not None and any(d.index == mic_index for d in devs):
+        return mic_index
+    return None
+
+
+def open_mic_stream(dev_index: int | None, target_rate: int = 16000):
+    """打开麦克风输入流，返回 (stream, 采样率, 通道数)。
+
+    WASAPI 共享模式常拒绝 16kHz；且阵列麦用单声道打开会拿到错误/静音通道，
+    因此优先按设备原生通道数打开，再在采集后自行降混为单声道。
+    """
+    info = sd.query_devices(dev_index) if dev_index is not None else sd.query_devices(kind="input")
+    native = int(info["default_samplerate"])
+    max_ch = int(info["max_input_channels"])
+    channel_opts: list[int] = []
+    for ch in (max_ch, 2, 1):
+        if 0 < ch <= max_ch and ch not in channel_opts:
+            channel_opts.append(ch)
+    rate_opts: list[int] = []
+    for r in (native, 48000, 44100, target_rate):
+        if r > 0 and r not in rate_opts:
+            rate_opts.append(r)
+
+    last_err: Exception | None = None
+    for rate in rate_opts:
+        for ch in channel_opts:
+            try:
+                sd.check_input_settings(device=dev_index, samplerate=rate, channels=ch, dtype="float32")
+                stream = sd.InputStream(
+                    device=dev_index, samplerate=rate, channels=ch,
+                    dtype="float32", blocksize=int(rate * 0.1),
+                )
+                return stream, rate, ch
+            except Exception as exc:  # noqa: BLE001
+                last_err = exc
+    raise RuntimeError(f"无法打开麦克风: {last_err}")
+
+
 def describe() -> str:
     lines = ["音频设备清单（仅 WASAPI）:"]
     for d in list_devices():

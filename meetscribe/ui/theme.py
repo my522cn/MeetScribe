@@ -75,4 +75,40 @@ QMessageBox QPushButton:default, QDialog QPushButton:default {
     background: #534AB7; color: #FFFFFF; border-color: #534AB7;
 }
 QToolTip { background: #2C2C2A; color: #FFFFFF; border: none; padding: 4px 8px; }
+
+/* ---------- 设置页 ---------- */
+QLabel#PageTitle { font-size: 19px; font-weight: 500; }
+QLabel#SectionTitle { font-size: 13px; font-weight: 500; color: #2C2C2A; }
+QLabel#FieldLabel { color: #5F5E5A; }
+QLabel#Mono { font-family: "Cascadia Mono", Consolas, monospace; font-size: 12px; color: #5F5E5A; }
+QLabel#Good { color: #0F6E56; }
+QLabel#Warn { color: #A15C00; }
+QLabel#Bad { color: #A32D2D; }
+
+QComboBox, QSpinBox, QDoubleSpinBox, QLineEdit {
+    background: #FFFFFF; border: 1px solid #D3D1C7; border-radius: 8px;
+    padding: 6px 10px; min-height: 20px;
+}
+QComboBox:focus, QSpinBox:focus, QDoubleSpinBox:focus, QLineEdit:focus { border-color: #AFA9EC; }
+QComboBox::drop-down { border: none; width: 22px; }
+QComboBox QAbstractItemView {
+    background: #FFFFFF; border: 1px solid #E4E2DC; selection-background-color: #EEEDFE;
+    selection-color: #534AB7; padding: 4px;
+}
+QComboBox:disabled, QSpinBox:disabled, QDoubleSpinBox:disabled, QLineEdit:disabled {
+    background: #F7F6F3; color: #B4B2A9;
+}
+QCheckBox { spacing: 8px; }
+QCheckBox::indicator {
+    width: 16px; height: 16px; border: 1px solid #C6C4BB; border-radius: 4px; background: #FFFFFF;
+}
+QCheckBox::indicator:checked { background: #534AB7; border-color: #534AB7; }
+QTextEdit {
+    background: #FFFFFF; border: 1px solid #E4E2DC; border-radius: 10px; padding: 8px;
+}
+QProgressBar {
+    background: #F1EFE8; border: none; border-radius: 4px; height: 8px; text-align: center;
+}
+QProgressBar::chunk { background: #534AB7; border-radius: 4px; }
+QProgressBar#LevelBar::chunk { background: #1D9E75; }
 """

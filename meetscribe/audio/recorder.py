@@ -18,7 +18,7 @@ import numpy as np
 import sounddevice as sd
 import soundfile as sf
 
-from .devices import default_input_device, find_loopback_source
+from .devices import default_input_device, find_loopback_source, open_mic_stream
 from .manifest import Segment, SessionManifest, new_session_id
 from .resample import StreamingResampler
 
@@ -37,10 +37,13 @@ class DualTrackRecorder:
         title: str = "",
         source: str = "manual",
         mic_device: int | None = None,
+        loopback_name: str | None = None,
+        audio_format: str = "flac",
         on_segment: Callable[[Segment], None] | None = None,
         on_audio: Callable[[str, np.ndarray], None] | None = None,
     ) -> None:
         self.samplerate = samplerate
+        self.audio_format = (audio_format or "flac").lower()
         self.segment_samples = segment_seconds * samplerate
         self.on_segment = on_segment
         self.on_audio = on_audio
@@ -59,6 +62,7 @@ class DualTrackRecorder:
         )
 
         self._mic_device = mic_device
+        self._loopback_name = loopback_name
         self._queues: dict[str, queue.Queue] = {"mic": queue.Queue(maxsize=300), "loop": queue.Queue(maxsize=300)}
         self._buf: dict[str, list[np.ndarray]] = {"mic": [], "loop": []}
         self._buf_count: dict[str, int] = {"mic": 0, "loop": 0}
@@ -147,36 +151,8 @@ class DualTrackRecorder:
             self._errors.append(f"mic: {exc}")
 
     def _open_mic_stream(self, dev_index: int | None):
-        """WASAPI 共享模式常拒绝 16kHz；且阵列麦用单声道打开会拿到错误/静音通道，
-        因此优先按设备原生通道数打开，再在采集后自行降混为单声道。"""
-        info = sd.query_devices(dev_index) if dev_index is not None else sd.query_devices(kind="input")
-        native = int(info["default_samplerate"])
-        max_ch = int(info["max_input_channels"])
-        # 优先原生通道数，其次 2，最后才退回 1
-        channel_opts: list[int] = []
-        for ch in (max_ch, 2, 1):
-            if 0 < ch <= max_ch and ch not in channel_opts:
-                channel_opts.append(ch)
-        rate_opts: list[int] = []
-        for r in (native, 48000, 44100, self.samplerate):
-            if r > 0 and r not in rate_opts:
-                rate_opts.append(r)
-
-        last_err: Exception | None = None
-        for rate in rate_opts:
-            for ch in channel_opts:
-                try:
-                    sd.check_input_settings(
-                        device=dev_index, samplerate=rate, channels=ch, dtype="float32"
-                    )
-                    stream = sd.InputStream(
-                        device=dev_index, samplerate=rate, channels=ch,
-                        dtype="float32", blocksize=int(rate * 0.1),
-                    )
-                    return stream, rate, ch
-                except Exception as exc:  # noqa: BLE001
-                    last_err = exc
-        raise RuntimeError(f"无法打开麦克风: {last_err}")
+        """设备探测逻辑统一放在 devices.open_mic_stream（配置页测试也复用）。"""
+        return open_mic_stream(dev_index, self.samplerate)
 
 
     def _loop_worker(self) -> None:
@@ -188,7 +164,7 @@ class DualTrackRecorder:
                 comtypes.CoInitialize()
             except Exception:  # noqa: BLE001
                 pass
-            src = find_loopback_source()
+            src = self._loopback_source()
             if src is None:
                 self._errors.append("loop: 未找到系统声音回环设备")
                 return
@@ -205,6 +181,19 @@ class DualTrackRecorder:
                     self._push("loop", arr)
         except Exception as exc:  # noqa: BLE001
             self._errors.append(f"loop: {exc}")
+
+    def _loopback_source(self) -> tuple[str, str] | None:
+        """优先用配置里指定的扬声器，找不到（拔了/改名了）退回系统默认。"""
+        if self._loopback_name:
+            try:
+                import soundcard as sc
+
+                for sp in sc.all_speakers():
+                    if sp.name == self._loopback_name:
+                        return sp.name, str(sp.id)
+            except Exception:  # noqa: BLE001
+                pass
+        return find_loopback_source()
 
     def _push(self, track: str, block: np.ndarray) -> None:
         if self._paused or not self._running:
@@ -256,15 +245,23 @@ class DualTrackRecorder:
             self._buf[track] = []
             self._buf_count[track] = 0
 
+    def _codec(self) -> tuple[str, str, str]:
+        """返回 (容器格式, 子类型, 扩展名)。OPUS 不可用时退回 FLAC，绝不让录音失败。"""
+        if self.audio_format == "opus":
+            try:
+                if "OPUS" in sf.available_subtypes("OGG"):
+                    return "OGG", "OPUS", "opus"
+            except Exception:  # noqa: BLE001
+                pass
+        return "FLAC", "PCM_16", "flac"
+
     def _write_segment(self, track: str, data: np.ndarray) -> None:
         if len(data) == 0:
             return
+        fmt, sub, ext = self._codec()
         self._seg_index[track] += 1
-        rel = f"{track}/seg_{self._seg_index[track]:04d}.flac"
-        sf.write(
-            self.session_dir / rel, data, self.samplerate,
-            format="FLAC", subtype="PCM_16",
-        )
+        rel = f"{track}/seg_{self._seg_index[track]:04d}.{ext}"
+        sf.write(self.session_dir / rel, data, self.samplerate, format=fmt, subtype=sub)
         seg = Segment(
             track=track,
             index=self._seg_index[track],

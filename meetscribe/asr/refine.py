@@ -12,7 +12,6 @@
 from __future__ import annotations
 
 import queue
-import re
 import threading
 import time
 from dataclasses import dataclass
@@ -21,10 +20,7 @@ from typing import Callable
 
 import numpy as np
 
-_TAG_RE = re.compile(r"<\|[^|]*\|>")
-# 句尾静音裁剪：低于这个能量视为静音，最多保留 0.35s 尾巴
-_TRIM_KEEP = 0.35
-_TRIM_WIN = 0.02  # 20ms 窗
+from .offline import OfflineASR, get_offline
 
 
 @dataclass
@@ -34,33 +30,7 @@ class RefineJob:
     raw_text: str
     start_ms: int
     end_ms: int
-
-
-def trim_silence(audio: np.ndarray, sr: int = 16000) -> np.ndarray:
-    """裁掉首尾静音并做峰值归一化——离线模型对音量不敏感，但裁干净能少些幻觉。"""
-    if audio.size < sr // 4:
-        return audio
-    win = max(1, int(sr * _TRIM_WIN))
-    n = audio.size // win
-    if n < 2:
-        return audio
-    frames = audio[: n * win].reshape(n, win)
-    rms = np.sqrt(np.mean(frames.astype(np.float64) ** 2, axis=1) + 1e-12)
-    peak = float(rms.max())
-    if peak <= 0:
-        return audio
-    loud = np.nonzero(rms > peak * 0.08)[0]
-    if loud.size == 0:
-        return audio
-    start = max(0, int(loud[0] * win - sr * 0.12))
-    end = min(audio.size, int((loud[-1] + 1) * win + sr * _TRIM_KEEP))
-    out = audio[start:end]
-    if out.size < sr // 4:
-        return audio
-    m = float(np.max(np.abs(out)))
-    if m > 1e-3:
-        out = out * (0.85 / m)
-    return out.astype(np.float32, copy=False)
+    live: bool = False   # True = 句中滑窗预校正（只更新临时字幕，不动定稿记录）
 
 
 class RefineService:
@@ -80,8 +50,7 @@ class RefineService:
         self._queue: queue.Queue[RefineJob | None] = queue.Queue(maxsize=200)
         self._thread: threading.Thread | None = None
         self._running = False
-        self._recognizer = None
-        self.last_rtf: float = 0.0
+        self._asr: OfflineASR | None = None
         self.done = 0
         self.failed = 0
 
@@ -92,6 +61,14 @@ class RefineService:
     @property
     def pending(self) -> int:
         return self._queue.qsize()
+
+    @property
+    def running(self) -> bool:
+        return self._running
+
+    @property
+    def last_rtf(self) -> float:
+        return self._asr.last_rtf if self._asr else 0.0
 
     def start(self) -> None:
         if self._running or not self.available:
@@ -122,32 +99,15 @@ class RefineService:
             pass  # 积压过多就放弃精修，优先保证不拖慢系统
 
     # ---------- 内部 ----------
-    def _build(self):
-        import sherpa_onnx
-
-        model = str(self.model_dir / "model.int8.onnx")
-        tokens = str(self.model_dir / "tokens.txt")
-        if self.kind == "sense_voice":
-            return sherpa_onnx.OfflineRecognizer.from_sense_voice(
-                model=model, tokens=tokens, num_threads=self.num_threads,
-                use_itn=True, language="auto",
-            )
-        return sherpa_onnx.OfflineRecognizer.from_paraformer(
-            paraformer=model, tokens=tokens, num_threads=self.num_threads,
-            sample_rate=16000, feature_dim=80, decoding_method="greedy_search",
-        )
-
     def _loop(self) -> None:
         try:
-            self._recognizer = self._build()
+            # 与配置页"测试识别"共用同一个识别器实例，避免重复占用内存
+            self._asr = get_offline(self.model_dir, self.kind, self.num_threads)
+            self._asr.load()
         except Exception:  # noqa: BLE001
             self._running = False
             return
-        # 预热：第一次推理要把 onnx 权重读进内存，否则第一句延迟很高
-        try:
-            self._decode(np.zeros(16000, dtype=np.float32))
-        except Exception:  # noqa: BLE001
-            pass
+        self._asr.warmup()  # 首次推理要把权重读进内存，否则第一句延迟很高
 
         while self._running:
             try:
@@ -157,7 +117,7 @@ class RefineService:
             if job is None:
                 break
             try:
-                text = self._decode(job.audio)
+                text = self._asr.transcribe(job.audio)
             except Exception:  # noqa: BLE001
                 self.failed += 1
                 continue
@@ -167,16 +127,3 @@ class RefineService:
                     self.on_result(job, text.strip())
                 except Exception:  # noqa: BLE001
                     pass
-
-    def _decode(self, audio: np.ndarray) -> str:
-        rec = self._recognizer
-        audio = trim_silence(audio)
-        t0 = time.perf_counter()
-        stream = rec.create_stream()
-        stream.accept_waveform(16000, audio.astype(np.float32, copy=False))
-        rec.decode_stream(stream)
-        dur = len(audio) / 16000
-        if dur > 0:
-            self.last_rtf = (time.perf_counter() - t0) / dur
-        text = stream.result.text
-        return _TAG_RE.sub("", text).strip()
