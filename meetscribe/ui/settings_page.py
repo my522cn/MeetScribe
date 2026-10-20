@@ -14,8 +14,8 @@ from pathlib import Path
 from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QDoubleSpinBox, QFrame, QGridLayout, QHBoxLayout, QLabel,
-    QLineEdit, QMessageBox, QProgressBar, QPushButton, QScrollArea, QSpinBox,
-    QTextEdit, QVBoxLayout, QWidget,
+    QLineEdit, QMessageBox, QProgressBar, QPushButton, QScrollArea, QSizePolicy,
+    QSpinBox, QTextEdit, QVBoxLayout, QWidget,
 )
 
 from ..audio import probe
@@ -31,6 +31,7 @@ class DeviceProbe(QObject):
     finished = Signal(object)          # ProbeResult
     recognized = Signal(str, str, float, float)   # 流式文本, 离线文本, 离线RTF, 加载秒
     failed = Signal(str)
+    stage = Signal(str)                # 阶段提示（录音中 x.x 秒 / 正在识别…）
 
     def __init__(self, settings: Settings, worker=None) -> None:
         super().__init__()
@@ -52,6 +53,8 @@ class DeviceProbe(QObject):
     def _on_level(self, seconds: float, rms: float) -> None:
         self.level.emit(rms)
         self.progress.emit(seconds)
+        # 录音过程给出实时反馈，否则 5 秒里界面毫无动静，看起来像"没反应"
+        self.stage.emit(f"正在录音 {seconds:.1f}s / 5s…（现在对着麦克风说话）")
 
     def _run(self, fn) -> None:
         if self._busy:
@@ -72,10 +75,12 @@ class DeviceProbe(QObject):
             self._busy = False
             return
         try:
+            self.stage.emit("正在流式识别（实时字幕同款引擎）…")
             t_load = time.perf_counter()
             stream_text = self._streaming(result.audio)
             from ..asr.offline import get_offline, resolve_model_dir
 
+            self.stage.emit("正在离线精修识别（首次需加载模型，约 5~15 秒）…")
             model_dir, kind = resolve_model_dir(PROJECT_ROOT / "models", self.settings.refine_model)
             asr = get_offline(model_dir, kind, int(self.settings.get("asr.refine_threads", 2)))
             asr.load()
@@ -196,6 +201,8 @@ class SettingsPage(QWidget):
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
+        # 内容始终随窗口宽度收缩，永远不出横向滚动条
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         body = QWidget()
         # 注意：直接写 setStyleSheet("background: transparent") 会作用于所有后代，
         # 把应用级样式表里输入框的白底也覆盖掉（离控件越近的样式表优先级越高），
@@ -221,6 +228,9 @@ class SettingsPage(QWidget):
         card, lay = _card("本机硬件与建议")
         self.hw_text = QLabel("检测中…")
         self.hw_text.setObjectName("Mono")
+        # 长文本必须换行且不参与最小宽度计算，否则会把整页撑出横向滚动条
+        self.hw_text.setWordWrap(True)
+        self.hw_text.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         lay.addWidget(self.hw_text)
         self.hw_verdict = QLabel("")
         self.hw_verdict.setObjectName("Good")
@@ -369,6 +379,8 @@ class SettingsPage(QWidget):
         lay.addWidget(self.txt_offline)
         self.test_meta = QLabel("")
         self.test_meta.setObjectName("Hint")
+        self.test_meta.setWordWrap(True)
+        self.test_meta.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         lay.addWidget(self.test_meta)
         return card
 
@@ -437,6 +449,7 @@ class SettingsPage(QWidget):
         self.probe.finished.connect(self._on_probe_done)
         self.probe.recognized.connect(self._on_recognized)
         self.probe.failed.connect(self._on_probe_failed)
+        self.probe.stage.connect(self._on_stage)
         self.hw_ready.connect(self._apply_hw_ui)
         self.llm_result.connect(self._on_llm_result)
 
@@ -584,9 +597,14 @@ class SettingsPage(QWidget):
             self.test_meta.setText("请检查麦克风是否选对、系统设置里是否允许应用使用麦克风，然后再试一次。")
             self._release()
 
+    def _on_stage(self, text: str) -> None:
+        """识别过程的阶段提示，让每一步都看得见（否则像卡死/无效）。"""
+        self.test_meta.setText(text)
+
     def _on_recognized(self, stream_text: str, off_text: str, rtf: float, load_s: float) -> None:
-        self.txt_stream.setPlainText(stream_text or "（无输出）")
-        self.txt_offline.setPlainText(off_text or "（无输出）")
+        self._release()  # 修复：识别完成后必须恢复测试按钮，否则之后再点"测试"毫无反应
+        self.txt_stream.setPlainText(stream_text or "（流式无输出）")
+        self.txt_offline.setPlainText(off_text or "（离线无输出）")
         same = (stream_text or "").replace(" ", "") == (off_text or "").replace(" ", "")
         self.test_meta.setText(
             ("两版完全一致，说明这段音频流式就够准。" if same else "两版不一致 → 精修改掉了首遍的错误。")

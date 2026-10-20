@@ -1,11 +1,10 @@
-"""会议管理页：会话列表、转写查看、一键生成纪要、打开文件夹、删除会话。
+"""会议管理页：会话列表（可多选批量删除）、转写/纪要查看、一键生成纪要（带进度）、回放。
 
 数据来源：session_root/<session_id>/ 下的
 - session.json     会话清单（SessionManifest.save 生成）
 - transcript.jsonl 每行一条 {"track","speaker","start_ms","end_ms","text",...}
+- minutes.md       生成纪要（本页写入）
 - mic/ loop/       分段音频（seg_0001.flac ...）
-
-回放（跨分段连续播放、时间对应会议时间）在本页 v2 实现。
 """
 from __future__ import annotations
 
@@ -15,10 +14,10 @@ import subprocess  # noqa: S404
 import threading
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtWidgets import (
     QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QMessageBox, QPushButton,
-    QSlider, QTextEdit, QVBoxLayout, QWidget,
+    QSlider, QTextEdit, QVBoxLayout, QWidget, QSizePolicy,
 )
 
 from ..audio.playback import SessionPlayer
@@ -70,12 +69,17 @@ class SessionInfo:
 
 
 class ManagePage(QWidget):
+    # 后台纪要线程 → UI 线程（线程里禁止直接碰控件，统一走信号）
+    minute_progress = Signal(str, str)   # 会话路径, 进度文本
+    minute_finished = Signal(str, bool, str)  # 会话路径, 是否成功, 消息
+
     def __init__(self, settings: Settings, parent=None) -> None:
         super().__init__(parent)
         self.settings = settings
         self._sessions: list[SessionInfo] = []
         self._current: SessionInfo | None = None
-        self._generating = False
+        # 纪要生成状态按会话跟踪：path -> "generating" / "done" / "failed:xxx"
+        self._minute_state: dict[str, str] = {}
         self._player: SessionPlayer | None = None
         self._slider_drag = False
         self._build()
@@ -83,6 +87,8 @@ class ManagePage(QWidget):
         self._poll.setInterval(200)
         self._poll.timeout.connect(self._tick_player)
         self._poll.start()
+        self.minute_progress.connect(self._on_minute_progress)
+        self.minute_finished.connect(self._on_minute_finished)
 
     # ---------- 构建 ----------
     def _build(self) -> None:
@@ -104,9 +110,10 @@ class ManagePage(QWidget):
         body = QHBoxLayout()
         body.setSpacing(14)
 
-        # 左：会话列表
+        # 左：会话列表（多选 → 支持批量删除）
         self.list = QListWidget()
         self.list.setFixedWidth(300)
+        self.list.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
         self.list.currentItemChanged.connect(self._on_select)
         body.addWidget(self.list)
 
@@ -124,6 +131,7 @@ class ManagePage(QWidget):
         self.lbl_meta = QLabel("")
         self.lbl_meta.setObjectName("Hint")
         self.lbl_meta.setWordWrap(True)
+        self.lbl_meta.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         cl.addWidget(self.lbl_title)
         cl.addWidget(self.lbl_meta)
 
@@ -136,7 +144,7 @@ class ManagePage(QWidget):
         self.btn_folder.clicked.connect(self._open_folder)
         self.btn_delete = QPushButton("删除会议")
         self.btn_delete.setObjectName("Ghost")
-        self.btn_delete.clicked.connect(self._delete_session)
+        self.btn_delete.clicked.connect(self._delete_sessions)
         self.btn_minutes.setEnabled(False)
         self.btn_folder.setEnabled(False)
         self.btn_delete.setEnabled(False)
@@ -146,9 +154,10 @@ class ManagePage(QWidget):
         btns.addStretch(1)
         cl.addLayout(btns)
 
-        self.status = QLabel("纪要保存在会议文件夹的 minutes.md，可用任意编辑器查看。")
+        self.status = QLabel("")
         self.status.setObjectName("Hint")
         self.status.setWordWrap(True)
+        self.status.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         cl.addWidget(self.status)
 
         # ---------- 回放控制 ----------
@@ -176,6 +185,23 @@ class ManagePage(QWidget):
         self.btn_stop.setEnabled(False)
         self.slider.setEnabled(False)
 
+        # ---------- 转写 / 纪要视图 ----------
+        views = QHBoxLayout()
+        self.btn_view_trans = QPushButton("转写稿")
+        self.btn_view_trans.setObjectName("SegmentLeft")
+        self.btn_view_trans.setCheckable(True)
+        self.btn_view_trans.setChecked(True)
+        self.btn_view_min = QPushButton("纪要预览")
+        self.btn_view_min.setObjectName("SegmentRight")
+        self.btn_view_min.setCheckable(True)
+        self.btn_view_trans.clicked.connect(lambda: self._switch_view("trans"))
+        self.btn_view_min.clicked.connect(lambda: self._switch_view("min"))
+        views.addWidget(self.btn_view_trans)
+        views.addWidget(self.btn_view_min)
+        views.addStretch(1)
+        cl.addLayout(views)
+        self._view = "trans"
+
         self.txt = QTextEdit()
         self.txt.setReadOnly(True)
         self.txt.setPlaceholderText("会议转写内容（说话人 · 时间 · 内容）")
@@ -187,16 +213,22 @@ class ManagePage(QWidget):
     # ---------- 列表 ----------
     def refresh(self) -> None:
         """重扫会话目录（切到本页或点刷新时调用）。"""
+        selected = {i.data(Qt.ItemDataRole.UserRole).path for i in self.list.selectedItems()
+                    if i.data(Qt.ItemDataRole.UserRole)}
         self.list.blockSignals(True)
         self.list.clear()
         self._sessions = self._scan()
-        for s in self._sessions:
+        restore_row = 0
+        for n, s in enumerate(self._sessions):
             item = QListWidgetItem(s.label)
             item.setData(Qt.ItemDataRole.UserRole, s)
             self.list.addItem(item)
+            if s.path in selected:
+                item.setSelected(True)
+                restore_row = n
         self.list.blockSignals(False)
         if self._sessions:
-            self.list.setCurrentRow(0)
+            self.list.setCurrentRow(restore_row)
         else:
             self._show_empty()
 
@@ -220,6 +252,8 @@ class ManagePage(QWidget):
         self.txt.clear()
         for b in (self.btn_minutes, self.btn_folder, self.btn_delete):
             b.setEnabled(False)
+        self.btn_play.setEnabled(False)
+        self.slider.setEnabled(False)
 
     # ---------- 详情 ----------
     def _on_select(self, cur, _prev) -> None:
@@ -237,9 +271,9 @@ class ManagePage(QWidget):
             f"{info.started}　·　{mode}　·　时长 {fmt_duration(info.duration_ms)}　·　"
             f"{info.n_segments} 个音频分段　·　{info.n_lines} 句转写　·　{st}"
         )
-        self.txt.setPlainText(self._load_transcript(info))
         for b in (self.btn_minutes, self.btn_folder, self.btn_delete):
             b.setEnabled(True)
+        self._apply_minute_ui()
         # 回放控件
         has_audio = info.n_segments > 0
         self.btn_play.setEnabled(has_audio)
@@ -247,6 +281,23 @@ class ManagePage(QWidget):
         self.slider.setRange(0, info.duration_ms)
         self.slider.setValue(0)
         self.lbl_playpos.setText(f"00:00 / {fmt_duration(info.duration_ms)}")
+        self._render_view()
+
+    # ---------- 转写 / 纪要视图 ----------
+    def _switch_view(self, view: str) -> None:
+        self._view = view
+        self.btn_view_trans.setChecked(view == "trans")
+        self.btn_view_min.setChecked(view == "min")
+        self._render_view()
+
+    def _render_view(self) -> None:
+        if not self._current:
+            self.txt.clear()
+            return
+        if self._view == "min":
+            self.txt.setPlainText(self._load_minutes(self._current))
+        else:
+            self.txt.setPlainText(self._load_transcript(self._current))
 
     @staticmethod
     def _load_transcript(info: SessionInfo) -> str:
@@ -266,6 +317,89 @@ class ManagePage(QWidget):
             return f"（读取转写失败：{exc}）"
         return "\n".join(lines) if lines else "（该会议没有可显示的转写内容）"
 
+    @staticmethod
+    def _load_minutes(info: SessionInfo) -> str:
+        path = info.path / "minutes.md"
+        if not path.exists():
+            return "（还没有生成纪要。点上方「生成会议纪要」，完成后这里会显示全文，文件保存在会议文件夹的 minutes.md）"
+        try:
+            return path.read_text(encoding="utf-8")
+        except Exception as exc:  # noqa: BLE001
+            return f"（读取纪要失败：{exc}）"
+
+    # ---------- 纪要生成 ----------
+    def _gen_minutes(self) -> None:
+        if not self._current:
+            return
+        info = self._current
+        state = self._minute_state.get(str(info.path))
+        if state == "generating":
+            QMessageBox.information(self, "正在生成", "这个会议的纪要正在后台生成，请稍候。")
+            return
+        if not self.settings.get("llm.enabled", False):
+            self.status.setText("未启用大模型：请到「设置」勾选「启用本地大模型」后再生成纪要。")
+            return
+        self._minute_state[str(info.path)] = "generating"
+        self._apply_minute_ui()
+        threading.Thread(target=self._minutes_work, args=(info,), name="minutes", daemon=True).start()
+
+    def _minutes_work(self, info: SessionInfo) -> None:
+        """后台线程：起服务 → summarize（带进度回调）→ 写 minutes.md。"""
+        from ..llm import OllamaClient
+        from ..llm.summary import summarize
+
+        path = str(info.path)
+        try:
+            base = str(self.settings.get("llm.base_url", "http://127.0.0.1:11434"))
+            model = str(self.settings.get("llm.summary_model", "qwen2.5:7b-instruct"))
+            client = OllamaClient(base, timeout=float(self.settings.get("llm.timeout", 90)))
+            if not client.alive():
+                self.minute_progress.emit(path, "正在启动 Ollama 服务…")
+                if not client.ensure_server():
+                    raise RuntimeError("连不上 Ollama，请确认已安装并运行后再试")
+            transcript = self._load_transcript(info)
+            result = summarize(
+                client, model, info.title, transcript,
+                on_progress=lambda text: self.minute_progress.emit(path, text),
+            )
+            out = info.path / "minutes.md"
+            out.write_text(result, encoding="utf-8")
+            self.minute_finished.emit(path, True, f"纪要已生成：{out}")
+        except Exception as exc:  # noqa: BLE001
+            self.minute_finished.emit(path, False, f"生成失败：{exc}")
+
+    def _on_minute_progress(self, path: str, text: str) -> None:
+        if self._current and str(self._current.path) == path:
+            self.status.setText(text)
+
+    def _on_minute_finished(self, path: str, ok: bool, message: str) -> None:
+        self._minute_state[path] = "done" if ok else f"failed:{message}"
+        if self._current and str(self._current.path) == path:
+            self.status.setText(message)
+            if ok and self._view == "min":
+                self._render_view()  # 完成后刷新纪要预览
+            if ok and self._view == "trans":
+                self.status.setText(message + "　（点下方「纪要预览」查看全文）")
+        self._apply_minute_ui()
+
+    def _apply_minute_ui(self) -> None:
+        """按当前选中会话的纪要状态更新按钮与提示（切换会话时状态跟着走）。"""
+        if not self._current:
+            return
+        state = self._minute_state.get(str(self._current.path))
+        generating = state == "generating"
+        self.btn_minutes.setEnabled(not generating)
+        self.btn_minutes.setText("生成中…" if generating else "生成会议纪要")
+        if state is None:
+            self.status.setText("")
+        elif generating:
+            if not self.status.text().startswith(("正在", "纪要已")):
+                self.status.setText("正在生成纪要…")
+        elif state and state.startswith("failed:"):
+            self.status.setText(state[len("failed:"):])
+        elif state == "done":
+            self.status.setText("纪要已生成（点下方「纪要预览」查看全文）")
+
     # ---------- 回放 ----------
     def _toggle_play(self) -> None:
         if not self._current:
@@ -283,6 +417,10 @@ class ManagePage(QWidget):
             self._player = None
         self.btn_play.setText("▶ 播放")
         self.btn_stop.setEnabled(False)
+        # 停止 = 回到起始位置（与暂停不同：暂停保留进度，停止归零）
+        self.slider.setValue(0)
+        if self._current:
+            self.lbl_playpos.setText(f"00:00 / {fmt_duration(self._current.duration_ms)}")
 
     def _on_seek(self) -> None:
         self._slider_drag = False
@@ -311,72 +449,36 @@ class ManagePage(QWidget):
             return
         subprocess.Popen(["explorer", str(self._current.path)], shell=False)  # noqa: S603,S607
 
-    def _delete_session(self) -> None:
-        if not self._current:
+    def _delete_sessions(self) -> None:
+        """删除当前选中的所有会话（支持 Ctrl/Shift 多选批量删除）。"""
+        items = [i for i in self.list.selectedItems() if i.data(Qt.ItemDataRole.UserRole)]
+        if not items:
             return
-        info = self._current
+        infos: list[SessionInfo] = [i.data(Qt.ItemDataRole.UserRole) for i in items]
+        names = "\n".join(f"· {x.title}（{x.started[:16]}）" for x in infos[:8])
+        if len(infos) > 8:
+            names += f"\n· …等共 {len(infos)} 个"
         if QMessageBox.question(
             self, "删除会议",
-            f"确定删除「{info.title}」？\n\n将永久删除其音频、转写与纪要：\n{info.path}",
+            f"确定删除选中的 {len(infos)} 个会议？\n\n将永久删除其音频、转写与纪要：\n{names}",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No,
         ) != QMessageBox.StandardButton.Yes:
             return
-        if self._player is not None and self._player.session_dir == info.path:
+        # 正在回放/生成纪要的会话先停掉
+        doomed = {str(x.path) for x in infos}
+        if self._player is not None and str(self._player.session_dir) in doomed:
             self._stop_play()
-        try:
-            shutil.rmtree(info.path)
-        except Exception as exc:  # noqa: BLE001
-            QMessageBox.warning(self, "删除失败", str(exc))
-            return
+        failed: list[str] = []
+        for x in infos:
+            try:
+                shutil.rmtree(x.path)
+                self._minute_state.pop(str(x.path), None)
+            except Exception as exc:  # noqa: BLE001
+                failed.append(f"{x.title}: {exc}")
+        if failed:
+            QMessageBox.warning(self, "部分删除失败", "\n".join(failed))
         self.refresh()
 
-    def _gen_minutes(self) -> None:
-        """后台调用本地大模型生成纪要，写入 minutes.md。"""
-        if not self._current or self._generating:
-            return
-        if not self.settings.get("llm.enabled", False):
-            self.status.setText("未启用大模型：请到「设置」勾选「启用本地大模型」后再生成纪要。")
-            return
-        info = self._current
-        self._generating = True
-        self.btn_minutes.setEnabled(False)
-        self.status.setText("正在生成纪要…（长会议需要几分钟，期间可继续使用其他页面）")
-
-        def work() -> None:
-            from ..llm import OllamaClient
-            from ..llm.summary import summarize
-
-            base = str(self.settings.get("llm.base_url", "http://127.0.0.1:11434"))
-            model = str(self.settings.get("llm.summary_model", "qwen2.5:7b-instruct"))
-            client = OllamaClient(base, timeout=float(self.settings.get("llm.timeout", 90)))
-            try:
-                if not client.alive():
-                    self._set_status("正在启动 Ollama 服务…")
-                    if not client.ensure_server():
-                        self._set_status("连不上 Ollama，请确认已安装并运行后再试。")
-                        return
-                transcript = ManagePage._load_transcript(info)
-                result = summarize(client, model, info.title, transcript)
-                out = info.path / "minutes.md"
-                out.write_text(result.text, encoding="utf-8")
-                sec = f"{result.seconds:.0f}s" if hasattr(result, "seconds") else ""
-                self._set_status(f"纪要已生成：{out}（{model}，用时 {sec}）")
-            except Exception as exc:  # noqa: BLE001
-                self._set_status(f"生成失败：{exc}")
-            finally:
-                self._generating = False
-                self._re_enable()
-
-        threading.Thread(target=work, name="minutes", daemon=True).start()
-
-    # 线程里不能直接碰控件，统一通过这个入口投递到 UI 线程
-    def _set_status(self, text: str) -> None:
-        from PySide6.QtCore import QTimer
-
-        QTimer.singleShot(0, lambda: self.status.setText(text))
-
-    def _re_enable(self) -> None:
-        from PySide6.QtCore import QTimer
-
-        QTimer.singleShot(0, lambda: self.btn_minutes.setEnabled(True))
+    def _set_status(self, text: str) -> None:  # 兼容旧调用
+        self.status.setText(text)

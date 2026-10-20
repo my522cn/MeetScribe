@@ -99,6 +99,24 @@ QSpinBox, QDoubleSpinBox {
 }
 QComboBox:focus, QAbstractSpinBox:focus, QLineEdit:focus,
 QSpinBox:focus, QDoubleSpinBox:focus { border-color: #AFA9EC; }
+/* 数字框的上下调节按钮：给底色 + 三角箭头，不再与白底融为一体 */
+QAbstractSpinBox::up-button, QAbstractSpinBox::down-button {
+    background: #EDEBE4; border: none; width: 20px;
+}
+QAbstractSpinBox::up-button { subcontrol-origin: border; subcontrol-position: top right; }
+QAbstractSpinBox::down-button { subcontrol-origin: border; subcontrol-position: bottom right; }
+QAbstractSpinBox::up-button:hover, QAbstractSpinBox::down-button:hover { background: #DDD9CE; }
+QAbstractSpinBox::up-button:pressed, QAbstractSpinBox::down-button:pressed { background: #CFCABA; }
+QAbstractSpinBox::up-arrow {
+    image: none; width: 0; height: 0;
+    border-left: 4px solid transparent; border-right: 4px solid transparent;
+    border-bottom: 5px solid #5F5E5A;
+}
+QAbstractSpinBox::down-arrow {
+    image: none; width: 0; height: 0;
+    border-left: 4px solid transparent; border-right: 4px solid transparent;
+    border-top: 5px solid #5F5E5A;
+}
 QComboBox::drop-down { border: none; width: 22px; }
 QComboBox QLineEdit { background: transparent; border: none; padding: 0; min-height: 0; }
 QComboBox QAbstractItemView {

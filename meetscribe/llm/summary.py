@@ -47,19 +47,27 @@ def _partial(client: OllamaClient, model: str, idx: int, total: int, chunk: str,
     return client.chat(model, SYSTEM, user, temperature=0.2, num_predict=1500, timeout=600).text
 
 
-def summarize(client: OllamaClient, model: str, title: str, transcript: str) -> str:
+def summarize(client: OllamaClient, model: str, title: str, transcript: str,
+              on_progress=None) -> str:
+    """on_progress(text) 在每个阶段被调用，用于界面显示进度。"""
     parts = _chunks(transcript)
     if len(parts) <= 1:
+        if on_progress:
+            on_progress("正在生成纪要（单段）…")
         user = f"会议《{title}》完整转写稿：\n\n{transcript}"
         return client.chat(model, SYSTEM, user, temperature=0.2, num_predict=2000, timeout=600).text
 
     notes = []
     for i, chunk in enumerate(parts, 1):
+        if on_progress:
+            on_progress(f"正在生成纪要：分段摘要 {i}/{len(parts)} …")
         try:
             notes.append(_partial(client, model, i, len(parts), chunk, title))
         except OllamaError as exc:
             notes.append(f"（第 {i} 段摘要失败：{exc}）")
     merged = "\n\n".join(f"### 第 {i} 段要点\n{n}" for i, n in enumerate(notes, 1))
+    if on_progress:
+        on_progress("正在生成纪要：合并分段要点 …")
     user = (
         f"会议《{title}》较长，已分段摘要。请把下面的分段要点合并成一份完整纪要，"
         f"去重、按主题归并，保持 6 个固定标题结构。\n\n{merged}"
