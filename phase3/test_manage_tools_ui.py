@@ -201,6 +201,30 @@ def main() -> int:
     else:
         checks.append(("播放配色切换", False, "测试会话缺少音频分段"))
 
+    # 10. 搜索：标题 / 转写正文 / 无结果
+    page.search.setText("20261021_110000")
+    for _ in range(3):
+        app.processEvents()
+    checks.append(("按标题搜索", page.list.count() == 1, f"命中 {page.list.count()} 条"))
+
+    page.search.setText("测试全流程通过")
+    for _ in range(3):
+        app.processEvents()
+    checks.append(("按转写正文搜索", page.list.count() == 1, f"命中 {page.list.count()} 条"))
+
+    page.search.setText("绝对不存在的关键词")
+    for _ in range(3):
+        app.processEvents()
+    checks.append(
+        ("无结果提示", page.list.count() == 0 and "没有匹配" in page.lbl_title.text(),
+         f"count={page.list.count()} title={page.lbl_title.text()}")
+    )
+
+    page.search.clear()
+    for _ in range(3):
+        app.processEvents()
+    checks.append(("清空搜索恢复全部", page.list.count() == 2, f"count={page.list.count()}"))
+
     page.grab().save(str(ROOT / "phase3" / "ui_manage_tools.png"))
     print("saved ui_manage_tools.png")
 

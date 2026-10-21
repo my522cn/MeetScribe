@@ -14,10 +14,10 @@ import subprocess  # noqa: S404
 import threading
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtCore import QSize, Qt, QTimer, Signal
 from PySide6.QtWidgets import (
-    QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QMessageBox, QPushButton,
-    QSlider, QTextEdit, QVBoxLayout, QWidget, QSizePolicy,
+    QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem, QMessageBox,
+    QPushButton, QSlider, QTextEdit, QVBoxLayout, QWidget, QSizePolicy,
 )
 
 from ..audio.playback import SessionPlayer
@@ -79,6 +79,8 @@ class ManagePage(QWidget):
         super().__init__(parent)
         self.settings = settings
         self._sessions: list[SessionInfo] = []
+        self._all: list[SessionInfo] = []   # 未过滤的全量（搜索用）
+        self._text_cache: dict[str, str] = {}  # path -> 转写正文（小写，按需读取）
         self._current: SessionInfo | None = None
         # 纪要生成状态按会话跟踪：path -> "generating" / "done" / "failed:xxx"
         self._minute_state: dict[str, str] = {}
@@ -104,6 +106,13 @@ class ManagePage(QWidget):
         title.setObjectName("PageTitle")
         head.addWidget(title)
         head.addStretch(1)
+        # 查询：标题/日期/转写正文都能搜（会议多了必须能查）
+        self.search = QLineEdit()
+        self.search.setPlaceholderText("搜索会议（标题 / 日期 / 转写内容）")
+        self.search.setClearButtonEnabled(True)
+        self.search.setFixedWidth(260)
+        self.search.textChanged.connect(lambda _: self._apply_filter())
+        head.addWidget(self.search)
         # 删除放列表旁边（对选中项操作，支持多选批量），离列表近更好找
         self.btn_delete = QPushButton("删除会议")
         self.btn_delete.setObjectName("Danger")
@@ -246,14 +255,26 @@ class ManagePage(QWidget):
     # ---------- 列表 ----------
     def refresh(self) -> None:
         """重扫会话目录（切到本页或点刷新时调用）。"""
+        self._all = self._scan()
+        self._text_cache.clear()
+        self._apply_filter()
+
+    def _apply_filter(self) -> None:
+        """按搜索框过滤：标题/日期命中，或（查询≥2字时）转写正文命中。"""
         selected = {i.data(Qt.ItemDataRole.UserRole).path for i in self.list.selectedItems()
                     if i.data(Qt.ItemDataRole.UserRole)}
+        query = self.search.text().strip().lower()
+        rows = self._all
+        if query:
+            rows = [s for s in rows if self._match(s, query)]
         self.list.blockSignals(True)
         self.list.clear()
-        self._sessions = self._scan()
+        self._sessions = rows
         restore_row = 0
-        for n, s in enumerate(self._sessions):
+        for n, s in enumerate(rows):
             item = QListWidgetItem(s.label)
+            # label 是两行（时间 + 标题·模式·时长），不给 size hint 第二行会被裁掉
+            item.setSizeHint(QSize(0, 46))
             item.setData(Qt.ItemDataRole.UserRole, s)
             self.list.addItem(item)
             if s.path in selected:
@@ -264,7 +285,21 @@ class ManagePage(QWidget):
         if self._sessions:
             self.list.setCurrentRow(restore_row)
         else:
-            self._show_empty()
+            self._show_empty(no_hit=bool(query))
+
+    def _match(self, info: SessionInfo, query: str) -> bool:
+        if query in info.label.lower() or query in info.started.lower():
+            return True
+        if len(query) < 2:  # 单字查正文噪声太大，只查标题/日期
+            return False
+        text = self._text_cache.get(str(info.path))
+        if text is None:
+            try:
+                text = (info.path / "transcript.jsonl").read_text(encoding="utf-8").lower()
+            except Exception:  # noqa: BLE001
+                text = ""
+            self._text_cache[str(info.path)] = text
+        return query in text
 
     def _scan(self) -> list[SessionInfo]:
         root_dir = self.settings.session_root
@@ -278,11 +313,15 @@ class ManagePage(QWidget):
                     out.append(info)
         return out
 
-    def _show_empty(self) -> None:
+    def _show_empty(self, no_hit: bool = False) -> None:
         self._current = None
         self._stop_play()
-        self.lbl_title.setText("还没有会议记录")
-        self.lbl_meta.setText("回到「录音」页开始第一次录音，结束后会自动出现在这里。")
+        if no_hit:
+            self.lbl_title.setText("没有匹配的会议")
+            self.lbl_meta.setText("换个关键词试试（标题、日期、转写正文都能搜）。")
+        else:
+            self.lbl_title.setText("还没有会议记录")
+            self.lbl_meta.setText("回到「录音」页开始第一次录音，结束后会自动出现在这里。")
         self.txt.clear()
         for b in (self.btn_minutes, self.btn_folder, self.btn_edit, self.btn_fix,
                   self.btn_names, self.btn_compress, self.btn_repair):
