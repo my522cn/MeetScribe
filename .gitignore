@@ -10,3 +10,9 @@ release/
 build/
 assets/app.ico
 assets/app.png
+
+# 调试录音（含个人麦克风/系统声音样本，只在本地保留，绝不入库）
+*.wav
+*.mp3
+*.flac
+*.ogg
