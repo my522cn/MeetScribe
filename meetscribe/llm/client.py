@@ -41,6 +41,22 @@ class OllamaClient:
         data = self._get("/api/tags")
         return [m.get("name", "") for m in data.get("models", [])]
 
+    def pick_model(self, wanted: str, fallback_hint: str = "qwen2.5") -> str:
+        """配置里的模型可能已被卸载/改名：本机没有就回退到一个已装的同名族模型。
+
+        返回空串表示本机一个可用模型都没有（调用方应关掉 LLM 功能）。
+        """
+        try:
+            installed = [m for m in self.models() if m]
+        except OllamaError:
+            return ""
+        if not installed:
+            return ""
+        if wanted in installed:
+            return wanted
+        same_family = [m for m in installed if fallback_hint in m]
+        return same_family[0] if same_family else installed[0]
+
     def alive(self) -> bool:
         try:
             self.models()

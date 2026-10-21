@@ -332,7 +332,14 @@ class CaptureWorker(QObject):
         except Exception:  # noqa: BLE001
             return
         base = str(self.settings.get("llm.base_url", "http://127.0.0.1:11434"))
-        model = str(self.settings.get("llm.fix_model", "qwen2.5:7b-instruct"))
+        # 配置里的模型可能已经被卸载，本机没有就回退到已装的同类模型
+        try:
+            probe = OllamaClient(base, timeout=5)
+            model = probe.pick_model(str(self.settings.get("llm.fix_model", "qwen2.5:7b-instruct")))
+        except Exception:  # noqa: BLE001
+            model = str(self.settings.get("llm.fix_model", "qwen2.5:7b-instruct"))
+        if not model:
+            return
         hotwords = []
         hw_file = self.settings.path.parent / "hotwords.txt"
         if hw_file.exists():

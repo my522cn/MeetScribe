@@ -95,6 +95,21 @@ def main() -> int:
     check("跳过思考前言只解析编号行", len(out6) == 2, f"回填 {len(out6)} 条")
     check("前言不会污染结果", all("首先" not in v for v in out6.values()), "")
 
+    # 6. 配置模型已卸载 → 回退到本机已装的同类模型
+    try:
+        from meetscribe.llm.client import OllamaClient
+
+        class FakeTags(OllamaClient):
+            def models(self):
+                return ["qwen2.5:7b-instruct", "qwen2.5:3b-instruct"]
+
+        c = FakeTags()
+        check("已卸载模型回退到同类", c.pick_model("qwen3:4b") == "qwen2.5:7b-instruct",
+              f"-> {c.pick_model('qwen3:4b')}")
+        check("已装模型原样返回", c.pick_model("qwen2.5:3b-instruct") == "qwen2.5:3b-instruct", "")
+    except Exception as exc:  # noqa: BLE001
+        check("模型回退", False, repr(exc))
+
     bad = [n for n, ok, _ in checks if not ok]
     print()
     for n, ok, d in checks:

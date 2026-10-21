@@ -441,6 +441,13 @@ class ManagePage(QWidget):
                 self.minute_progress.emit(path, "正在启动 Ollama 服务…")
                 if not client.ensure_server():
                     raise RuntimeError("连不上 Ollama，请确认已安装并运行后再试")
+            # 配置里的模型可能已被卸载，回退到本机已装的同类模型
+            picked = client.pick_model(model)
+            if not picked:
+                raise RuntimeError("本机没有可用的 Ollama 模型，请在设置里选择或先拉取模型")
+            if picked != model:
+                self.minute_progress.emit(path, f"模型 {model} 不可用，改用 {picked}")
+            model = picked
             transcript = self._load_transcript(info)
             result = summarize(
                 client, model, info.title, transcript,
