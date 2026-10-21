@@ -156,12 +156,7 @@ def asr_sentences() -> list[dict]:
 
 # ---------- 4. 对齐校对 ----------
 def cer(ref: str, hyp: str) -> float:
-    import difflib
-
-    sm = difflib.SequenceMatcher(None, ref, hyp)
-    err = sum(blk.size for blk in (
-        sm.get_opcodes()[i] for i in range(len(sm.get_opcodes()))) if False)  # placeholder
-    # 用编辑距离
+    # 编辑距离（滚动数组，最终距离为 dp[n]）
     m, n = len(ref), len(hyp)
     dp = list(range(n + 1))
     for i in range(1, m + 1):
@@ -171,7 +166,7 @@ def cer(ref: str, hyp: str) -> float:
             cur = dp[j]
             dp[j] = min(dp[j] + 1, dp[j - 1] + 1, prev + (ref[i - 1] != hyp[j - 1]))
             prev = cur
-    return dp[m] / max(1, m)
+    return dp[n] / max(1, m)
 
 
 def align_report(subs: list[dict], sents: list[dict]) -> str:
@@ -181,16 +176,15 @@ def align_report(subs: list[dict], sents: list[dict]) -> str:
     total_cer, n_pair = 0.0, 0
     for st in sents:
         mid = (st["start_ms"] + st["end_ms"]) / 2
-        best = None
-        for sb in subs:
-            if sb["start_ms"] - 400 <= mid <= sb["end_ms"] + 800:
-                if best is None or sb["start_ms"] < best["start_ms"]:
-                    best = sb
-        if best:
-            c = cer(best["text"], st["text"])
+        over = [sb["text"] for sb in subs
+                if sb["start_ms"] - 400 <= (st["start_ms"] + st["end_ms"]) / 2 <= sb["end_ms"] + 800
+                or sb["start_ms"] < st["end_ms"] and sb["end_ms"] > st["start_ms"]]
+        if over:
+            best_text = "".join(over)
+            c = cer(best_text, st["text"])
             total_cer += c
             n_pair += 1
-            lines.append(f"  [{st['start_ms']:>7}ms] ASR「{st['text']}」 vs 字幕「{best['text']}」 CER={c:.2f}")
+            lines.append(f"  [{st['start_ms']:>7}ms] ASR「{st['text']}」 vs 字幕「{best_text}」 CER={c:.2f}")
     if n_pair:
         lines.append(f"对齐 {n_pair} 对，平均 CER = {total_cer / n_pair:.3f}")
     # 句长分布（短句多 = 间隔短/抢话的体现）
