@@ -10,6 +10,7 @@
 """
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 import sys
@@ -21,6 +22,7 @@ DIST = ROOT / "release"
 APP_NAME = "MeetScribe"          # exe 用 ASCII 名，快捷方式显示中文
 SHORTCUT_NAME = "会议转写助手"
 APP_DIR = DIST / APP_NAME
+PREV_DIR = DIST / (APP_NAME + "_prev")  # 上一版留档：用户配置与会话数据从这里继承
 
 # 打包时不用带进去的“重”模块（本项目完全没用到）
 EXCLUDES = [
@@ -94,33 +96,30 @@ def build() -> Path:
     return exe
 
 
-def _merge_user_settings(defaults_path, user_path) -> None:
-    """把开发侧 settings.json 的"新增键"合并进用户的 settings.json。
+def _load_json(path):
+    if not Path(path).exists():
+        return {}
+    try:
+        return json.loads(Path(path).read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return {}
 
-    规则：同名键一律保留用户值（用户调过的参数不许被打包重置）；
-    用户没有的键（新版本新增参数）从默认值补进来。
-    """
-    import json
 
-    if not defaults_path.exists():
-        return
-    defaults = json.loads(defaults_path.read_text(encoding="utf-8"))
-    if user_path.exists():
-        user = json.loads(user_path.read_text(encoding="utf-8"))
-    else:
-        user = {}
+def _write_json(path, data: dict) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp.replace(path)
 
-    def merge(dst: dict, src: dict) -> None:
-        for k, v in src.items():
-            if k not in dst:
-                dst[k] = v
-            elif isinstance(v, dict) and isinstance(dst[k], dict):
-                merge(dst[k], v)
 
-    merge(user, defaults)
-    tmp = user_path.with_suffix(".tmp")
-    tmp.write_text(json.dumps(user, ensure_ascii=False, indent=2), encoding="utf-8")
-    tmp.replace(user_path)
+def _merge_settings(dst: dict, defaults: dict) -> None:
+    """把默认模板里的"新增键"补进用户配置；同名键一律保留用户值。"""
+    for k, v in defaults.items():
+        if k not in dst:
+            dst[k] = v
+        elif isinstance(v, dict) and isinstance(dst[k], dict):
+            _merge_settings(dst[k], v)
 
 
 def stage_runtime_files() -> None:
@@ -134,30 +133,28 @@ def stage_runtime_files() -> None:
         print("模型已存在，跳过复制")
 
     # 配置（hotwords / replacements / settings）
-    # settings.json 做"深合并"：release 里用户改过的键保留用户值，开发侧新增的键补进来。
-    # 直接 rmtree+copytree 会把用户调好的参数（如 speaker_max）每次打包都重置掉。
+    # settings.json = 上一版留档里的用户值（speaker_max 等调过的参数）+ 开发侧新增键。
+    # 用户数据永远从 MeetScribe_prev 继承，开发目录的 config 只是"默认模板"。
     dst_cfg = APP_DIR / "config"
-    if dst_cfg.exists():
-        _merge_user_settings(ROOT / "config" / "settings.json", dst_cfg / "settings.json")
-        for name in ("hotwords.txt", "replacements.txt"):
-            src = ROOT / "config" / name
-            if src.exists():
-                shutil.copy2(src, dst_cfg / name)
-        print("已合并 config/（用户设置保留）")
-    else:
-        shutil.copytree(ROOT / "config", dst_cfg)
-        print("已复制 config/")
+    dst_cfg.mkdir(parents=True, exist_ok=True)
+    for name in ("hotwords.txt", "replacements.txt"):
+        src = ROOT / "config" / name
+        if src.exists():
+            shutil.copy2(src, dst_cfg / name)
+    defaults = _load_json(ROOT / "config" / "settings.json")
+    user = _load_json(PREV_DIR / "config" / "settings.json")  # 上一版用户调过的值
+    _merge_settings(user, defaults)  # 同名键用户值优先，缺的键用默认补
+    _write_json(dst_cfg / "settings.json", user)
+    print(f"已生成 config/settings.json（用户参数{'已从上一版继承' if user else '：全新默认'}）")
 
-    # 会话目录：只在 release 还没有任何会话时做"首次带样"复制；
-    # 之后绝不合并——用户在应用里删掉的记录，开发目录的残留副本不允许再复活。
+    # 会话目录：只从上一版留档继承（那是用户真实的增删后状态）。
+    # 绝不从开发目录复制——用户在应用里删掉的记录，开发目录的残留副本不许复活。
     dst_sessions = APP_DIR / "data" / "sessions"
     dst_sessions.mkdir(parents=True, exist_ok=True)
-    src_sessions = ROOT / "data" / "sessions"
-    if any(dst_sessions.iterdir()):
-        print("会话目录非空，跳过复制（保护用户删除操作）")
-    elif src_sessions.exists():
+    prev_sessions = PREV_DIR / "data" / "sessions"
+    if prev_sessions.exists():
         n = 0
-        for child in src_sessions.iterdir():
+        for child in prev_sessions.iterdir():
             target = dst_sessions / child.name
             if not target.exists():
                 if child.is_dir():
@@ -165,7 +162,7 @@ def stage_runtime_files() -> None:
                 else:
                     shutil.copy2(child, target)
                 n += 1
-        print(f"已随包复制 {n} 个历史会话")
+        print(f"已从上一版继承 {n} 个会话")
 
 
 def make_shortcut(exe: Path) -> Path:
