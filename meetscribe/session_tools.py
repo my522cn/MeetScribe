@@ -270,3 +270,42 @@ def mark_completed(session_dir: Path) -> None:
     data["status"] = "completed"
     data["recovered"] = True
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+# ---------------------------------------------------------------- 声纹长期档案（嵌入版）
+def _speaker_emb_path() -> Path:
+    return PROJECT_ROOT / "config" / "speaker_embs.json"
+
+
+def load_speaker_embeddings() -> dict[str, list[float]]:
+    """读取跨会话说话人嵌入档案 {名字: 192 维向量}；没有就返回空。"""
+    path = _speaker_emb_path()
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+def merge_speaker_embeddings(new_profiles: dict[str, list[float]], weight: float = 0.3) -> dict:
+    """本场结果并进长期档案。
+
+    档案向量 = 旧档案 * (1-weight) + 本场均值 * weight，滑动平均，
+    声音随时间慢慢漂移也能跟上。首次出现的说话人直接写入。
+    """
+    path = _speaker_emb_path()
+    old = load_speaker_embeddings()
+    import numpy as np
+
+    for name, vec in (new_profiles or {}).items():
+        v = np.asarray(vec, dtype=np.float32)
+        if name in old:
+            o = np.asarray(old[name], dtype=np.float32)
+            if o.shape == v.shape:
+                v = o * (1 - weight) + v * weight
+        old[name] = [round(float(x), 5) for x in v]
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(old, ensure_ascii=False), encoding="utf-8")
+    os.replace(tmp, path)
+    return old

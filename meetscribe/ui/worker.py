@@ -32,7 +32,7 @@ def _normalize(text: str) -> str:
 
 class CaptureWorker(QObject):
     partial = Signal(str, str, int)          # track, text, start_ms
-    final = Signal(str, str, int, int, str)  # track, text, start_ms, end_ms, speaker
+    final = Signal(str, str, int, int, str, bool)  # track, text, start_ms, end_ms, speaker, 疑似多人
     refined = Signal(str, int, str)          # track, start_ms, 精修后文本
     live_refined = Signal(str, int, str)     # track, start_ms, 句中滑窗校正文本
     overlap = Signal(bool)
@@ -109,17 +109,23 @@ class CaptureWorker(QObject):
         if self.recorder is not None:
             return
         self.mode = mode
-        # 线下模式对麦克风轨做轻量声纹聚类，区分房间里的不同说话人
-        self.diarizer = SpeakerRegistry() if mode == "offline" else None
-        if self.diarizer is not None:
-            # 声纹长期学习：用历史档案预置已知说话人，本场第一句就能认出是谁
-            try:
-                from ..session_tools import load_global_profiles
+        # 线下模式对麦克风轨做说话人区分：有声纹模型用嵌入聚类，没有就退回 F0+质心
+        self.diarizer = None
+        self._emb_profiles: dict[str, list[float]] = {}
+        if mode == "offline":
+            from ..asr.diarize import EmbeddingSpeakerRegistry, SpeakerRegistry, embedding_model_path
 
-                for name, feat in load_global_profiles().items():
-                    self.diarizer.seed(name, feat)
-            except Exception:  # noqa: BLE001
-                pass
+            model_path = embedding_model_path(self._models_root)
+            if model_path is not None:
+                try:
+                    self.diarizer = EmbeddingSpeakerRegistry(model_path)
+                except Exception:  # noqa: BLE001
+                    self.diarizer = None
+            if self.diarizer is None:
+                self.diarizer = SpeakerRegistry()
+                self._seed_f0_profiles()
+            else:
+                self._seed_emb_profiles()
         self._diarize_log = None  # 特征调试日志（写入会话目录 diarize.log）
         s = self.settings
         try:
@@ -183,6 +189,38 @@ class CaptureWorker(QObject):
             )
         )
         self._engine_sig = sig
+
+    def _seed_f0_profiles(self) -> None:
+        """声纹长期学习（F0 兜底版）：用历史档案预置已知说话人。"""
+        try:
+            from ..session_tools import load_global_profiles
+
+            for name, feat in load_global_profiles().items():
+                self.diarizer.seed(name, feat)
+        except Exception:  # noqa: BLE001
+            pass
+
+    def _seed_emb_profiles(self) -> None:
+        """声纹长期学习（嵌入版）：加载跨会话积累的平均嵌入。"""
+        try:
+            from ..session_tools import load_speaker_embeddings
+
+            self._emb_profiles = load_speaker_embeddings()
+            for name, vec in self._emb_profiles.items():
+                self.diarizer.seed(name, np.asarray(vec, dtype=np.float32))
+        except Exception:  # noqa: BLE001
+            self._emb_profiles = {}
+
+    def _save_emb_profiles(self) -> None:
+        """本场每个说话人的平均嵌入并进长期档案（滑动平均，越用越准）。"""
+        if getattr(self.diarizer, "profiles", None) is None:
+            return
+        try:
+            from ..session_tools import merge_speaker_embeddings
+
+            self._emb_profiles = merge_speaker_embeddings(self.diarizer.profiles())
+        except Exception:  # noqa: BLE001
+            pass
 
     def pause(self) -> None:
         if self.recorder:
@@ -269,6 +307,7 @@ class CaptureWorker(QObject):
             except Exception:  # noqa: BLE001
                 pass
             self._diarize_log = None
+        self._save_emb_profiles()  # 声纹档案：本场结果并进跨会话长期档案
         self.refiner.stop()
 
     # ---------- 大模型纠错 ----------
@@ -343,23 +382,36 @@ class CaptureWorker(QObject):
             return
         base = SPEAKER_ONLINE if self.mode == "online" else SPEAKER_OFFLINE
         speaker = base.get(cap.track, cap.track)
+        mixed = 0.0
         # 线下模式：麦克风轨不分"本地"，按声纹聚类拆成说话人A/B/C/D
         if self.mode == "offline" and cap.track == "mic" and self.diarizer is not None:
-            feat = sentence_features(cap.audio)
-            if feat is not None:
-                speaker = self.diarizer.assign(feat)
+            if getattr(self.diarizer, "assign_sentence", None) is not None:
+                # 嵌入版：滑窗投票，能识别"一句里两个人抢话"并给出比例
+                speaker, mixed = self.diarizer.assign_sentence(cap.audio)
+                if self._diarize_log is not None:
+                    try:
+                        self._diarize_log.write(
+                            f"{cap.start_ms}\temb\t{mixed:.2f}\t{speaker}\n"
+                        )
+                        self._diarize_log.flush()
+                    except Exception:  # noqa: BLE001
+                        pass
             else:
-                # 句子太短/太轻提不出特征：归入当前说话最多的人，而不是笼统的"本地"
-                speaker = self.diarizer.majority_label()
-            if self._diarize_log is not None:
-                try:
-                    f0s, cents = feat if feat is not None else (-1, -1)
-                    self._diarize_log.write(
-                        f"{cap.start_ms}\t{f0s:.1f}\t{cents:.1f}\t{speaker}\n"
-                    )
-                    self._diarize_log.flush()
-                except Exception:  # noqa: BLE001
-                    pass
+                feat = sentence_features(cap.audio)
+                if feat is not None:
+                    speaker = self.diarizer.assign(feat)
+                else:
+                    # 句子太短/太轻提不出特征：归入当前说话最多的人，而不是笼统的"本地"
+                    speaker = self.diarizer.majority_label()
+                if self._diarize_log is not None:
+                    try:
+                        f0s, cents = feat if feat is not None else (-1, -1)
+                        self._diarize_log.write(
+                            f"{cap.start_ms}\t{f0s:.1f}\t{cents:.1f}\t{speaker}\n"
+                        )
+                        self._diarize_log.flush()
+                    except Exception:  # noqa: BLE001
+                        pass
         record = {
             "track": cap.track,
             "speaker": speaker,
@@ -368,11 +420,12 @@ class CaptureWorker(QObject):
             "text": text,
             "refined": False,
             "raw": cap.text,
+            "mixed": round(mixed, 2),
         }
         with self._lock:
             self._records.append(record)
             self._flush_transcript()
-        self.final.emit(cap.track, text, cap.start_ms, cap.end_ms, speaker)
+        self.final.emit(cap.track, text, cap.start_ms, cap.end_ms, speaker, mixed > 0.34)
         ev = getattr(self, "_llm_wake", None)
         if ev is not None:
             ev.set()  # 有新句子，尽快安排一轮纠错

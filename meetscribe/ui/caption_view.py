@@ -68,10 +68,17 @@ class CaptionRow(QFrame):
         self.mark.setVisible(False)
         self.mark.setToolTip("已用离线模型二次识别校正")
 
+        # 声纹检测到一句里有多人抢话时打个 ⚡（文字仍按多数说话人归属）
+        self.multi = QLabel("⚡多人")
+        self.multi.setObjectName("MixedBadge")
+        self.multi.setVisible(False)
+        self.multi.setToolTip("这句话里检测到多人同时说话，文字可能有交叠")
+
         layout.addWidget(self.chip, 0, Qt.AlignmentFlag.AlignTop)
         layout.addWidget(self.time, 0, Qt.AlignmentFlag.AlignTop)
         layout.addWidget(self.text, 1)
         layout.addWidget(self.mark, 0, Qt.AlignmentFlag.AlignTop)
+        layout.addWidget(self.multi, 0, Qt.AlignmentFlag.AlignTop)
 
     def set_text(self, text: str, final: bool) -> None:
         self.text.setText(text)
@@ -82,6 +89,9 @@ class CaptionRow(QFrame):
 
     def set_refined(self) -> None:
         self.mark.setVisible(True)
+
+    def set_mixed(self) -> None:
+        self.multi.setVisible(True)
 
     def set_speaker(self, speaker: str, chip_style: str) -> None:
         self.chip.setText(speaker)
@@ -153,7 +163,7 @@ class CaptionView(QScrollArea):
             self._after_change()
 
     def finalize(self, track: str, text: str, start_ms: int, end_ms: int,
-                 speaker: str | None = None) -> None:
+                 speaker: str | None = None, mixed: bool = False) -> None:
         row = self._live.pop(track, None)
         if row is None:
             row = self._new_row(track, start_ms)
@@ -161,6 +171,8 @@ class CaptionView(QScrollArea):
         row.time.setText(fmt_ms(start_ms)[3:])
         if speaker is not None and speaker != row.chip.text():
             row.set_speaker(speaker, _speaker_chip(speaker))
+        if mixed:
+            row.set_mixed()
         self._finals[(track, start_ms)] = row
         self._after_change()
 

@@ -90,6 +90,7 @@ QLabel#ChipSpkD { background: #FCE9F1; color: #B0296A; border-radius: 10px; padd
 QLabel#CaptionText { font-size: 14px; }
 QLabel#CaptionTime { color: #A6ABB4; font-size: 11px; font-family: "Cascadia Mono", Consolas, monospace; }
 QLabel#RefineMark { color: #0E7A5F; font-size: 11px; }
+QLabel#MixedBadge { background: #FCEFDC; color: #96620A; border-radius: 8px; padding: 2px 7px; font-size: 11px; }
 QLabel#OverlapBadge { background: #FCEFDC; color: #96620A; border-radius: 9px; padding: 3px 10px; font-size: 11px; }
 
 /* 字幕区右下角的“回到底部”浮动按钮（用户上滚后出现） */

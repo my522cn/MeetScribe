@@ -1,13 +1,17 @@
 """轻量说话人区分（线下会议模式）。
 
-思路：不跑重型说话人模型，用每句音频的两个声学特征做增量聚类——
-- F0 基频（自相关法）：男声 ~85-180Hz，女声 ~165-255Hz，差异最稳定；
-- 谱质心：音色明亮度（同一人齿音/共振峰分布稳定）。
+两代方案：
+- F0 + 谱质心（SpeakerRegistry）：纯 numpy，单句 <10ms，模型缺失时的兜底；
+- CAM++ 说话人嵌入（EmbeddingSpeakerRegistry）：sherpa-onnx 声纹模型，
+  对同性别、音色接近的说话人远比 F0 可靠。
 
-每句定稿时算一次特征，与已有说话人质心比距离：近则归入并微调质心，
-远则立新说话人（最多 4 人）。纯 numpy，单句 <10ms，不影响实时性。
+嵌入版按 1s 滑窗（0.5s 步进）给整句投票——一句里混着两个人（间隔极短甚至
+同时出声）时，整句嵌入会被"平均"成第三个人，窗口投票 + 多数派标注能扛住
+这种情况，并顺带给出"疑似多人同时说话"的比例。
 """
 from __future__ import annotations
+
+from pathlib import Path
 
 import numpy as np
 
@@ -21,6 +25,13 @@ SCALE_F0 = 45.0
 SCALE_CENT = 900.0
 NEW_SPEAKER_THRESHOLD = 1.15   # 归一化距离超过它就认为是新说话人
 MAX_SPEAKERS = 4
+
+# 嵌入版默认参数（阈值来自 diar_eval 在真实语料上的扫描）
+EMB_MODEL_REL = "campplus_zh/campplus_zh.onnx"
+EMB_ASSIGN_THRESHOLD = 0.45
+EMB_WIN_SEC = 1.0
+EMB_HOP_SEC = 0.5
+EMB_WIN_RMS = 0.008   # 窗口能量门限（AGC 之后正常说话远高于它）
 
 LABELS = ["说话人A", "说话人B", "说话人C", "说话人D"]
 
@@ -136,3 +147,123 @@ class SpeakerRegistry:
         df = abs(a[0] - b[0]) / SCALE_F0
         dc = abs(a[1] - b[1]) / SCALE_CENT
         return float(np.hypot(df, dc))
+
+
+def _cos(a: np.ndarray, b: np.ndarray) -> float:
+    return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-9))
+
+
+class EmbeddingSpeakerRegistry:
+    """CAM++ 声纹嵌入 + 滑窗投票的说话人聚类。
+
+    - assign_sentence(audio) 返回 (标签, 疑似多人比例)。一句里两个人抢话时，
+      不同窗口会投给不同说话人，多数派赢，少数派比例高就打"多人"标记。
+    - 质心用"投给它"的窗口嵌入均值更新，混说窗口不污染质心。
+    - profiles() 输出每个说话人的平均嵌入，供跨会话长期档案使用。
+    """
+
+    def __init__(
+        self,
+        model_path: Path,
+        threshold: float = EMB_ASSIGN_THRESHOLD,
+        max_speakers: int = MAX_SPEAKERS,
+        win_sec: float = EMB_WIN_SEC,
+        hop_sec: float = EMB_HOP_SEC,
+    ) -> None:
+        import sherpa_onnx
+
+        cfg = sherpa_onnx.SpeakerEmbeddingExtractorConfig(
+            model=str(model_path), num_threads=2
+        )
+        self._ext = sherpa_onnx.SpeakerEmbeddingExtractor(cfg)
+        self.threshold = threshold
+        self.max_speakers = max_speakers
+        self._win = int(win_sec * SR)
+        self._hop = int(hop_sec * SR)
+        self._cents: list[np.ndarray] = []
+        self._counts: list[int] = []
+        self._names: list[str] = []
+
+    @property
+    def n_speakers(self) -> int:
+        return len(self._cents)
+
+    def seed(self, name: str, emb: np.ndarray, count: int = 3) -> None:
+        """长期档案预置（emb 是历史会话积累的平均嵌入）。"""
+        self._cents.append(np.asarray(emb, dtype=np.float32))
+        self._counts.append(max(1, count))
+        self._names.append(name)
+
+    def majority_label(self) -> str:
+        """整句提不出任何有效窗口时（太短/纯静音），归入当前说话最多的人。"""
+        if not self._counts:
+            return LABELS[0]
+        return self._names[int(np.argmax(self._counts))]
+
+    def profiles(self) -> dict[str, list[float]]:
+        """每个说话人的平均嵌入（跨会话档案用）。"""
+        return {self._names[i]: self._cents[i].tolist() for i in range(len(self._cents))}
+
+    def _windows(self, audio: np.ndarray) -> list[np.ndarray]:
+        x = np.asarray(audio, dtype=np.float32)
+        if x.ndim > 1:
+            x = x.mean(axis=1)
+        out = []
+        for start in range(0, len(x) - self._win + 1, self._hop):
+            seg = x[start:start + self._win]
+            if float(np.sqrt(np.mean(seg ** 2))) < EMB_WIN_RMS:
+                continue
+            out.append(seg)
+        return out
+
+    def assign_sentence(self, audio: np.ndarray | None) -> tuple[str, float]:
+        """整句标注。返回 (说话人, 疑似多人比例 0~1)。"""
+        windows = self._windows(audio) if audio is not None else []
+        if not windows:
+            return self.majority_label(), 0.0
+
+        embs: list[np.ndarray] = []
+        for seg in windows:
+            stream = self._ext.create_stream()
+            stream.accept_waveform(SR, seg)
+            stream.input_finished()
+            embs.append(np.asarray(self._ext.compute(stream), dtype=np.float32))
+
+        votes: list[int] = []
+        for e in embs:
+            if not self._cents:
+                self._cents.append(e)
+                self._counts.append(1)
+                self._names.append(LABELS[0])
+                votes.append(0)
+                continue
+            sims = [_cos(e, c) for c in self._cents]
+            best = int(np.argmax(sims))
+            if sims[best] >= self.threshold or len(self._cents) >= self.max_speakers:
+                votes.append(best)
+            else:
+                if len(self._cents) < self.max_speakers:
+                    self._cents.append(e)
+                    self._counts.append(0)
+                    self._names.append(LABELS[len(self._cents) - 1])
+                    votes.append(len(self._cents) - 1)
+                else:
+                    votes.append(best)
+
+        counts = np.bincount(votes, minlength=len(self._cents))
+        winner = int(np.argmax(counts))
+        # 质心用投给赢家且相似度达标的窗口均值更新（混说窗口不进来）
+        members = [embs[k] for k, v in enumerate(votes) if v == winner and _cos(embs[k], self._cents[winner]) >= self.threshold]
+        if members:
+            n = max(1, self._counts[winner])
+            self._cents[winner] = (self._cents[winner] * n + np.mean(members, axis=0)) / (n + len(members))
+        self._counts[winner] += len(members)
+
+        mixed_ratio = 1.0 - counts[winner] / len(votes)
+        return self._names[winner], float(mixed_ratio)
+
+
+def embedding_model_path(models_root: Path) -> Path | None:
+    """声纹嵌入模型的位置；不存在返回 None（走 F0 兜底）。"""
+    p = Path(models_root) / EMB_MODEL_REL
+    return p if p.exists() else None

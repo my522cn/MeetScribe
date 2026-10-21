@@ -16,3 +16,8 @@ assets/app.png
 *.mp3
 *.flac
 *.ogg
+
+# 声纹评测素材（含音视频，不入库）
+phase3/diar_eval/*.m4a
+phase3/diar_eval/*.mp4
+phase3/diar_eval/scan_out.txt
