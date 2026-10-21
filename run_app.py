@@ -74,11 +74,19 @@ def selftest() -> int:
             "paraformer_zh_en/tokens.txt",
             "paraformer_offline/model.int8.onnx",
             "punct_zh_en/model.int8.onnx",
+            "campplus_zh/campplus_zh.onnx",
         ]
         missing = [p for p in need if not (root / "models" / p).exists()]
         if missing:
             raise FileNotFoundError(f"缺模型：{missing}")
-        return f"{len(need)} 个文件齐全"
+        n_emb = 0
+        try:
+            from meetscribe.asr.diarize import EmbeddingSpeakerRegistry
+
+            n_emb = EmbeddingSpeakerRegistry(root / "models" / "campplus_zh" / "campplus_zh.onnx").dim
+        except Exception as exc:  # noqa: BLE001
+            raise RuntimeError(f"声纹嵌入不可用：{exc!r}")
+        return f"{len(need)} 个文件齐全（声纹嵌入 {n_emb} 维）"
 
     def settings() -> str:
         from meetscribe.config import Settings

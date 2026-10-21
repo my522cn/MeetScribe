@@ -188,6 +188,11 @@ class EmbeddingSpeakerRegistry:
     def n_speakers(self) -> int:
         return len(self._cents)
 
+    @property
+    def dim(self) -> int:
+        """嵌入维度（CAM++ 为 192），供自检/档案校验使用。"""
+        return self._ext.dim
+
     def seed(self, name: str, emb: np.ndarray, count: int = 3) -> None:
         """长期档案预置（emb 是历史会话积累的平均嵌入）。"""
         self._cents.append(np.asarray(emb, dtype=np.float32))
