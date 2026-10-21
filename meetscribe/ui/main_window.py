@@ -15,12 +15,13 @@ from ..config import Settings
 from ..system.detect import MeetingDetector, capability
 from .caption_view import fmt_ms
 from .float_bar import FloatBar
+from ..paths import project_root
 from .manage_page import ManagePage
 from .record_page import RecordPage
 from .settings_page import SettingsPage
 from .worker import CaptureWorker
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = project_root()
 SESSION_ROOT = PROJECT_ROOT / "data" / "sessions"
 MODEL_DIR = PROJECT_ROOT / "models" / "paraformer_zh_en"
 

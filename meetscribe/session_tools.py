@@ -13,7 +13,9 @@ import os
 import tempfile
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+from .paths import project_root
+
+PROJECT_ROOT = project_root()
 
 
 # ---------------------------------------------------------------- 转写读写

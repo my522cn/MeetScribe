@@ -1,0 +1,7 @@
+frozen=False root=C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe
+[OK ] 模型文件　5 个文件齐全
+[OK ] 配置读取　session_root=C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\data\sessions
+[OK ] 流式识别　流式识别可用 1.8s
+[OK ] 离线精修　离线精修模型可用 rtf=0.00
+[OK ] 音频设备　16 个输入设备，回环=扬声器 (Realtek(R) Audio)
+结论：通过

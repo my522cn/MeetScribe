@@ -11,7 +11,10 @@ import threading
 from pathlib import Path
 from typing import Any
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+from ..paths import project_root
+
+# 打包成 exe 后必须取 exe 所在目录（见 meetscribe/paths.py）
+PROJECT_ROOT = project_root()
 DEFAULT_PATH = PROJECT_ROOT / "config" / "settings.json"
 
 DEFAULTS: dict[str, Any] = {

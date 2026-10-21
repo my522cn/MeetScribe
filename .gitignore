@@ -4,3 +4,9 @@ data/
 __pycache__/
 *.pyc
 phase3/*.png
+
+# 打包产物（exe/模型副本，体积太大不进版本库）
+release/
+build/
+assets/app.ico
+assets/app.png

@@ -15,6 +15,7 @@ from ..audio.devices import resolve_input_index
 from ..audio.manifest import SessionManifest
 from ..audio.recorder import DualTrackRecorder
 from ..config import Settings
+from ..paths import project_root
 from ..text.postprocess import TextPostProcessor, has_punctuation
 
 SPEAKER_ONLINE = {"mic": "我", "loop": "对方"}
@@ -50,7 +51,7 @@ class CaptureWorker(QObject):
         super().__init__()
         self.model_dir = Path(model_dir)
         self.session_root = Path(session_root)
-        root = Path(__file__).resolve().parents[2]
+        root = project_root()
         cfg = Path(config_dir) if config_dir else root / "config"
         self.settings = settings or Settings(cfg / "settings.json")
         self._models_root = root / "models"
