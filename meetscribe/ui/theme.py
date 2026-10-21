@@ -92,6 +92,13 @@ QLabel#CaptionTime { color: #A6ABB4; font-size: 11px; font-family: "Cascadia Mon
 QLabel#RefineMark { color: #0E7A5F; font-size: 11px; }
 QLabel#OverlapBadge { background: #FCEFDC; color: #96620A; border-radius: 9px; padding: 3px 10px; font-size: 11px; }
 
+/* 字幕区右下角的“回到底部”浮动按钮（用户上滚后出现） */
+QPushButton#GotoEnd {
+    background: #4F46E5; color: #FFFFFF; border: none; border-radius: 14px;
+    padding: 6px 14px; font-size: 12px;
+}
+QPushButton#GotoEnd:hover { background: #4338CA; }
+
 /* ---------- 置顶小窗 ---------- */
 QWidget#FloatBar { background: #23262D; border-radius: 12px; }
 QWidget#FloatBar QLabel { color: #FFFFFF; }

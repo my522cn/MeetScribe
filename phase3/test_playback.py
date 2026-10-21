@@ -49,10 +49,15 @@ def main() -> int:
 
     # ---------- 2. 播放推进 ----------
     player.play(0)
-    time.sleep(1.2)
+    # 开播前要打开 WASAPI 设备（冷启动可达数百毫秒），等位置真正开始推进再计时，
+    # 否则断言会随设备状态抖动
+    deadline = time.time() + 5
+    while time.time() < deadline and (not player.active or player.position_ms() < 50):
+        time.sleep(0.05)
+    time.sleep(1.0)
     pos = player.position_ms()
-    ok = 800 <= pos <= player.duration_ms
-    print(f"[{'OK ' if ok else 'FAIL'}] 播放 1.2s 后虚拟位置 = {pos}ms")
+    ok = 700 <= pos <= player.duration_ms
+    print(f"[{'OK ' if ok else 'FAIL'}] 开播 1s 后虚拟位置 = {pos}ms")
     if not ok:
         failures.append("播放推进")
 

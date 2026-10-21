@@ -195,6 +195,37 @@ class CaptureWorker(QObject):
             if ev is not None:
                 ev.set()  # 立即跑一轮大模型纠错，不必等 25 秒
 
+    def set_mode(self, mode: str) -> None:
+        """录音中热切换线上线下。
+
+        双轨（mic+loop）本来就一直在录，切换只改变“之后的句子怎么标注说话人”：
+        - 切到线下：临时建声纹聚类器（带长期档案预置），麦克风轨开始分说话人A/B/C/D
+        - 切到线上：恢复 我/对方 按轨标注；聚类器保留，再切回线下可继续沿用本场结果
+        已写盘的历史句子不改标注——转写里能看出模式切换的“分界线”。
+        """
+        if mode == self.mode:
+            return
+        self.mode = mode
+        if self.recorder is None:
+            return  # 未在录音：下次 start() 会按新参数初始化
+        self.recorder.manifest.mode = mode  # 管理页按最终使用的模式显示
+        if mode == "offline" and self.diarizer is None:
+            self.diarizer = SpeakerRegistry()
+            try:
+                from ..session_tools import load_global_profiles
+
+                for name, feat in load_global_profiles().items():
+                    self.diarizer.seed(name, feat)
+            except Exception:  # noqa: BLE001
+                pass
+        if mode == "offline" and self.recorder is not None and getattr(self, "_diarize_log", None) is None:
+            try:
+                self._diarize_log = open(  # noqa: SIM115
+                    self.recorder.session_dir / "diarize.log", "a", encoding="utf-8"
+                )
+            except Exception:  # noqa: BLE001
+                pass
+
     def resume(self) -> None:
         if self.recorder:
             self.recorder.resume()

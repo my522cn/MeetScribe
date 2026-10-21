@@ -18,6 +18,7 @@ class RecordPage(QWidget):
     resume_requested = Signal()
     stop_requested = Signal()
     float_requested = Signal()
+    mode_changed = Signal(str)         # 录音中也能切换，worker 收到后热切换标注方式
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -154,17 +155,19 @@ class RecordPage(QWidget):
 
     # ---------- 交互 ----------
     def _set_mode(self, mode: str) -> None:
-        # 只有正在录音/暂停时不允许切换；"已结束(stopped)"和待机一样可以随意选
-        if self._state in ("recording", "paused"):
-            # 此时 Qt 已经把刚点的按钮置为选中，必须弹回去，否则出现双选中
-            self.online_btn.setChecked(self._mode == "online")
-            self.offline_btn.setChecked(self._mode == "offline")
-            return
+        """任何状态（待机/录音中/暂停/已结束）都允许切换。
+
+        之前的两版 bug 都出在拦截上：先是无条件拦截（录过一次就永远选不了），
+        后来改成录音中拦截——但线上/线下都一直在录双轨，切换只是改"之后的
+        句子怎么标注说话人"，随时可切。这里不再有任何拦截。
+        """
+        changed = mode != self._mode
         self._mode = mode
         self.online_btn.setChecked(mode == "online")
         self.offline_btn.setChecked(mode == "offline")
-        meta = SPEAKER_ONLINE if mode == "online" else SPEAKER_OFFLINE
-        self.captions.set_speaker_meta(meta)
+        self.captions.set_speaker_meta(SPEAKER_ONLINE if mode == "online" else SPEAKER_OFFLINE)
+        if changed:
+            self.mode_changed.emit(mode)
 
     def _on_pause(self) -> None:
         if self._state == "recording":

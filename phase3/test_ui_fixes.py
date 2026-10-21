@@ -76,15 +76,19 @@ def main() -> int:
 
     # ---------- 3. 模式按钮互斥 ----------
     rp = RecordPage()
+    fired_modes: list[str] = []
+    rp.mode_changed.connect(fired_modes.append)
     rp.show()
     app.processEvents()
+    # 录音中允许热切换（双轨一直在录，切换只改之后的说话人标注方式）
     rp.set_state("recording")
     rp.offline_btn.click()
     app.processEvents()
-    ok = rp.online_btn.isChecked() and not rp.offline_btn.isChecked()
-    print(f"[{'OK ' if ok else 'FAIL'}] 录音中点'线下会议' → 仍保持线上={rp.online_btn.isChecked()}, 线下={rp.offline_btn.isChecked()}")
+    ok = (rp.offline_btn.isChecked() and not rp.online_btn.isChecked()
+          and fired_modes == ["offline"])
+    print(f"[{'OK ' if ok else 'FAIL'}] 录音中点'线下会议' → 热切换成功={ok}, fired={fired_modes}")
     if not ok:
-        failures.append("录音中模式按钮没有保持互斥")
+        failures.append("录音中无法切换模式")
     rp.set_state("idle")
     rp.offline_btn.click()
     ok = rp.offline_btn.isChecked() and not rp.online_btn.isChecked()

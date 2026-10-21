@@ -177,6 +177,7 @@ class MainWindow(QMainWindow):
         rp.resume_requested.connect(self.worker.resume)
         rp.stop_requested.connect(self._stop)
         rp.float_requested.connect(self._toggle_float)
+        rp.mode_changed.connect(self.worker.set_mode)
 
         self.worker.partial.connect(rp.captions.update_partial)
         self.worker.final.connect(rp.captions.finalize)

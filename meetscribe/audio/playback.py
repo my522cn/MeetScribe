@@ -98,6 +98,12 @@ class SessionPlayer:
         self._thread: threading.Thread | None = None
         self._anchor_wall = 0.0   # 当前锚点对应的墙钟
         self._anchor_ms = 0       # 当前锚点对应的会议时间
+        # play() 被调用的时刻：开播前要开 WASAPI 设备（数百毫秒），
+        # 位置必须从“点播放那一刻”起算，否则进度条会先跳到片尾再跳回来
+        self._start_wall: float | None = None
+        # 播放线程完成首次锚定之前，position 一律返回起始值
+        # （否则旧 _anchor_wall=0 会算出越界的巨大位置）
+        self._anchored = threading.Event()
 
     # ---------- 对外 ----------
     @property
@@ -116,6 +122,10 @@ class SessionPlayer:
             if self.active:
                 return
             self._stop.clear()
+            self._anchored.clear()
+            self._anchor_ms = max(0, int(from_ms))
+            self._anchor_wall = time.perf_counter()
+            self._start_wall = self._anchor_wall
             self._thread = threading.Thread(target=self._run, name="replay", daemon=True)
             self._thread.start()
 
@@ -134,9 +144,10 @@ class SessionPlayer:
     def stop(self) -> None:
         self._stop.set()
         self._pause.clear()
+        self._anchored.clear()
 
     def position_ms(self) -> int:
-        if not self.active or self._pause.is_set():
+        if not self._anchored.is_set() or not self.active or self._pause.is_set():
             return self._anchor_ms
         elapsed = (time.perf_counter() - self._anchor_wall) * 1000
         return min(self.duration_ms, int(self._anchor_ms + elapsed))
@@ -160,7 +171,13 @@ class SessionPlayer:
                 if start is None:
                     return
                 self._anchor_ms = start
-                self._anchor_wall = time.perf_counter()
+                # 首次开播：锚点从 play() 调用时刻起算，把开设备的耗时算进已播时间
+                if self._start_wall is not None:
+                    self._anchor_wall = self._start_wall
+                    self._start_wall = None
+                else:
+                    self._anchor_wall = time.perf_counter()
+                self._anchored.set()
                 t = start
                 while t < self.duration_ms and not self._stop.is_set():
                     # seek 请求：跳出内层，重建锚点
