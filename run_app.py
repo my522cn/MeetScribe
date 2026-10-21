@@ -141,11 +141,19 @@ def main() -> int:
     app.setPalette(_light_palette())
     app.setStyleSheet(QSS)
 
+    # 单实例：已经开着一个就把它的窗口抬到最前，自己静默退出
+    from meetscribe.ui.single_instance import SingleInstance
+
+    guard = SingleInstance()
+    if not guard.acquire():
+        return 0
+
     try:
         win = MainWindow()
     except Exception as exc:  # noqa: BLE001
         QMessageBox.critical(None, "启动失败", f"{exc}\n\n{traceback.format_exc()}")
         return 1
+    guard.activated.connect(win.bring_to_front)
     win.show()
     return app.exec()
 

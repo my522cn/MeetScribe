@@ -325,6 +325,14 @@ class MainWindow(QMainWindow):
         self.raise_()
         self.activateWindow()
 
+    def bring_to_front(self) -> None:
+        """另一个实例试图启动时调用：从托盘/最小化恢复并把窗口带到最前。"""
+        self._restore()
+        self.setWindowState(self.windowState() & ~Qt.WindowState.WindowMinimized)
+        self.show()
+        self.raise_()
+        self.activateWindow()
+
     def closeEvent(self, event) -> None:
         if self.worker.is_active:
             reply = QMessageBox.question(
