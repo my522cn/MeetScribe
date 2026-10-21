@@ -83,12 +83,19 @@ class RefineService:
         deadline = time.time() + 8
         while not self._queue.empty() and time.time() < deadline:
             time.sleep(0.05)
-        try:
-            self._queue.put_nowait(None)
-        except queue.Full:
-            pass
-        if self._thread:
+        if self._thread and self._thread.is_alive():
+            try:
+                self._queue.put_nowait(None)
+            except queue.Full:
+                pass
             self._thread.join(timeout=4)
+        # 消费线程已退出：残留的哨兵/积压不会再被取走，必须清空，
+        # 否则 pending 永远显示 1 句（界面会一直停在“还剩 1 句”）。
+        while True:
+            try:
+                self._queue.get_nowait()
+            except queue.Empty:
+                break
 
     def drain(self, timeout: float = 600.0, on_done=None) -> None:
         """录音结束后用：队列里的句子一句不丢，全部精修完再收尾。

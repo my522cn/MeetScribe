@@ -110,6 +110,15 @@ class CaptureWorker(QObject):
         self.mode = mode
         # 线下模式对麦克风轨做轻量声纹聚类，区分房间里的不同说话人
         self.diarizer = SpeakerRegistry() if mode == "offline" else None
+        if self.diarizer is not None:
+            # 声纹长期学习：用历史档案预置已知说话人，本场第一句就能认出是谁
+            try:
+                from ..session_tools import load_global_profiles
+
+                for name, feat in load_global_profiles().items():
+                    self.diarizer.seed(name, feat)
+            except Exception:  # noqa: BLE001
+                pass
         self._diarize_log = None  # 特征调试日志（写入会话目录 diarize.log）
         s = self.settings
         try:

@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
 
 from ..audio.playback import SessionPlayer
 from ..config import Settings
+from .. import session_tools
 
 
 def fmt_duration(ms: int) -> str:
@@ -72,6 +73,7 @@ class ManagePage(QWidget):
     # 后台纪要线程 → UI 线程（线程里禁止直接碰控件，统一走信号）
     minute_progress = Signal(str, str)   # 会话路径, 进度文本
     minute_finished = Signal(str, bool, str)  # 会话路径, 是否成功, 消息
+    task_status = Signal(str)            # 通用后台任务状态（压缩等）
 
     def __init__(self, settings: Settings, parent=None) -> None:
         super().__init__(parent)
@@ -89,6 +91,7 @@ class ManagePage(QWidget):
         self._poll.start()
         self.minute_progress.connect(self._on_minute_progress)
         self.minute_finished.connect(self._on_minute_finished)
+        self.task_status.connect(self._on_task_status)
 
     # ---------- 构建 ----------
     def _build(self) -> None:
@@ -148,15 +151,41 @@ class ManagePage(QWidget):
         self.btn_folder = QPushButton("打开文件夹")
         self.btn_folder.setObjectName("Ghost")
         self.btn_folder.clicked.connect(self._open_folder)
-        self.btn_delete = QPushButton("删除会议")
-        self.btn_delete.setObjectName("Ghost")
-        self.btn_delete.clicked.connect(self._delete_sessions)
+        # 注意：删除按钮只在标题栏创建一次（紧邻“刷新列表”）。
+        # 这里曾经又创建过一个同名按钮且未加入布局，导致 self.btn_delete 指向
+        # 隐藏控件，标题栏那个永远停在 disabled —— 用户反馈“删除会议一直是禁用”。
         self.btn_minutes.setEnabled(False)
         self.btn_folder.setEnabled(False)
         btns.addWidget(self.btn_minutes)
         btns.addWidget(self.btn_folder)
         btns.addStretch(1)
         cl.addLayout(btns)
+
+        # 第二排：会后整理工具
+        tools = QHBoxLayout()
+        self.btn_edit = QPushButton("编辑转写")
+        self.btn_edit.setObjectName("Ghost")
+        self.btn_edit.setCheckable(True)
+        self.btn_edit.clicked.connect(self._toggle_edit)
+        self.btn_fix = QPushButton("批量纠正")
+        self.btn_fix.setObjectName("Ghost")
+        self.btn_fix.clicked.connect(self._batch_fix)
+        self.btn_names = QPushButton("说话人改名")
+        self.btn_names.setObjectName("Ghost")
+        self.btn_names.clicked.connect(self._rename_speakers)
+        self.btn_compress = QPushButton("压缩录音")
+        self.btn_compress.setObjectName("Ghost")
+        self.btn_compress.clicked.connect(self._compress)
+        self.btn_repair = QPushButton("标记为已结束")
+        self.btn_repair.setObjectName("Ghost")
+        self.btn_repair.setVisible(False)  # 仅异常退出的会话显示
+        self.btn_repair.clicked.connect(self._repair_session)
+        for b in (self.btn_edit, self.btn_fix, self.btn_names, self.btn_compress):
+            b.setEnabled(False)
+            tools.addWidget(b)
+        tools.addWidget(self.btn_repair)
+        tools.addStretch(1)
+        cl.addLayout(tools)
 
         self.status = QLabel("")
         self.status.setObjectName("Hint")
@@ -255,8 +284,10 @@ class ManagePage(QWidget):
         self.lbl_title.setText("还没有会议记录")
         self.lbl_meta.setText("回到「录音」页开始第一次录音，结束后会自动出现在这里。")
         self.txt.clear()
-        for b in (self.btn_minutes, self.btn_folder):
+        for b in (self.btn_minutes, self.btn_folder, self.btn_edit, self.btn_fix,
+                  self.btn_names, self.btn_compress, self.btn_repair):
             b.setEnabled(False)
+        self.btn_repair.setVisible(False)
         self.btn_delete.setEnabled(False)
         self.btn_play.setEnabled(False)
         self.slider.setEnabled(False)
@@ -277,9 +308,16 @@ class ManagePage(QWidget):
             f"{info.started}　·　{mode}　·　时长 {fmt_duration(info.duration_ms)}　·　"
             f"{info.n_segments} 个音频分段　·　{info.n_lines} 句转写　·　{st}"
         )
-        for b in (self.btn_minutes, self.btn_folder):
+        for b in (self.btn_minutes, self.btn_folder, self.btn_edit, self.btn_fix,
+                  self.btn_names, self.btn_compress):
             b.setEnabled(True)
         self.btn_delete.setEnabled(True)  # 有会话即可删（列表多选决定删哪些）
+        # 异常退出的会话：显示"标记为已结束"
+        self.btn_repair.setVisible(info.status not in ("completed",))
+        self.btn_repair.setEnabled(info.status not in ("completed",))
+        self.btn_edit.setChecked(False)
+        self.btn_edit.setText("编辑转写")
+        self.txt.setReadOnly(True)
         self._apply_minute_ui()
         # 回放控件
         has_audio = info.n_segments > 0
@@ -406,6 +444,181 @@ class ManagePage(QWidget):
             self.status.setText(state[len("failed:"):])
         elif state == "done":
             self.status.setText("纪要已生成（点下方「纪要预览」查看全文）")
+
+    # ---------- 会后整理：转写编辑 / 批量纠正 / 说话人改名 / 压缩 / 恢复 ----------
+    def _toggle_edit(self) -> None:
+        if not self._current:
+            return
+        if self.btn_edit.isChecked():
+            if self._view != "trans":
+                self._switch_view("trans")
+            self.txt.setReadOnly(False)
+            self.btn_edit.setText("保存转写")
+            self.status.setText("编辑模式：直接修改每行内容后点「保存转写」。前缀（说话人　时间）请保留。")
+        else:
+            self._save_transcript_edits()
+
+    def _save_transcript_edits(self) -> None:
+        info = self._current
+        self.btn_edit.setChecked(False)
+        self.btn_edit.setText("编辑转写")
+        self.txt.setReadOnly(True)
+        if not info:
+            return
+        records = session_tools.load_records(info.path)
+        lines = [ln for ln in self.txt.toPlainText().splitlines()]
+        changed = 0
+        for i, rec in enumerate(records):
+            if i >= len(lines):
+                break
+            parts = lines[i].split("　", 2)  # 说话人　时间　内容
+            if len(parts) < 3:
+                continue
+            new_text = parts[2].strip()
+            if new_text and new_text != rec.get("text", ""):
+                rec["text"] = new_text
+                changed += 1
+        if changed:
+            session_tools.save_records(info.path, records)
+        self._render_view()
+        self.status.setText(f"已保存 {changed} 处修改" if changed else "内容没有变化")
+
+    def _batch_fix(self) -> None:
+        """批量同音字纠正：一次替换全文，可同时写入全局替换表供以后自动生效。"""
+        info = self._current
+        if not info:
+            return
+        from PySide6.QtWidgets import QCheckBox, QDialog, QDialogButtonBox, QLineEdit
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle("批量纠正")
+        lay = QVBoxLayout(dlg)
+        tip = QLabel("把识别错的词批量替换成正确写法（适用于同一个错字反复出现的场景）。")
+        tip.setObjectName("Hint")
+        tip.setWordWrap(True)
+        lay.addWidget(tip)
+        edit_wrong = QLineEdit()
+        edit_wrong.setPlaceholderText("错误写法，如：联条")
+        edit_right = QLineEdit()
+        edit_right.setPlaceholderText("正确写法，如：联调")
+        lay.addWidget(QLabel("错误"))
+        lay.addWidget(edit_wrong)
+        lay.addWidget(QLabel("正确"))
+        lay.addWidget(edit_right)
+        chk_global = QCheckBox("同时加入全局替换表（以后录音自动纠正）")
+        chk_global.setChecked(True)
+        lay.addWidget(chk_global)
+        bb = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        bb.accepted.connect(dlg.accept)
+        bb.rejected.connect(dlg.reject)
+        lay.addWidget(bb)
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return
+        wrong = edit_wrong.text().strip()
+        right = edit_right.text().strip()
+        if not wrong:
+            return
+        records = session_tools.load_records(info.path)
+        changed = session_tools.replace_text(records, [(wrong, right)])
+        if changed:
+            session_tools.save_records(info.path, records)
+            self._render_view()
+        msg = f"已替换 {changed} 句：{wrong} → {right or '（删除）'}"
+        if chk_global.isChecked() and right:
+            n = session_tools.append_global_replacements([(wrong, right)])
+            msg += f"，并写入全局替换表（新增 {n} 条）"
+        self.status.setText(msg)
+
+    def _rename_speakers(self) -> None:
+        """给说话人起真名（说话人A→张总），并可写入声纹档案供下次自动认人。"""
+        info = self._current
+        if not info:
+            return
+        from PySide6.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QLineEdit
+
+        records = session_tools.load_records(info.path)
+        speakers = session_tools.speakers_in(records)
+        if not speakers:
+            QMessageBox.information(self, "没有说话人", "这个会议还没有可改名的说话人。")
+            return
+        saved = session_tools.load_speaker_names(info.path)
+        dlg = QDialog(self)
+        dlg.setWindowTitle("说话人改名")
+        outer = QVBoxLayout(dlg)
+        tip = QLabel("给说话人填真实姓名；勾选下面选项会把声纹存进档案，下次开会自动认人。")
+        tip.setObjectName("Hint")
+        tip.setWordWrap(True)
+        outer.addWidget(tip)
+        form = QFormLayout()
+        edits: dict[str, QLineEdit] = {}
+        for sp in speakers:
+            ed = QLineEdit(saved.get(sp, "" if sp.startswith("说话人") else sp))
+            ed.setPlaceholderText(sp)
+            edits[sp] = ed
+            form.addRow(sp, ed)
+        outer.addLayout(form)
+        from PySide6.QtWidgets import QCheckBox
+
+        chk_learn = QCheckBox("记入声纹档案（下次会议自动识别这些人）")
+        chk_learn.setChecked(True)
+        outer.addWidget(chk_learn)
+        bb = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        bb.accepted.connect(dlg.accept)
+        bb.rejected.connect(dlg.reject)
+        outer.addWidget(bb)
+        if dlg.exec() != QDialog.DialogCode.Accepted:
+            return
+        mapping = {sp: ed.text().strip() for sp, ed in edits.items() if ed.text().strip()}
+        if not mapping:
+            return
+        changed = session_tools.rename_speakers(records, mapping)
+        session_tools.save_records(info.path, records)
+        session_tools.save_speaker_names(info.path, {**saved, **mapping})
+        self._render_view()
+        msg = f"已改名 {changed} 句：" + "、".join(f"{k}→{v}" for k, v in mapping.items())
+        if chk_learn.isChecked():
+            n = session_tools.save_global_profiles(info.path, mapping)
+            msg += f"；已存入声纹档案 {n} 人"
+        self.status.setText(msg)
+
+    def _compress(self) -> None:
+        """FLAC → OPUS 压缩（体积约减半），后台执行。"""
+        info = self._current
+        if not info:
+            return
+        self.btn_compress.setEnabled(False)
+        self.status.setText("正在压缩录音…")
+
+        def work() -> None:
+            done, saved, skipped = session_tools.compress_session(
+                info.path, on_progress=lambda t: self.task_status.emit(t)
+            )
+            if done:
+                mb = saved / 1024 / 1024
+                self.task_status.emit(f"压缩完成：{done} 个分段，节省 {mb:.1f} MB")
+            else:
+                self.task_status.emit("未压缩：" + (skipped[0] if skipped else "没有可压缩的分段"))
+            self.task_status.emit("__reload__")
+
+        threading.Thread(target=work, name="compress", daemon=True).start()
+
+    def _repair_session(self) -> None:
+        info = self._current
+        if not info:
+            return
+        session_tools.mark_completed(info.path)
+        self.refresh()
+        self.status.setText("已标记为正常结束（音频与转写都已保留）")
+
+    def _on_task_status(self, text: str) -> None:
+        if text == "__reload__":
+            info = self._current
+            if info:
+                info._load()
+            self.btn_compress.setEnabled(True)
+            self._render_view()
+            return
+        self.status.setText(text)
 
     # ---------- 回放 ----------
     def _toggle_play(self) -> None:

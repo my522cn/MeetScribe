@@ -77,29 +77,41 @@ def _autocorr_f0(seg: np.ndarray, sr: int) -> float | None:
 
 
 class SpeakerRegistry:
-    """增量式说话人聚类：录音会话内维护每个说话人的特征质心。"""
+    """增量式说话人聚类：录音会话内维护每个说话人的特征质心。
+
+    seed() 可预置"长期档案"里的已知说话人（上次会议命名过的人），
+    本场会议第一句就能认出是谁，实现跨会话的声纹长期学习。
+    """
 
     def __init__(self, max_speakers: int = MAX_SPEAKERS) -> None:
         self._centroids: list[tuple[float, float]] = []
         self._counts: list[int] = []
+        self._names: list[str] = []
         self.max_speakers = max_speakers
 
     @property
     def n_speakers(self) -> int:
         return len(self._centroids)
 
+    def seed(self, name: str, feat: tuple[float, float], count: int = 3) -> None:
+        """用历史档案预置一个已知说话人（count 给大一点，让质心更稳）。"""
+        self._centroids.append(feat)
+        self._counts.append(max(1, count))
+        self._names.append(name)
+
     def majority_label(self) -> str:
         """特征提取失败（太短/太轻）的句子归入当前说话最多的人。"""
         if not self._counts:
             return LABELS[0]
-        return LABELS[int(np.argmax(self._counts))]
+        return self._names[int(np.argmax(self._counts))]
 
     def assign(self, feat: tuple[float, float]) -> str:
-        """把一句的特征归到某个说话人，返回"说话人A"式标签。"""
+        """把一句的特征归到某个说话人，返回标签（预置档案用真名，新人用说话人X）。"""
         if not self._centroids:
             self._centroids.append(feat)
             self._counts.append(1)
-            return LABELS[0]
+            self._names.append(LABELS[0])
+            return self._names[0]
 
         dists = [self._distance(feat, c) for c in self._centroids]
         best = int(np.argmin(dists))
@@ -112,10 +124,12 @@ class SpeakerRegistry:
                 (cent * n + feat[1]) / (n + 1),
             )
             self._counts[best] = n + 1
-            return LABELS[best]
+            return self._names[best]
         self._centroids.append(feat)
         self._counts.append(1)
-        return LABELS[len(self._centroids) - 1]
+        idx = len(self._centroids) - 1
+        self._names.append(LABELS[idx] if idx < len(LABELS) else f"说话人{idx + 1}")
+        return self._names[idx]
 
     @staticmethod
     def _distance(a: tuple[float, float], b: tuple[float, float]) -> float:
