@@ -1,0 +1,5976 @@
+1
+00:00:00,333 --> 00:00:02,000
+hello everyone good morning
+
+2
+00:00:02,200 --> 00:00:05,333
+I Learned that today is the start of Gemini season
+
+3
+00:00:05,766 --> 00:00:07,766
+I'm not really sure what the big deal is
+
+4
+00:00:07,766 --> 00:00:10,400
+every day is Gemini season here at Google
+
+5
+00:00:10,966 --> 00:00:13,466
+our 7th generation TPU Ironwood
+
+6
+00:00:13,500 --> 00:00:14,300
+it delivers
+
+7
+00:00:14,300 --> 00:00:16,933
+10x the performance over the previous generation
+
+8
+00:00:17,200 --> 00:00:19,733
+and packs an incredible 42
+
+9
+00:00:19,966 --> 00:00:22,800
+5 extra flops of compute per pod
+
+10
+00:00:22,800 --> 00:00:25,000
+and it's coming to Google Cloud customers
+
+11
+00:00:25,000 --> 00:00:26,066
+later this year
+
+12
+00:00:26,500 --> 00:00:28,200
+introducing Google Beam
+
+13
+00:00:28,500 --> 00:00:32,533
+a new AI first video communications platform
+
+14
+00:00:32,733 --> 00:00:34,600
+an array of six cameras
+
+15
+00:00:34,766 --> 00:00:36,733
+captures you from different angles
+
+16
+00:00:37,100 --> 00:00:41,200
+and with AI we can merge these video streams together
+
+17
+00:00:41,200 --> 00:00:43,900
+and render you on a 3D light field display
+
+18
+00:00:44,466 --> 00:00:47,566
+with near perfect head tracking down to the millimeter
+
+19
+00:00:47,733 --> 00:00:49,600
+and at 60 frames per second
+
+20
+00:00:49,966 --> 00:00:51,333
+all in real time
+
+21
+00:00:51,766 --> 00:00:55,900
+the result a much more natural and deeply immersive
+
+22
+00:00:56,133 --> 00:00:57,733
+conversational experience
+
+23
+00:00:57,900 --> 00:01:01,566
+in collaboration with HP the first Google Beam devices
+
+24
+00:01:01,733 --> 00:01:05,733
+will be available for early customers later this year
+
+25
+00:01:06,066 --> 00:01:09,100
+we've been bringing underlying technology from Starline
+
+26
+00:01:09,100 --> 00:01:10,000
+into Google Meet
+
+27
+00:01:10,566 --> 00:01:13,333
+that includes real time speech translation
+
+28
+00:01:13,333 --> 00:01:15,466
+to help break down language barriers
+
+29
+00:01:15,666 --> 00:01:17,733
+let me turn on speech translation
+
+30
+00:01:20,100 --> 00:01:22,300
+it's nice to finally talk to you
+
+31
+00:01:22,333 --> 00:01:24,400
+es bueno ablarte finamente
+
+32
+00:01:24,700 --> 00:01:25,700
+nopuedo esperar a llegar a
+
+33
+00:01:25,900 --> 00:01:26,700
+casa
+
+34
+00:01:29,600 --> 00:01:30,733
+you're going to have a lot of fun
+
+35
+00:01:30,733 --> 00:01:33,366
+and I think you're going to love visiting the city
+
+36
+00:01:33,500 --> 00:01:35,500
+the house is in a very nice neighborhood
+
+37
+00:01:35,500 --> 00:01:37,533
+and overlooks the mountains
+
+38
+00:01:37,533 --> 00:01:38,333
+and today
+
+39
+00:01:38,333 --> 00:01:41,333
+we are introducing this real time speech translation
+
+40
+00:01:41,333 --> 00:01:42,666
+directly in Google meet
+
+41
+00:01:43,400 --> 00:01:46,066
+English and Spanish translation is now available
+
+42
+00:01:46,066 --> 00:01:47,566
+for subscribers
+
+43
+00:01:47,800 --> 00:01:49,500
+with more languages
+
+44
+00:01:49,600 --> 00:01:51,766
+rolling out in the next few weeks
+
+45
+00:01:51,766 --> 00:01:52,466
+and real time
+
+46
+00:01:52,466 --> 00:01:54,733
+translation will be coming to enterprises
+
+47
+00:01:54,733 --> 00:01:55,666
+later this year
+
+48
+00:01:55,766 --> 00:01:58,666
+we are starting to bring it to our products Today
+
+49
+00:01:58,666 --> 00:02:00,600
+Jem and I live as Project Astras
+
+50
+00:02:00,600 --> 00:02:03,266
+camera and screen sharing capabilities
+
+51
+00:02:03,400 --> 00:02:05,800
+so you can talk about anything you see
+
+52
+00:02:05,966 --> 00:02:07,600
+that's a pretty nice convertible
+
+53
+00:02:08,200 --> 00:02:09,500
+I think you might have mistaken
+
+54
+00:02:09,500 --> 00:02:11,666
+the garbage truck for a convertible
+
+55
+00:02:11,733 --> 00:02:13,566
+is there anything else I can help you with
+
+56
+00:02:13,566 --> 00:02:16,000
+what's this skinny building doing in my neighborhood
+
+57
+00:02:16,000 --> 00:02:18,666
+it's a street light not a building
+
+58
+00:02:18,900 --> 00:02:21,866
+why is this person following me wherever I walk
+
+59
+00:02:22,566 --> 00:02:23,966
+no one's following you
+
+60
+00:02:23,966 --> 00:02:25,500
+that's just your shadow
+
+61
+00:02:25,966 --> 00:02:28,566
+Gemma is pretty good at telling you when you're wrong
+
+62
+00:02:28,900 --> 00:02:32,966
+we are rolling this out to everyone on Android and iOS
+
+63
+00:02:32,966 --> 00:02:34,166
+starting today
+
+64
+00:02:34,700 --> 00:02:37,966
+we also have a research prototype Project Mariner
+
+65
+00:02:38,500 --> 00:02:41,166
+it's an agent that can interact with the web
+
+66
+00:02:41,166 --> 00:02:42,366
+and get stuff done
+
+67
+00:02:42,866 --> 00:02:46,100
+first we are introducing multitasking
+
+68
+00:02:46,266 --> 00:02:49,900
+and it can now oversee up to 10 simultaneous tasks
+
+69
+00:02:49,900 --> 00:02:52,933
+second it's using a feature called teach and repeat
+
+70
+00:02:53,400 --> 00:02:56,200
+this is where you can show it a task once
+
+71
+00:02:56,400 --> 00:02:59,866
+and it learns a plan for similar tasks in the future
+
+72
+00:03:00,366 --> 00:03:02,000
+we are bringing Project Mariners
+
+73
+00:03:02,000 --> 00:03:03,966
+computer use capabilities
+
+74
+00:03:04,066 --> 00:03:06,700
+to developers via the Gemini API
+
+75
+00:03:06,966 --> 00:03:09,900
+and it will be available more broadly this summer
+
+76
+00:03:10,100 --> 00:03:12,533
+then there is the Model Context protocol
+
+77
+00:03:12,533 --> 00:03:13,966
+introduced by anthropic
+
+78
+00:03:13,966 --> 00:03:16,566
+so agents can access other services
+
+79
+00:03:16,933 --> 00:03:19,733
+and today we are excited to announce that our Gemini
+
+80
+00:03:19,733 --> 00:03:23,600
+SDK is now compatible with MCP tools
+
+81
+00:03:24,333 --> 00:03:26,300
+and we are starting to bring agentic
+
+82
+00:03:26,300 --> 00:03:28,100
+capabilities to Chrome
+
+83
+00:03:28,166 --> 00:03:30,133
+Search and the Gemini app
+
+84
+00:03:30,700 --> 00:03:32,666
+let me show you what we are excited about
+
+85
+00:03:32,666 --> 00:03:33,566
+in the Gemini app
+
+86
+00:03:33,733 --> 00:03:35,466
+we call it Agent Mode
+
+87
+00:03:36,100 --> 00:03:36,933
+normally
+
+88
+00:03:36,933 --> 00:03:39,266
+you'd have to spend a lot of time scrolling through
+
+89
+00:03:39,266 --> 00:03:40,566
+endless listings
+
+90
+00:03:40,966 --> 00:03:42,166
+using agent mode
+
+91
+00:03:42,166 --> 00:03:45,300
+the Gemini app goes to work behind the scenes
+
+92
+00:03:45,700 --> 00:03:48,266
+it finds listings from sites like Zillow
+
+93
+00:03:48,266 --> 00:03:49,766
+that match your criteria
+
+94
+00:03:50,200 --> 00:03:51,900
+and uses Project Miner
+
+95
+00:03:51,900 --> 00:03:54,933
+when needed to adjust very specific filters
+
+96
+00:03:55,333 --> 00:03:57,333
+if there's an apartment you want to check out
+
+97
+00:03:57,333 --> 00:03:59,000
+Gemini uses MCP
+
+98
+00:03:59,300 --> 00:04:01,000
+to access the listings
+
+99
+00:04:01,200 --> 00:04:03,500
+and even schedule a tour on your behalf
+
+100
+00:04:03,733 --> 00:04:06,100
+an experimental version of the agent mode
+
+101
+00:04:06,100 --> 00:04:07,000
+in the Gemini app
+
+102
+00:04:07,000 --> 00:04:08,400
+will be coming soon
+
+103
+00:04:08,700 --> 00:04:09,866
+to subscribers
+
+104
+00:04:10,000 --> 00:04:12,566
+personalization will be really powerful
+
+105
+00:04:13,200 --> 00:04:15,133
+we are working to bring this to life
+
+106
+00:04:15,133 --> 00:04:16,366
+with something we call
+
+107
+00:04:16,366 --> 00:04:17,733
+personal context
+
+108
+00:04:18,466 --> 00:04:19,733
+with your permission
+
+109
+00:04:19,766 --> 00:04:22,166
+Gemini models can use relevant context
+
+110
+00:04:22,166 --> 00:04:23,966
+across your Google Apps
+
+111
+00:04:24,266 --> 00:04:25,666
+in a way that is private
+
+112
+00:04:25,666 --> 00:04:28,266
+transparent and fully under your control
+
+113
+00:04:28,400 --> 00:04:30,166
+you might be familiar with our AI
+
+114
+00:04:30,166 --> 00:04:32,000
+powered Smart Reply features
+
+115
+00:04:32,000 --> 00:04:35,733
+now imagine if those responses could sound like you
+
+116
+00:04:36,400 --> 00:04:39,900
+that's the idea behind personalized smart replies
+
+117
+00:04:40,200 --> 00:04:42,933
+let's say my friend wrote to me looking for advice
+
+118
+00:04:42,933 --> 00:04:44,300
+now if I'm being honest
+
+119
+00:04:44,300 --> 00:04:47,300
+I would probably reply something short and unhelpful
+
+120
+00:04:47,500 --> 00:04:48,566
+sorry Felix
+
+121
+00:04:49,466 --> 00:04:51,466
+but with personalized smart replies
+
+122
+00:04:51,466 --> 00:04:52,800
+I can be a better friend
+
+123
+00:04:53,366 --> 00:04:55,600
+that's because gem and I
+
+124
+00:04:55,966 --> 00:04:58,133
+can do almost all the work for me
+
+125
+00:04:58,700 --> 00:05:00,700
+looking up my notes and drive
+
+126
+00:05:00,933 --> 00:05:03,533
+scanning past emails for reservations
+
+127
+00:05:03,733 --> 00:05:06,333
+and finding my itinerary in Google Docs
+
+128
+00:05:06,566 --> 00:05:10,200
+Gemini matches my typical greetings from past emails
+
+129
+00:05:10,500 --> 00:05:13,266
+captures my tone style
+
+130
+00:05:13,700 --> 00:05:15,500
+and favorite word choices
+
+131
+00:05:15,600 --> 00:05:18,400
+and then it automatically generates a reply
+
+132
+00:05:18,900 --> 00:05:21,666
+this will be available in Gmail this summer
+
+133
+00:05:21,666 --> 00:05:22,966
+for subscribers
+
+134
+00:05:23,166 --> 00:05:26,600
+Gemini Flash is our most efficient workhorse model
+
+135
+00:05:26,933 --> 00:05:28,700
+today I'm thrilled to announce that
+
+136
+00:05:28,700 --> 00:05:30,700
+we're releasing an updated version of 2
+
+137
+00:05:30,733 --> 00:05:31,666
+5 flash
+
+138
+00:05:31,800 --> 00:05:34,900
+the new flash is better in nearly every dimension
+
+139
+00:05:35,000 --> 00:05:37,600
+improving across key benchmarks for reasoning
+
+140
+00:05:37,666 --> 00:05:39,600
+code and long context
+
+141
+00:05:39,900 --> 00:05:41,166
+I'm excited to say
+
+142
+00:05:41,166 --> 00:05:44,100
+that flash will be generally available in early June
+
+143
+00:05:44,100 --> 00:05:45,600
+with Pro soon after
+
+144
+00:05:45,733 --> 00:05:47,800
+but you can go try out the preview now
+
+145
+00:05:48,000 --> 00:05:51,400
+in AI Studio Vertex AI and Gemini app
+
+146
+00:05:51,700 --> 00:05:55,766
+we are also introducing new previews for text to speech
+
+147
+00:05:56,300 --> 00:05:58,600
+these now have a first of its kind
+
+148
+00:05:58,600 --> 00:06:01,566
+multi speaker support for two voices
+
+149
+00:06:01,733 --> 00:06:04,533
+built on native audio output
+
+150
+00:06:05,000 --> 00:06:07,666
+this means the model can converse in more
+
+151
+00:06:07,666 --> 00:06:09,333
+expressive ways
+
+152
+00:06:09,400 --> 00:06:10,800
+it can capture the really subtle
+
+153
+00:06:10,800 --> 00:06:12,566
+nuances of how we speak
+
+154
+00:06:14,300 --> 00:06:18,133
+it can even seamlessly switch to a whisper like this
+
+155
+00:06:18,600 --> 00:06:20,000
+this works in over
+
+156
+00:06:20,266 --> 00:06:21,466
+24 languages
+
+157
+00:06:21,500 --> 00:06:24,900
+and it can even easily go between languages
+
+158
+00:06:25,100 --> 00:06:29,166
+so the model can begin speaking in English but then
+
+159
+00:06:30,766 --> 00:06:33,666
+a hindia kisi bhi or Bhasha me switch kar sakta Hai
+
+160
+00:06:35,466 --> 00:06:38,766
+and switch back all with the same voice
+
+161
+00:06:39,466 --> 00:06:41,700
+you can use this text to speech capability
+
+162
+00:06:41,700 --> 00:06:43,133
+starting today
+
+163
+00:06:43,133 --> 00:06:44,566
+in the Gemini API
+
+164
+00:06:45,066 --> 00:06:46,133
+second
+
+165
+00:06:46,600 --> 00:06:48,900
+we've strengthened protections against security threats
+
+166
+00:06:48,900 --> 00:06:51,000
+like indirect prompt injections
+
+167
+00:06:51,000 --> 00:06:55,266
+so Gemini 2 5 is our most secure model yet
+
+168
+00:06:55,800 --> 00:06:57,166
+and in both 2
+
+169
+00:06:57,400 --> 00:06:58,766
+5 Pro and flash
+
+170
+00:06:58,800 --> 00:07:00,766
+we're including thought summaries
+
+171
+00:07:00,766 --> 00:07:03,533
+via the Gemini API and Vertex AI
+
+172
+00:07:03,766 --> 00:07:06,966
+thought summaries take the model's raw thoughts
+
+173
+00:07:07,000 --> 00:07:10,400
+and organize them into a clear format with headers
+
+174
+00:07:10,400 --> 00:07:11,566
+key details
+
+175
+00:07:11,566 --> 00:07:14,500
+and information about model actions like tool calls
+
+176
+00:07:14,700 --> 00:07:16,533
+finally we launched 2
+
+177
+00:07:16,566 --> 00:07:18,600
+5 flash with Thinking Budgets
+
+178
+00:07:18,700 --> 00:07:20,466
+to give you control over cost
+
+179
+00:07:20,466 --> 00:07:22,300
+and latency versus quality
+
+180
+00:07:22,366 --> 00:07:25,733
+so we're bringing Thinking Budgets to 2 5 Pro
+
+181
+00:07:25,966 --> 00:07:27,900
+which will roll out in the coming weeks
+
+182
+00:07:27,900 --> 00:07:29,933
+along with our generally available model
+
+183
+00:07:30,533 --> 00:07:32,700
+you've seen something like this before right
+
+184
+00:07:32,933 --> 00:07:35,800
+someone comes to you with a brilliant idea
+
+185
+00:07:35,900 --> 00:07:37,100
+scratched on a napkin
+
+186
+00:07:37,100 --> 00:07:38,666
+I am going to
+
+187
+00:07:38,966 --> 00:07:41,600
+add the image I just showed you of the sphere
+
+188
+00:07:42,066 --> 00:07:44,800
+and I'm going to add in a prompt that asks 2
+
+189
+00:07:45,066 --> 00:07:47,600
+5 Pro to update my code based on the image
+
+190
+00:07:47,733 --> 00:07:50,400
+and I'm going to jump to another tab that I ran
+
+191
+00:07:50,400 --> 00:07:51,366
+right before this keynote
+
+192
+00:07:51,366 --> 00:07:52,333
+with the same prompt
+
+193
+00:07:53,000 --> 00:07:55,966
+and here's what Gemini generates
+
+194
+00:07:56,400 --> 00:07:57,200
+whoa
+
+195
+00:07:57,600 --> 00:07:59,966
+we went from that rough sketch
+
+196
+00:08:00,366 --> 00:08:03,966
+directly to code updating multiple of my files
+
+197
+00:08:04,333 --> 00:08:07,333
+and actually you can see it thought for 37 seconds
+
+198
+00:08:07,400 --> 00:08:09,600
+and you can see the changes it thought through
+
+199
+00:08:09,966 --> 00:08:11,500
+and then the files it updated
+
+200
+00:08:11,800 --> 00:08:13,800
+but what if it talked
+
+201
+00:08:14,933 --> 00:08:17,366
+that's where Gemini's native audio comes in
+
+202
+00:08:18,066 --> 00:08:19,466
+that's a penguin
+
+203
+00:08:19,500 --> 00:08:21,733
+and its scales are made of keratin
+
+204
+00:08:21,766 --> 00:08:23,400
+just like your fingernails
+
+205
+00:08:23,766 --> 00:08:27,500
+2 5 Pro is available on your favorite IDE platforms
+
+206
+00:08:27,933 --> 00:08:31,733
+and in Google products like Android Studio
+
+207
+00:08:32,000 --> 00:08:33,333
+Firebase Studio
+
+208
+00:08:33,600 --> 00:08:35,066
+Gemini Code Assist
+
+209
+00:08:35,133 --> 00:08:38,533
+and our a synchronous coding agent Jules
+
+210
+00:08:39,100 --> 00:08:41,866
+Jules can tackle complex tasks in large code bases
+
+211
+00:08:41,866 --> 00:08:43,500
+that used to take hours
+
+212
+00:08:43,533 --> 00:08:45,466
+like updating an older version of Node
+
+213
+00:08:45,466 --> 00:08:46,266
+JS
+
+214
+00:08:46,666 --> 00:08:51,366
+it can plan the steps modify files and more in minutes
+
+215
+00:08:51,866 --> 00:08:53,933
+so today I'm delighted to announce
+
+216
+00:08:53,933 --> 00:08:55,866
+that Jules is now in public beta
+
+217
+00:08:55,866 --> 00:08:58,666
+so anyone can sign up at Jules Google
+
+218
+00:08:59,066 --> 00:09:00,466
+Gemini Diffusion
+
+219
+00:09:00,466 --> 00:09:01,600
+is a state of the art
+
+220
+00:09:01,600 --> 00:09:03,766
+experimental text diffusion model
+
+221
+00:09:04,100 --> 00:09:06,900
+the version of Gemini Diffusion we're releasing today
+
+222
+00:09:07,133 --> 00:09:10,333
+generates five times faster than even 2
+
+223
+00:09:10,500 --> 00:09:13,366
+0 flashlight our fastest model so far
+
+224
+00:09:13,566 --> 00:09:15,800
+while matching its coding performance
+
+225
+00:09:16,133 --> 00:09:19,066
+so take this math example ready
+
+226
+00:09:19,266 --> 00:09:20,066
+go
+
+227
+00:09:21,733 --> 00:09:23,300
+if you blinked you missed it
+
+228
+00:09:23,533 --> 00:09:24,966
+today we're making 2
+
+229
+00:09:25,266 --> 00:09:28,666
+5 pro even better by introducing a new mode
+
+230
+00:09:28,666 --> 00:09:30,400
+we're calling Deep Think
+
+231
+00:09:31,366 --> 00:09:35,000
+it gets an impressive score on USA Mo 2025
+
+232
+00:09:35,100 --> 00:09:37,800
+currently one of the hardest math benchmarks
+
+233
+00:09:38,333 --> 00:09:40,566
+we're taking a little bit of extra time to conduct
+
+234
+00:09:40,566 --> 00:09:42,700
+more frontier safety evaluations
+
+235
+00:09:42,700 --> 00:09:45,000
+and get further input from safety experts
+
+236
+00:09:45,566 --> 00:09:46,500
+as part of that
+
+237
+00:09:46,500 --> 00:09:48,966
+we're going to make it available to trusted testers
+
+238
+00:09:49,066 --> 00:09:50,533
+via the Gemini API
+
+239
+00:09:50,766 --> 00:09:51,766
+to get their feedback
+
+240
+00:09:51,766 --> 00:09:53,500
+before making it widely available
+
+241
+00:09:53,866 --> 00:09:57,600
+Gemini is already the best multimodal foundation model
+
+242
+00:09:58,066 --> 00:09:59,966
+but we're working hard to extend it
+
+243
+00:10:00,166 --> 00:10:02,466
+to become what we call a world model
+
+244
+00:10:03,133 --> 00:10:05,900
+this is our ultimate vision for the Gemini app
+
+245
+00:10:06,300 --> 00:10:09,866
+to transform it into a universal AI assistant
+
+246
+00:10:10,400 --> 00:10:11,866
+this starts with the capabilities
+
+247
+00:10:11,866 --> 00:10:13,533
+we first explored last year
+
+248
+00:10:13,533 --> 00:10:14,533
+in Project Astral
+
+249
+00:10:14,933 --> 00:10:17,800
+such as video understanding screen sharing and memory
+
+250
+00:10:18,133 --> 00:10:18,966
+for example
+
+251
+00:10:18,966 --> 00:10:21,333
+we've upgraded voice output to be more natural
+
+252
+00:10:21,333 --> 00:10:22,500
+with native audio
+
+253
+00:10:22,866 --> 00:10:25,800
+we've improved memory and added computer control
+
+254
+00:10:26,133 --> 00:10:27,166
+let's take a look
+
+255
+00:10:27,666 --> 00:10:29,600
+I think I stripped this screw
+
+256
+00:10:29,733 --> 00:10:30,766
+can you go on YouTube
+
+257
+00:10:30,766 --> 00:10:32,333
+and find a video for how to fix that
+
+258
+00:10:32,800 --> 00:10:33,766
+of course
+
+259
+00:10:33,766 --> 00:10:35,166
+I'm opening YouTube now
+
+260
+00:10:38,133 --> 00:10:39,700
+this looks like a good video
+
+261
+00:10:39,766 --> 00:10:40,300
+place your run
+
+262
+00:10:40,300 --> 00:10:43,100
+it seems like I need a spare tension screw
+
+263
+00:10:43,533 --> 00:10:44,866
+can you call the nearest bike shop
+
+264
+00:10:44,866 --> 00:10:46,100
+and see what they have in stock
+
+265
+00:10:46,266 --> 00:10:47,933
+yep calling them now
+
+266
+00:10:48,100 --> 00:10:50,100
+I'll get back to you with what they have in stock
+
+267
+00:10:50,133 --> 00:10:52,066
+hey any updates on that call
+
+268
+00:10:52,533 --> 00:10:54,900
+yep I just got off with the bike shop
+
+269
+00:10:54,966 --> 00:10:57,200
+they confirm they have your tension screw in stock
+
+270
+00:10:57,800 --> 00:10:59,166
+we've built alpha proof
+
+271
+00:10:59,166 --> 00:11:01,066
+that can solve mass Olympiad problems
+
+272
+00:11:01,066 --> 00:11:02,466
+at the silver medal level
+
+273
+00:11:03,000 --> 00:11:04,166
+co scientists
+
+274
+00:11:04,166 --> 00:11:05,700
+that can collaborate with researchers
+
+275
+00:11:05,700 --> 00:11:08,366
+helping them develop and test novel hypotheses
+
+276
+00:11:08,800 --> 00:11:11,133
+and we've just released Alpha Evolve
+
+277
+00:11:11,366 --> 00:11:13,266
+which can discover new scientific knowledge
+
+278
+00:11:13,266 --> 00:11:14,166
+and speed up AI
+
+279
+00:11:14,166 --> 00:11:15,500
+training itself
+
+280
+00:11:16,966 --> 00:11:19,333
+in the life sciences we've built Amy
+
+281
+00:11:19,366 --> 00:11:20,266
+a research system
+
+282
+00:11:20,266 --> 00:11:22,933
+that could help clinicians with medical diagnoses
+
+283
+00:11:23,366 --> 00:11:25,400
+Alpha Fold 3 which can predict
+
+284
+00:11:25,400 --> 00:11:27,800
+the structure and interactions of all of life's
+
+285
+00:11:27,800 --> 00:11:30,733
+molecules and Isomorph Labs
+
+286
+00:11:30,733 --> 00:11:32,366
+which builds on our Alpha fold work
+
+287
+00:11:32,366 --> 00:11:34,266
+to revolutionize the
+
+288
+00:11:34,400 --> 00:11:36,400
+drug discovery process with AI
+
+289
+00:11:37,133 --> 00:11:39,966
+and will one day help to solve many global diseases
+
+290
+00:11:40,766 --> 00:11:42,866
+as people use AI overviews
+
+291
+00:11:42,866 --> 00:11:45,133
+we see they are happier with their results
+
+292
+00:11:45,333 --> 00:11:46,800
+and they search more often
+
+293
+00:11:47,133 --> 00:11:50,333
+for those who want an end to end AI search experience
+
+294
+00:11:50,600 --> 00:11:53,600
+we are introducing an all new AI mode
+
+295
+00:11:54,200 --> 00:11:56,733
+it's a total reimagining of search
+
+296
+00:11:57,133 --> 00:11:58,766
+with more advanced reasoning
+
+297
+00:11:59,200 --> 00:12:03,266
+you can ask AI more longer and more complex queries
+
+298
+00:12:03,333 --> 00:12:07,266
+in fact users have been asking much longer queries
+
+299
+00:12:07,266 --> 00:12:10,133
+two to three times the length of traditional searches
+
+300
+00:12:10,733 --> 00:12:13,600
+and I'm excited to share that AI Mode is coming to
+
+301
+00:12:13,600 --> 00:12:14,666
+everyone in the U
+
+302
+00:12:14,666 --> 00:12:16,400
+s starting today
+
+303
+00:12:16,800 --> 00:12:19,366
+soon AI Mode will be able to make your responses
+
+304
+00:12:19,366 --> 00:12:20,666
+even more helpful
+
+305
+00:12:21,000 --> 00:12:22,766
+with personalized suggestions
+
+306
+00:12:22,800 --> 00:12:24,500
+based on your past searches
+
+307
+00:12:25,200 --> 00:12:27,733
+you can also opt in to connect other Google apps
+
+308
+00:12:27,733 --> 00:12:28,966
+starting with Gmail
+
+309
+00:12:29,600 --> 00:12:31,466
+now this is always under your control
+
+310
+00:12:31,733 --> 00:12:33,566
+and you can choose to connect or disconnect it
+
+311
+00:12:33,566 --> 00:12:34,500
+at any time
+
+312
+00:12:35,566 --> 00:12:38,266
+personal context is coming to AI mode this summer
+
+313
+00:12:38,766 --> 00:12:40,400
+you already come to search today
+
+314
+00:12:40,400 --> 00:12:41,966
+to really unpack a topic
+
+315
+00:12:42,300 --> 00:12:44,566
+but this brings it to a much deeper level
+
+316
+00:12:45,000 --> 00:12:48,200
+so much so that we're calling this deep search
+
+317
+00:12:48,800 --> 00:12:49,333
+it reasons
+
+318
+00:12:49,333 --> 00:12:52,000
+across all those disparate pieces of information
+
+319
+00:12:52,333 --> 00:12:54,866
+to create an expert level fully cited report
+
+320
+00:12:54,866 --> 00:12:56,200
+in just minutes
+
+321
+00:12:56,400 --> 00:12:57,366
+so I'll ask
+
+322
+00:12:57,700 --> 00:13:00,466
+show the batting average and on base percentage
+
+323
+00:13:00,466 --> 00:13:01,166
+for this season
+
+324
+00:13:01,166 --> 00:13:02,000
+and last
+
+325
+00:13:02,000 --> 00:13:05,166
+for notable players who currently use a torpedo bat
+
+326
+00:13:05,400 --> 00:13:07,266
+I get this helpful response
+
+327
+00:13:07,266 --> 00:13:09,533
+including this easy to read table
+
+328
+00:13:09,733 --> 00:13:11,466
+I can follow up and ask
+
+329
+00:13:11,666 --> 00:13:14,133
+how many home runs have these players hit this season
+
+330
+00:13:14,333 --> 00:13:15,466
+search figured out that
+
+331
+00:13:15,466 --> 00:13:18,700
+the best way to present this information is a graph
+
+332
+00:13:18,733 --> 00:13:19,966
+and it created it
+
+333
+00:13:20,700 --> 00:13:23,133
+it's like having my very own sports analyst
+
+334
+00:13:23,133 --> 00:13:24,566
+right in search
+
+335
+00:13:25,366 --> 00:13:26,600
+complex analysis
+
+336
+00:13:26,600 --> 00:13:29,400
+and data visualization is coming this summer
+
+337
+00:13:29,400 --> 00:13:31,533
+for sports and financial questions
+
+338
+00:13:31,533 --> 00:13:34,100
+so I'm excited to share that
+
+339
+00:13:34,100 --> 00:13:37,466
+we're bringing Project Mariner's agentic capabilities
+
+340
+00:13:37,466 --> 00:13:38,700
+into AI mode
+
+341
+00:13:38,766 --> 00:13:39,566
+I'll say
+
+342
+00:13:39,800 --> 00:13:41,600
+find two affordable tickets
+
+343
+00:13:41,600 --> 00:13:43,300
+for this Saturday's Reds game
+
+344
+00:13:43,300 --> 00:13:44,500
+in the lower level
+
+345
+00:13:45,366 --> 00:13:46,533
+search kicks off a query
+
+346
+00:13:46,533 --> 00:13:48,933
+fan out looking across several sites
+
+347
+00:13:48,933 --> 00:13:51,766
+to analyze hundreds of potential ticket options
+
+348
+00:13:51,900 --> 00:13:54,300
+search helps me skip a bunch of steps
+
+349
+00:13:54,300 --> 00:13:56,700
+linking me right to finish checking out
+
+350
+00:13:57,533 --> 00:14:00,266
+we're taking the next big leap in multimodality
+
+351
+00:14:00,366 --> 00:14:01,966
+by bringing Project Astras
+
+352
+00:14:02,100 --> 00:14:04,933
+live capabilities into AI mode
+
+353
+00:14:04,933 --> 00:14:06,766
+we call this search live
+
+354
+00:14:07,000 --> 00:14:09,733
+it's like hopping on a video call with surge
+
+355
+00:14:09,900 --> 00:14:12,733
+we are introducing a new try on feature
+
+356
+00:14:12,966 --> 00:14:16,133
+that will help you virtually try on clothes
+
+357
+00:14:16,200 --> 00:14:17,900
+I really like this blue one
+
+358
+00:14:18,533 --> 00:14:20,966
+I click on this button to try it on
+
+359
+00:14:20,966 --> 00:14:22,933
+it asks me to upload a picture
+
+360
+00:14:23,200 --> 00:14:25,766
+which takes me to my camera roll
+
+361
+00:14:26,300 --> 00:14:27,700
+I have many pictures here
+
+362
+00:14:27,700 --> 00:14:29,400
+I'm going to pick one that is
+
+363
+00:14:29,400 --> 00:14:31,966
+full length and a clear view of me
+
+364
+00:14:32,066 --> 00:14:34,666
+we built a custom image generation
+
+365
+00:14:34,666 --> 00:14:37,200
+model specifically trained for fashion
+
+366
+00:14:38,000 --> 00:14:39,400
+wow and it's back
+
+367
+00:14:41,000 --> 00:14:43,100
+the AI model is able to show
+
+368
+00:14:43,100 --> 00:14:47,333
+how this material will fold and stretch and drape
+
+369
+00:14:47,333 --> 00:14:50,300
+on people and let's assume the price is now dropped
+
+370
+00:14:51,166 --> 00:14:52,500
+when that happens
+
+371
+00:14:53,266 --> 00:14:55,800
+I get a notification just like this
+
+372
+00:14:56,000 --> 00:14:57,366
+and if I want to buy
+
+373
+00:14:57,566 --> 00:14:58,966
+my checkout agent
+
+374
+00:14:59,100 --> 00:15:02,133
+will add the right size and color to my cart
+
+375
+00:15:02,333 --> 00:15:04,466
+I can choose to review all my payment
+
+376
+00:15:04,466 --> 00:15:05,800
+and shipping information
+
+377
+00:15:06,166 --> 00:15:08,900
+or just let the agent just buy it for me
+
+378
+00:15:09,266 --> 00:15:10,766
+with just one tap
+
+379
+00:15:11,100 --> 00:15:14,500
+search securely buys it for me with Google Pay
+
+380
+00:15:14,500 --> 00:15:17,333
+and of course all of this happened under my guidance
+
+381
+00:15:18,066 --> 00:15:18,933
+our new visual
+
+382
+00:15:18,933 --> 00:15:20,133
+shopping and agentic
+
+383
+00:15:20,133 --> 00:15:23,133
+checkout features are rolling out in the coming months
+
+384
+00:15:23,300 --> 00:15:26,800
+and you can start trying on looks in labs
+
+385
+00:15:26,900 --> 00:15:27,900
+beginning today
+
+386
+00:15:28,500 --> 00:15:30,300
+we're launching 5 things today
+
+387
+00:15:30,700 --> 00:15:33,733
+first let's talk about Gemini Live now
+
+388
+00:15:33,733 --> 00:15:34,666
+as Sundar mentioned
+
+389
+00:15:34,666 --> 00:15:37,866
+Gemini Live now includes camera and screen sharing
+
+390
+00:15:38,133 --> 00:15:39,600
+both of which are incredible
+
+391
+00:15:39,866 --> 00:15:41,900
+all of it is rolling out free of charge
+
+392
+00:15:41,900 --> 00:15:42,800
+in the Gemini app
+
+393
+00:15:42,800 --> 00:15:44,766
+on Android and iOS today
+
+394
+00:15:45,333 --> 00:15:46,400
+and in the coming weeks
+
+395
+00:15:46,400 --> 00:15:47,333
+you'll be able to connect
+
+396
+00:15:47,333 --> 00:15:49,700
+Jim and I live to some of your favorite apps
+
+397
+00:15:49,700 --> 00:15:51,200
+like calendar maps
+
+398
+00:15:51,200 --> 00:15:55,133
+keep tasks so soon you can just point your camera
+
+399
+00:15:55,166 --> 00:15:57,933
+and ask it to add an invite to your calendar
+
+400
+00:15:57,933 --> 00:15:58,900
+and it'll be done
+
+401
+00:15:59,133 --> 00:16:00,466
+starting today
+
+402
+00:16:00,466 --> 00:16:03,900
+deep research will now let you upload your own files
+
+403
+00:16:03,900 --> 00:16:05,466
+to guide the research agent
+
+404
+00:16:05,466 --> 00:16:08,766
+so let's say you have this incredible detailed report
+
+405
+00:16:08,866 --> 00:16:10,700
+how do you get all that brilliance
+
+406
+00:16:10,866 --> 00:16:14,166
+distilled down into something digestible engaging
+
+407
+00:16:14,400 --> 00:16:16,166
+this is where canvas comes in
+
+408
+00:16:16,200 --> 00:16:19,333
+canvas will now let you transform that report
+
+409
+00:16:19,333 --> 00:16:22,533
+with one tap into all kinds of new things
+
+410
+00:16:22,600 --> 00:16:26,466
+like a dynamic web page an infographic a helpful quiz
+
+411
+00:16:26,566 --> 00:16:29,466
+even a custom podcast in 45 languages
+
+412
+00:16:29,866 --> 00:16:31,566
+but if you want to go further
+
+413
+00:16:31,800 --> 00:16:35,300
+you can vibe code all sorts of amazing things in canvas
+
+414
+00:16:35,300 --> 00:16:37,300
+with as much back and forth as you want
+
+415
+00:16:37,766 --> 00:16:40,133
+we're introducing Gemini and Chrome
+
+416
+00:16:41,100 --> 00:16:43,800
+the amazing part is that you can use this and it
+
+417
+00:16:43,800 --> 00:16:45,300
+understands the context
+
+418
+00:16:45,300 --> 00:16:46,800
+of the page that you're on
+
+419
+00:16:46,900 --> 00:16:47,900
+automatically
+
+420
+00:16:48,200 --> 00:16:49,600
+so if you have a question
+
+421
+00:16:49,800 --> 00:16:50,766
+it can be answered
+
+422
+00:16:51,200 --> 00:16:54,166
+we're starting to roll out Gemini and Chrome this week
+
+423
+00:16:54,200 --> 00:16:56,533
+to Gemini subscribers in the US
+
+424
+00:16:56,533 --> 00:16:57,700
+starting today
+
+425
+00:16:58,066 --> 00:17:00,566
+we're bringing our latest and most capable
+
+426
+00:17:00,566 --> 00:17:02,300
+image generation model
+
+427
+00:17:02,500 --> 00:17:03,900
+into the Gemini app
+
+428
+00:17:04,500 --> 00:17:06,300
+it's called imagine for
+
+429
+00:17:06,533 --> 00:17:09,466
+and imagine for is so much better at text
+
+430
+00:17:09,466 --> 00:17:10,666
+and typography
+
+431
+00:17:11,100 --> 00:17:11,766
+in the past
+
+432
+00:17:11,766 --> 00:17:14,266
+you might have created something that looked good
+
+433
+00:17:14,400 --> 00:17:17,800
+but adding words didn't always work just right
+
+434
+00:17:18,066 --> 00:17:19,333
+so check this out
+
+435
+00:17:19,533 --> 00:17:22,300
+maybe I want to create a poster for a music festival
+
+436
+00:17:22,366 --> 00:17:24,733
+we'll make the chrome dino the big headliner
+
+437
+00:17:25,100 --> 00:17:28,533
+imagine 4 doesn't just get the text and spelling right
+
+438
+00:17:28,700 --> 00:17:31,300
+it's actually making creative choices
+
+439
+00:17:31,466 --> 00:17:34,000
+like using Dinosaur bones in the font
+
+440
+00:17:34,300 --> 00:17:35,933
+or figuring out the spacing
+
+441
+00:17:35,933 --> 00:17:36,766
+the font size
+
+442
+00:17:36,766 --> 00:17:39,500
+the layout that makes it look like this great poster
+
+443
+00:17:39,566 --> 00:17:42,766
+it's 10 times faster than our previous model
+
+444
+00:17:42,866 --> 00:17:45,533
+so you can iterate through many ideas quickly
+
+445
+00:17:46,500 --> 00:17:47,966
+images are incredible
+
+446
+00:17:48,266 --> 00:17:51,466
+but sometimes you need motion and sound
+
+447
+00:17:51,766 --> 00:17:52,733
+today
+
+448
+00:17:52,933 --> 00:17:56,533
+I'm excited to announce our new state of the art model
+
+449
+00:17:56,966 --> 00:17:57,766
+VO3
+
+450
+00:17:59,066 --> 00:18:02,733
+vo3 comes with native audio generation
+
+451
+00:18:03,066 --> 00:18:06,800
+that means that vo3 can generate sound effects
+
+452
+00:18:07,066 --> 00:18:09,866
+background sounds and dialogue
+
+453
+00:18:10,666 --> 00:18:13,866
+now you prompt it and your characters can speak
+
+454
+00:18:14,000 --> 00:18:14,900
+take a listen
+
+455
+00:18:20,000 --> 00:18:22,600
+they left behind a ball today
+
+456
+00:18:22,600 --> 00:18:24,733
+it bounced higher than I can jump
+
+457
+00:18:25,566 --> 00:18:27,900
+what manner of magic is that
+
+458
+00:18:34,466 --> 00:18:35,400
+pretty cool right
+
+459
+00:18:35,500 --> 00:18:38,133
+VI added not just the sounds of the forest
+
+460
+00:18:38,133 --> 00:18:39,600
+but also the dialogue
+
+461
+00:18:40,100 --> 00:18:44,100
+this ocean it's a force a wild untamed might
+
+462
+00:18:44,800 --> 00:18:48,133
+and she commands your awe with every breaking light
+
+463
+00:18:48,500 --> 00:18:49,666
+starting today
+
+464
+00:18:49,766 --> 00:18:52,066
+Gemini Live capabilities are free
+
+465
+00:18:52,200 --> 00:18:54,866
+and rolling out across Android and iOS
+
+466
+00:18:55,466 --> 00:18:57,366
+we recently launched Lyria 2
+
+467
+00:18:57,366 --> 00:18:59,366
+which can generate high fidelity music
+
+468
+00:18:59,366 --> 00:19:00,866
+and professional grade audio
+
+469
+00:19:01,333 --> 00:19:05,533
+the music is melodious with vocals in solos and choirs
+
+470
+00:19:06,200 --> 00:19:09,133
+as you hear it makes expressive and rich music
+
+471
+00:19:20,866 --> 00:19:23,500
+Lirio is available today for enterprises
+
+472
+00:19:23,500 --> 00:19:25,600
+YouTube creators and musicians
+
+473
+00:19:26,100 --> 00:19:26,900
+right now
+
+474
+00:19:26,900 --> 00:19:29,900
+it's not easy for people or organizations to detect
+
+475
+00:19:29,900 --> 00:19:31,400
+AI generated images
+
+476
+00:19:31,766 --> 00:19:34,100
+two years ago we pioneered Synth ID
+
+477
+00:19:34,166 --> 00:19:37,400
+which embeds invisible watermarks into generated media
+
+478
+00:19:38,000 --> 00:19:41,200
+our new Synth ID detector can identify if an image
+
+479
+00:19:41,200 --> 00:19:44,533
+audio track text or video has Synth ID in it
+
+480
+00:19:44,600 --> 00:19:47,466
+whether it's in the whole piece or even just a part
+
+481
+00:19:47,733 --> 00:19:50,400
+we're starting to roll this out to early testers today
+
+482
+00:19:50,900 --> 00:19:53,700
+we teamed up with visionary director Darren Aronofsky
+
+483
+00:19:53,766 --> 00:19:56,500
+and his new storytelling venture Primordial Soup
+
+484
+00:19:56,800 --> 00:19:57,333
+together
+
+485
+00:19:57,333 --> 00:20:00,000
+we are putting the world's best video generation model
+
+486
+00:20:00,000 --> 00:20:01,800
+into the hands of top filmmakers
+
+487
+00:20:01,800 --> 00:20:04,466
+the first of the partnership's three short films
+
+488
+00:20:04,466 --> 00:20:07,266
+is director Eliza Mcnitts and Cestra
+
+489
+00:20:08,000 --> 00:20:10,866
+we filmed really emotional performances
+
+490
+00:20:10,866 --> 00:20:12,933
+but then generated video
+
+491
+00:20:12,933 --> 00:20:15,400
+we could never capture otherwise
+
+492
+00:20:16,733 --> 00:20:19,966
+I want the baby to be holding the mother's finger
+
+493
+00:20:20,466 --> 00:20:21,900
+just the bliss of the two of them
+
+494
+00:20:21,900 --> 00:20:22,700
+yeah
+
+495
+00:20:24,333 --> 00:20:26,866
+for every creature that came before you
+
+496
+00:20:28,266 --> 00:20:30,400
+from every star that died
+
+497
+00:20:30,733 --> 00:20:32,566
+so that you could be
+
+498
+00:20:33,066 --> 00:20:35,800
+so when you're making a video it will use ingredients
+
+499
+00:20:35,800 --> 00:20:36,600
+you give it
+
+500
+00:20:36,933 --> 00:20:41,066
+characters scenes or styles and keep them consistent
+
+501
+00:20:41,600 --> 00:20:43,333
+or you can direct vo
+
+502
+00:20:43,333 --> 00:20:45,466
+giving it precise camera instructions
+
+503
+00:20:45,466 --> 00:20:47,700
+and have it shoot along a specific path
+
+504
+00:20:47,800 --> 00:20:50,066
+we've been building a new AI
+
+505
+00:20:50,066 --> 00:20:52,266
+filmmaking tool for creatives
+
+506
+00:20:52,666 --> 00:20:54,266
+we're calling it flow
+
+507
+00:20:54,500 --> 00:20:55,933
+and it's launching today
+
+508
+00:20:56,366 --> 00:20:58,533
+let's drop into a project I'm working on
+
+509
+00:20:58,666 --> 00:21:00,666
+our hero the grandpa
+
+510
+00:21:00,666 --> 00:21:01,966
+is building a flying car
+
+511
+00:21:01,966 --> 00:21:03,800
+with help from a feathered friend
+
+512
+00:21:04,366 --> 00:21:05,800
+these are my ingredients
+
+513
+00:21:05,933 --> 00:21:07,933
+the old man and his car
+
+514
+00:21:08,466 --> 00:21:11,566
+we make it easy to upload your own images into the tool
+
+515
+00:21:11,766 --> 00:21:14,566
+or you can generate them on the fly using imagine
+
+516
+00:21:14,566 --> 00:21:15,866
+which is built right in
+
+517
+00:21:16,333 --> 00:21:18,866
+if I want to capture the next shot of the scene
+
+518
+00:21:19,166 --> 00:21:22,333
+I can just hit the plus icon to create the next shot
+
+519
+00:21:22,900 --> 00:21:25,500
+I can describe what I want to happen next
+
+520
+00:21:25,733 --> 00:21:28,500
+like adding a 10 foot tall chicken in the backseat
+
+521
+00:21:28,866 --> 00:21:30,366
+and flow will do the rest
+
+522
+00:21:30,866 --> 00:21:34,166
+the character consistency the scene consistency
+
+523
+00:21:34,166 --> 00:21:35,333
+it just works
+
+524
+00:21:35,533 --> 00:21:37,966
+and if something isn't oh quite right
+
+525
+00:21:38,133 --> 00:21:39,066
+no problem
+
+526
+00:21:39,266 --> 00:21:42,300
+you can just go back in like any other video tool
+
+527
+00:21:42,366 --> 00:21:44,866
+and trim it up if it's not working for you
+
+528
+00:21:45,333 --> 00:21:48,400
+but flow works in the other direction as well
+
+529
+00:21:48,666 --> 00:21:51,200
+it lets you extend a clip too
+
+530
+00:21:51,700 --> 00:21:53,533
+so I can get the perfect ending
+
+531
+00:21:53,533 --> 00:21:55,100
+that I've been working towards
+
+532
+00:21:55,800 --> 00:21:57,500
+once I've got all the clips I need
+
+533
+00:21:57,500 --> 00:21:59,300
+I can download the files
+
+534
+00:21:59,400 --> 00:22:02,366
+I can bring them into my favorite editing software
+
+535
+00:22:02,366 --> 00:22:04,266
+add some music from Lyria
+
+536
+00:22:04,400 --> 00:22:08,700
+and now the old man finally has his flying car
+
+537
+00:22:27,200 --> 00:22:30,200
+so I'm excited to share that we're upgrading
+
+538
+00:22:30,400 --> 00:22:33,200
+and two AI subscription plans today
+
+539
+00:22:33,466 --> 00:22:35,566
+we will have Google AI Pro
+
+540
+00:22:35,900 --> 00:22:38,366
+and the all new Google AI Ultra
+
+541
+00:22:39,366 --> 00:22:40,800
+with the Pro plan
+
+542
+00:22:40,800 --> 00:22:42,733
+which is going to be available globally
+
+543
+00:22:42,733 --> 00:22:45,200
+you'll get a full suite of AI products
+
+544
+00:22:45,200 --> 00:22:47,900
+with higher rate limits and special features
+
+545
+00:22:47,900 --> 00:22:49,466
+compared to the free version
+
+546
+00:22:49,733 --> 00:22:51,700
+then there's the Ultra plan
+
+547
+00:22:52,100 --> 00:22:55,166
+the plan comes with the highest rate limits
+
+548
+00:22:55,333 --> 00:22:57,500
+the earliest access to new features
+
+549
+00:22:57,500 --> 00:22:59,533
+and products from across Google
+
+550
+00:22:59,933 --> 00:23:02,166
+it's available in the US today
+
+551
+00:23:02,400 --> 00:23:04,666
+and will be rolling it out globally soon
+
+552
+00:23:05,000 --> 00:23:07,333
+so if you're an Ultra subscriber
+
+553
+00:23:07,500 --> 00:23:10,800
+you'll get huge rate limits and access to that 2
+
+554
+00:23:11,166 --> 00:23:13,600
+5 pro deep think mode in the gym and eye app
+
+555
+00:23:13,600 --> 00:23:14,500
+when it's ready
+
+556
+00:23:15,100 --> 00:23:17,800
+you'll get access to flow with VO3
+
+557
+00:23:18,366 --> 00:23:19,700
+available today
+
+558
+00:23:20,200 --> 00:23:22,466
+and it also comes with YouTube Premium
+
+559
+00:23:22,466 --> 00:23:24,533
+and a massive amount of storage
+
+560
+00:23:24,700 --> 00:23:26,166
+in the coming months
+
+561
+00:23:26,466 --> 00:23:28,800
+we're bringing Gemini to your watch
+
+562
+00:23:29,333 --> 00:23:31,100
+your car's dashboard
+
+563
+00:23:31,366 --> 00:23:32,900
+even your TV
+
+564
+00:23:33,300 --> 00:23:35,900
+but what about emerging form factors
+
+565
+00:23:35,933 --> 00:23:38,200
+that could let you experience an AI
+
+566
+00:23:38,200 --> 00:23:40,600
+assistant in new ways
+
+567
+00:23:40,966 --> 00:23:44,566
+that's exactly why we're building Android XR
+
+568
+00:23:46,300 --> 00:23:48,733
+from headsets to glasses
+
+569
+00:23:48,766 --> 00:23:50,566
+and everything in between
+
+570
+00:23:51,300 --> 00:23:54,333
+we believe there's not a one size fits all for XR
+
+571
+00:23:54,500 --> 00:23:57,400
+and you'll use different devices throughout your day
+
+572
+00:23:57,966 --> 00:23:59,066
+for example
+
+573
+00:23:59,200 --> 00:24:03,333
+for watching movies playing games or getting work done
+
+574
+00:24:03,466 --> 00:24:05,733
+you'll want an immersive headset
+
+575
+00:24:06,400 --> 00:24:08,333
+but when you're on the go
+
+576
+00:24:08,333 --> 00:24:10,200
+you'll want lightweight glasses
+
+577
+00:24:10,333 --> 00:24:12,366
+that can give you timely information
+
+578
+00:24:12,400 --> 00:24:14,066
+without reaching for your phone
+
+579
+00:24:15,066 --> 00:24:18,866
+we built Android XR together as one team with Samsung
+
+580
+00:24:19,100 --> 00:24:22,100
+and optimized it for Snapdragon with Qualcomm
+
+581
+00:24:22,533 --> 00:24:25,200
+let's start with Jem and I on headsets
+
+582
+00:24:25,566 --> 00:24:28,200
+this is Samsung's Project Muhan
+
+583
+00:24:28,366 --> 00:24:31,133
+the first Android XR device
+
+584
+00:24:31,133 --> 00:24:32,333
+Muhan gives you an
+
+585
+00:24:32,333 --> 00:24:35,000
+infinite screen to explore your apps by
+
+586
+00:24:35,133 --> 00:24:36,966
+with Gemini by your side
+
+587
+00:24:37,466 --> 00:24:39,300
+with Google Maps in XR
+
+588
+00:24:39,366 --> 00:24:41,733
+you can teleport anywhere in the world
+
+589
+00:24:41,766 --> 00:24:44,733
+simply by asking Gemini to take you there
+
+590
+00:24:45,500 --> 00:24:47,866
+you can talk with your AI assistant
+
+591
+00:24:47,966 --> 00:24:49,600
+about anything you see
+
+592
+00:24:49,800 --> 00:24:51,533
+and have it pull up videos
+
+593
+00:24:51,533 --> 00:24:54,133
+and websites about what you're exploring
+
+594
+00:24:54,466 --> 00:24:57,366
+imagine watching them play in the MLB app
+
+595
+00:24:57,366 --> 00:25:00,100
+as if you were right there in the stadium
+
+596
+00:25:00,500 --> 00:25:04,333
+while chatting with Gemini about player and game stats
+
+597
+00:25:05,133 --> 00:25:06,933
+Samsung's Project Muhan
+
+598
+00:25:06,966 --> 00:25:10,166
+will be available for purchase later this year
+
+599
+00:25:10,800 --> 00:25:14,066
+let's turn our attention to glasses
+
+600
+00:25:14,066 --> 00:25:16,166
+glasses with Android XR
+
+601
+00:25:16,266 --> 00:25:19,100
+are lightweight and designed for all day wear
+
+602
+00:25:19,200 --> 00:25:21,933
+even though they're packed with technology
+
+603
+00:25:22,766 --> 00:25:24,900
+a camera and microphones
+
+604
+00:25:24,966 --> 00:25:28,700
+give Gemini the ability to see and hear the world
+
+605
+00:25:29,133 --> 00:25:31,200
+speakers let you listen to the AI
+
+606
+00:25:31,266 --> 00:25:33,533
+play music or take calls
+
+607
+00:25:33,966 --> 00:25:36,133
+and an optional in lens display
+
+608
+00:25:36,266 --> 00:25:38,933
+privately shows you helpful information
+
+609
+00:25:39,000 --> 00:25:40,333
+just when you need it
+
+610
+00:25:41,300 --> 00:25:43,200
+these glasses work with your phone
+
+611
+00:25:43,200 --> 00:25:45,100
+giving you access to your apps
+
+612
+00:25:45,100 --> 00:25:46,866
+while keeping your hands free
+
+613
+00:25:47,666 --> 00:25:51,866
+all this makes glasses a natural form factor for AI
+
+614
+00:25:51,966 --> 00:25:55,500
+let's see how they work in the most hectic
+
+615
+00:25:55,733 --> 00:25:59,466
+environment possible right now backstage at Io
+
+616
+00:26:01,766 --> 00:26:03,100
+hey everyone
+
+617
+00:26:03,333 --> 00:26:06,533
+right now you should be seeing exactly what I'm seeing
+
+618
+00:26:06,533 --> 00:26:09,100
+through the lens of my Android XR glasses
+
+619
+00:26:09,266 --> 00:26:11,366
+like my delicious coffee over here
+
+620
+00:26:11,366 --> 00:26:13,533
+and that text from Sharon that just came in
+
+621
+00:26:13,533 --> 00:26:14,566
+let's see what he said
+
+622
+00:26:16,766 --> 00:26:18,766
+alright it's definitely show time
+
+623
+00:26:18,766 --> 00:26:21,400
+so I'm gonna launch Gemini and get us going
+
+624
+00:26:22,666 --> 00:26:24,800
+send Sharon a text that I'm getting started
+
+625
+00:26:24,800 --> 00:26:27,133
+and silence my notifications please
+
+626
+00:26:29,533 --> 00:26:31,500
+okay I've sent that message to him
+
+627
+00:26:31,566 --> 00:26:35,366
+and muted all your notifications perfect
+
+628
+00:26:36,333 --> 00:26:37,100
+oh hey Mista
+
+629
+00:26:37,100 --> 00:26:37,933
+hey Deeder
+
+630
+00:26:37,933 --> 00:26:39,566
+I see the lights on on your glasses
+
+631
+00:26:39,566 --> 00:26:41,733
+so I think it's safe to say that we're live right now
+
+632
+00:26:41,733 --> 00:26:44,533
+yes we're officially on with the Io crew
+
+633
+00:26:44,633 --> 00:26:45,166
+hey everybody
+
+634
+00:26:45,166 --> 00:26:47,366
+it is pretty great to see Io from this angle
+
+635
+00:26:47,400 --> 00:26:48,366
+Nishtha you promised me
+
+636
+00:26:48,366 --> 00:26:50,600
+I could get my own pair of Android XR glasses
+
+637
+00:26:50,600 --> 00:26:52,000
+if I helped out back here
+
+638
+00:26:52,000 --> 00:26:53,600
+so what do you say
+
+639
+00:26:53,600 --> 00:26:55,566
+of course let's get coffee after this
+
+640
+00:26:55,566 --> 00:26:56,966
+and I'll bring you those glasses awesome
+
+641
+00:26:56,966 --> 00:26:57,600
+we'll see you then
+
+642
+00:26:57,600 --> 00:26:59,066
+good luck thank you
+
+643
+00:26:59,300 --> 00:27:03,066
+as you all can see there's a ton going on backstage
+
+644
+00:27:03,066 --> 00:27:04,000
+and is that
+
+645
+00:27:04,000 --> 00:27:06,866
+pro basketball player Yannis wearing our glasses
+
+646
+00:27:07,366 --> 00:27:08,300
+I love them
+
+647
+00:27:08,766 --> 00:27:11,000
+it frees up both of my hands for double high fives
+
+648
+00:27:11,900 --> 00:27:13,066
+nice
+
+649
+00:27:13,533 --> 00:27:16,000
+let me keep showing you guys what these glasses can do
+
+650
+00:27:16,466 --> 00:27:19,466
+I've been curious about this photo wall all day
+
+651
+00:27:19,600 --> 00:27:21,133
+like what
+
+652
+00:27:21,133 --> 00:27:24,300
+band is this and how are they connected to this place
+
+653
+00:27:31,000 --> 00:27:32,300
+a legend rock
+
+654
+00:27:32,933 --> 00:27:33,733
+band
+
+655
+00:27:34,566 --> 00:27:35,866
+shows at Shoreline Amphitheater
+
+656
+00:27:35,866 --> 00:27:38,733
+which are often seen as homecoming shows for the band
+
+657
+00:27:39,000 --> 00:27:42,266
+Gemini what was the name of the coffee shop on the cup
+
+658
+00:27:42,266 --> 00:27:43,266
+I had earlier
+
+659
+00:27:45,733 --> 00:27:47,466
+hmm that might have been Bloomsday
+
+660
+00:27:47,500 --> 00:27:48,533
+from what I can tell
+
+661
+00:27:48,533 --> 00:27:51,000
+it's a vibrant coffee shop on Castro Street
+
+662
+00:27:51,100 --> 00:27:52,566
+great memory
+
+663
+00:27:53,766 --> 00:27:56,066
+can you show me the photos of that cafe
+
+664
+00:27:56,066 --> 00:27:57,600
+I want to check out the vibes
+
+665
+00:28:00,133 --> 00:28:03,066
+definitely do these photos from maps help
+
+666
+00:28:03,500 --> 00:28:04,566
+oh I know that spot
+
+667
+00:28:04,566 --> 00:28:06,666
+it's a flower shop as well as a coffee shop
+
+668
+00:28:06,666 --> 00:28:07,900
+but it is downtown
+
+669
+00:28:07,900 --> 00:28:08,533
+hmm
+
+670
+00:28:08,533 --> 00:28:11,700
+okay Jem and I show me what it would take to walk here
+
+671
+00:28:14,866 --> 00:28:16,500
+getting those directions now
+
+672
+00:28:17,266 --> 00:28:18,933
+it'll take you about an hour
+
+673
+00:28:19,166 --> 00:28:20,266
+okay
+
+674
+00:28:20,933 --> 00:28:22,300
+I can get some steps in
+
+675
+00:28:22,300 --> 00:28:24,866
+and these heads up directions and a full
+
+676
+00:28:24,866 --> 00:28:27,366
+3D map should make it super easy
+
+677
+00:28:30,566 --> 00:28:32,500
+go ahead and send dither an
+
+678
+00:28:32,500 --> 00:28:36,166
+invite for that cafe and get coffee at 3 p m today
+
+679
+00:28:39,733 --> 00:28:42,466
+I'll send out that invite now enjoy the coffee
+
+680
+00:28:43,200 --> 00:28:47,000
+as you saw Jem and I help Nisha search what she sees
+
+681
+00:28:47,066 --> 00:28:50,466
+remember details like the coffee coffee cup
+
+682
+00:28:50,733 --> 00:28:53,966
+book an event even navigate all without
+
+683
+00:28:53,966 --> 00:28:56,500
+taking her phone out of her pocket
+
+684
+00:28:56,966 --> 00:28:59,300
+I'm even wearing the glasses right now too
+
+685
+00:28:59,566 --> 00:29:01,900
+they're my they're my personal teleprompter
+
+686
+00:29:02,066 --> 00:29:04,666
+and I have prescription lenses so I can see you all
+
+687
+00:29:05,466 --> 00:29:08,100
+okay Nisha this is a big moment for glasses
+
+688
+00:29:08,100 --> 00:29:09,000
+let's capture it
+
+689
+00:29:09,166 --> 00:29:11,733
+yes get ready for a quick photo everyone
+
+690
+00:29:11,733 --> 00:29:13,966
+and let's bring out our star
+
+691
+00:29:15,866 --> 00:29:17,100
+there comes FINTA
+
+692
+00:29:19,866 --> 00:29:21,066
+alright dumb and I
+
+693
+00:29:22,400 --> 00:29:23,966
+take a photo for me
+
+694
+00:29:32,900 --> 00:29:35,000
+all right dumb and I take a photo for me
+
+695
+00:29:35,000 --> 00:29:36,600
+and add it to my favorites
+
+696
+00:29:44,133 --> 00:29:45,733
+that looks amazing
+
+697
+00:29:46,466 --> 00:29:49,066
+Cindy showed what's possible with live
+
+698
+00:29:49,066 --> 00:29:50,700
+translation earlier
+
+699
+00:29:51,000 --> 00:29:53,800
+let's see what that's like on glasses
+
+700
+00:29:54,200 --> 00:29:56,400
+this is a very risky demo
+
+701
+00:29:56,400 --> 00:29:57,733
+but we're going to give it a shot
+
+702
+00:29:59,666 --> 00:30:00,666
+Nishter and I
+
+703
+00:30:00,666 --> 00:30:03,366
+are gonna speak to each other in our mother tongues
+
+704
+00:30:03,600 --> 00:30:05,166
+Nishter is gonna speak Hindi
+
+705
+00:30:05,466 --> 00:30:08,266
+I'm gonna speak Farsi very poorly
+
+706
+00:30:08,600 --> 00:30:10,066
+and you'll see the feed
+
+707
+00:30:10,133 --> 00:30:12,466
+from both of our glasses back here
+
+708
+00:30:12,766 --> 00:30:14,566
+and so you can all follow along
+
+709
+00:30:14,900 --> 00:30:17,900
+we'll show an English translation in real time
+
+710
+00:30:18,366 --> 00:30:20,733
+okay let's give it a shot
+
+711
+00:30:21,266 --> 00:30:22,466
+fingers crossed
+
+712
+00:30:23,566 --> 00:30:24,900
+Bessyard hoop
+
+713
+00:30:25,466 --> 00:30:26,800
+Halamituni Bebeni
+
+714
+00:30:26,933 --> 00:30:30,966
+had fireman Tair Jomemishan has Farci Beangillyci
+
+715
+00:30:36,100 --> 00:30:37,400
+ha bilkul
+
+716
+00:30:37,900 --> 00:30:40,266
+AB miri puri duniya kul jati Hai
+
+717
+00:30:40,300 --> 00:30:42,800
+or masub kuch samajh sakti Hai asani se
+
+718
+00:30:45,800 --> 00:30:49,733
+Allahumma inni Baha'ma 'adama I donya sawat bukoni
+
+719
+00:30:50,400 --> 00:30:53,933
+baba Ram mama na baba baba baba baba baba baba baba
+
+720
+00:31:01,300 --> 00:31:03,800
+let's see we said it's a risky demo
+
+721
+00:31:06,166 --> 00:31:06,966
+let's
+
+722
+00:31:08,500 --> 00:31:10,900
+we're taking our partnership with Samsung
+
+723
+00:31:10,900 --> 00:31:12,300
+to the next level
+
+724
+00:31:12,366 --> 00:31:15,933
+by extending Android XR beyond headsets
+
+725
+00:31:15,933 --> 00:31:18,066
+to glasses our glasses
+
+726
+00:31:18,066 --> 00:31:21,400
+prototypes are already being used by trusted testers
+
+727
+00:31:21,500 --> 00:31:24,700
+and you'll be able to start developing for glasses
+
+728
+00:31:24,700 --> 00:31:25,966
+later this year
+
+729
+00:31:26,266 --> 00:31:29,266
+Gentle Monster and Warby Parker
+
+730
+00:31:29,366 --> 00:31:31,000
+will be the first eyewear
+
+731
+00:31:31,000 --> 00:31:33,966
+partners to build glasses with Android XR
+
+732
+00:31:34,600 --> 00:31:37,066
+Today you've heard a lot about eloscores
+
+733
+00:31:37,366 --> 00:31:40,166
+benchmarks and state of the art performance
+
+734
+00:31:40,600 --> 00:31:42,133
+but I know there's one metric
+
+735
+00:31:42,133 --> 00:31:43,666
+you've all been waiting for
+
+736
+00:31:43,933 --> 00:31:45,566
+our AI counter
+
+737
+00:31:46,100 --> 00:31:48,933
+so let's take a look at one last leaderboard
+
+738
+00:31:50,566 --> 00:31:54,366
+looks like I guess we have a new entrant
+
+739
+00:31:54,900 --> 00:31:58,000
+Gemini takes the lead coming in at
+
+740
+00:31:58,666 --> 00:31:59,500
+95
+
+741
+00:32:00,200 --> 00:32:01,500
+on a more serious note
+
+742
+00:32:01,500 --> 00:32:03,666
+here's everything we've announced today
+
+743
+00:32:04,000 --> 00:32:07,100
+from new launches and product expansions
+
+744
+00:32:07,366 --> 00:32:09,200
+to glimmers of what's to come
+
+745
+00:32:09,800 --> 00:32:13,700
+the opportunity with AI is truly as big as it gets
+
+746
+00:32:14,133 --> 00:32:16,600
+and I can't wait to see what amazing things
+
+747
+00:32:16,600 --> 00:32:18,766
+we'll build together next thank you
+
+748
+00:00:00,333 --> 00:00:02,000
+大家好早上好
+
+749
+00:00:02,200 --> 00:00:05,333
+我知道今天是双子座季节的开始
+
+750
+00:00:05,766 --> 00:00:07,766
+我不知道有什么大不了的
+
+751
+00:00:07,766 --> 00:00:10,400
+在Google，每天都是双子座的季节
+
+752
+00:00:10,966 --> 00:00:13,466
+我们的第7代TPU铁木
+
+753
+00:00:13,500 --> 00:00:14,300
+它交付
+
+754
+00:00:14,300 --> 00:00:16,933
+性能是上一代的10倍
+
+755
+00:00:17,200 --> 00:00:19,733
+并打包了令人难以置信的42个。
+
+756
+00:00:19,966 --> 00:00:22,800
+每个pod额外5次计算失败
+
+757
+00:00:22,800 --> 00:00:25,000
+它正在走向谷歌云客户
+
+758
+00:00:25,000 --> 00:00:26,066
+今年晚些时候
+
+759
+00:00:26,500 --> 00:00:28,200
+介绍Google Beam
+
+760
+00:00:28,500 --> 00:00:32,533
+一个新的人工智能第一视频通信平台
+
+761
+00:00:32,733 --> 00:00:34,600
+六个摄像头的阵列
+
+762
+00:00:34,766 --> 00:00:36,733
+从不同的角度捕捉你
+
+763
+00:00:37,100 --> 00:00:41,200
+使用AI，我们可以将这些视频流合并在一起
+
+764
+00:00:41,200 --> 00:00:43,900
+并在3D光场显示上渲染您
+
+765
+00:00:44,466 --> 00:00:47,566
+几乎完美的头部跟踪到毫米
+
+766
+00:00:47,733 --> 00:00:49,600
+每秒60帧
+
+767
+00:00:49,966 --> 00:00:51,333
+全部实时
+
+768
+00:00:51,766 --> 00:00:55,900
+结果更加自然和身临其境
+
+769
+00:00:56,133 --> 00:00:57,733
+会话体验
+
+770
+00:00:57,900 --> 00:01:01,566
+与惠普合作推出首款Google Beam设备
+
+771
+00:01:01,733 --> 00:01:05,733
+将于今年晚些时候提供给早期客户
+
+772
+00:01:06,066 --> 00:01:09,100
+我们从Starline引进了基础技术
+
+773
+00:01:09,100 --> 00:01:10,000
+进入谷歌会议
+
+774
+00:01:10,566 --> 00:01:13,333
+包括实时语音翻译
+
+775
+00:01:13,333 --> 00:01:15,466
+帮助打破语言障碍
+
+776
+00:01:15,666 --> 00:01:17,733
+让我打开语音翻译
+
+777
+00:01:20,100 --> 00:01:22,300
+很高兴终于跟你说话了
+
+778
+00:01:22,333 --> 00:01:24,400
+很高兴和你细说
+
+779
+00:01:24,700 --> 00:01:25,700
+我等不及要去
+
+780
+00:01:25,900 --> 00:01:26,700
+家
+
+781
+00:01:29,600 --> 00:01:30,733
+你会玩得很开心的
+
+782
+00:01:30,733 --> 00:01:33,366
+我觉得你会喜欢参观这个城市的
+
+783
+00:01:33,500 --> 00:01:35,500
+房子在一个非常好的社区
+
+784
+00:01:35,500 --> 00:01:37,533
+俯瞰群山
+
+785
+00:01:37,533 --> 00:01:38,333
+而今天
+
+786
+00:01:38,333 --> 00:01:41,333
+我们正在介绍这种实时语音翻译
+
+787
+00:01:41,333 --> 00:01:42,666
+直接在Google会议中
+
+788
+00:01:43,400 --> 00:01:46,066
+现在提供英语和西班牙语翻译
+
+789
+00:01:46,066 --> 00:01:47,566
+订户
+
+790
+00:01:47,800 --> 00:01:49,500
+使用更多语言
+
+791
+00:01:49,600 --> 00:01:51,766
+在接下来的几周内推出
+
+792
+00:01:51,766 --> 00:01:52,466
+和实时
+
+793
+00:01:52,466 --> 00:01:54,733
+翻译将进入企业
+
+794
+00:01:54,733 --> 00:01:55,666
+今年晚些时候
+
+795
+00:01:55,766 --> 00:01:58,666
+我们今天开始把它带到我们的产品中
+
+796
+00:01:58,666 --> 00:02:00,600
+杰姆和我住在阿斯特拉斯计划
+
+797
+00:02:00,600 --> 00:02:03,266
+相机和屏幕共享功能
+
+798
+00:02:03,400 --> 00:02:05,800
+所以你可以谈论你看到的任何东西
+
+799
+00:02:05,966 --> 00:02:07,600
+那辆敞篷车真不错
+
+800
+00:02:08,200 --> 00:02:09,500
+我想你可能搞错了
+
+801
+00:02:09,500 --> 00:02:11,666
+一辆敞篷车的垃圾车
+
+802
+00:02:11,733 --> 00:02:13,566
+还有什么我能帮你的吗？
+
+803
+00:02:13,566 --> 00:02:16,000
+这栋小楼怎么会在我家附近
+
+804
+00:02:16,000 --> 00:02:18,666
+这是路灯不是建筑物
+
+805
+00:02:18,900 --> 00:02:21,866
+为什么无论我走到哪里，这个人都跟着我？
+
+806
+00:02:22,566 --> 00:02:23,966
+没人跟踪你
+
+807
+00:02:23,966 --> 00:02:25,500
+那只是你的影子
+
+808
+00:02:25,966 --> 00:02:28,566
+Gemma很擅长告诉你你错了
+
+809
+00:02:28,900 --> 00:02:32,966
+我们正在向Android和iOS上的每个人推出这个
+
+810
+00:02:32,966 --> 00:02:34,166
+从今天开始
+
+811
+00:02:34,700 --> 00:02:37,966
+我们还有一个水手计划的研究原型
+
+812
+00:02:38,500 --> 00:02:41,166
+它是一个可以与网络交互的代理
+
+813
+00:02:41,166 --> 00:02:42,366
+把事情做好
+
+814
+00:02:42,866 --> 00:02:46,100
+首先我们引入多任务处理
+
+815
+00:02:46,266 --> 00:02:49,900
+它现在可以同时监督多达10项任务
+
+816
+00:02:49,900 --> 00:02:52,933
+其次，它使用了一个叫做“教授和重复”的功能
+
+817
+00:02:53,400 --> 00:02:56,200
+这是您可以向其展示一次任务的地方
+
+818
+00:02:56,400 --> 00:02:59,866
+它学习未来类似任务的计划
+
+819
+00:03:00,366 --> 00:03:02,000
+我们将带来水手计划
+
+820
+00:03:02,000 --> 00:03:03,966
+计算机使用能力
+
+821
+00:03:04,066 --> 00:03:06,700
+通过双子座API给开发人员
+
+822
+00:03:06,966 --> 00:03:09,900
+它将在今年夏天更广泛地上市
+
+823
+00:03:10,100 --> 00:03:12,533
+然后是模型上下文协议
+
+824
+00:03:12,533 --> 00:03:13,966
+由人类引入
+
+825
+00:03:13,966 --> 00:03:16,566
+因此代理可以访问其他服务
+
+826
+00:03:16,933 --> 00:03:19,733
+今天我们激动地宣布我们的双子座
+
+827
+00:03:19,733 --> 00:03:23,600
+SDK现在与MCP工具兼容
+
+828
+00:03:24,333 --> 00:03:26,300
+我们开始带代理
+
+829
+00:03:26,300 --> 00:03:28,100
+Chrome能力
+
+830
+00:03:28,166 --> 00:03:30,133
+搜索和双子座应用程序
+
+831
+00:03:30,700 --> 00:03:32,666
+让我告诉你我们对什么感到兴奋
+
+832
+00:03:32,666 --> 00:03:33,566
+在双子座应用程序中
+
+833
+00:03:33,733 --> 00:03:35,466
+我们称之为特工模式
+
+834
+00:03:36,100 --> 00:03:36,933
+通常
+
+835
+00:03:36,933 --> 00:03:39,266
+你得花很多时间浏览
+
+836
+00:03:39,266 --> 00:03:40,566
+没完没了的列表
+
+837
+00:03:40,966 --> 00:03:42,166
+使用代理模式
+
+838
+00:03:42,166 --> 00:03:45,300
+双子座应用程序在幕后工作
+
+839
+00:03:45,700 --> 00:03:48,266
+它从Zillow等网站查找列表
+
+840
+00:03:48,266 --> 00:03:49,766
+符合您的标准
+
+841
+00:03:50,200 --> 00:03:51,900
+并使用Project Miner
+
+842
+00:03:51,900 --> 00:03:54,933
+当需要调整非常具体的过滤器时
+
+843
+00:03:55,333 --> 00:03:57,333
+如果你想去看看公寓
+
+844
+00:03:57,333 --> 00:03:59,000
+双子座使用MCP
+
+845
+00:03:59,300 --> 00:04:01,000
+访问列表
+
+846
+00:04:01,200 --> 00:04:03,500
+甚至代表您安排一次旅行
+
+847
+00:04:03,733 --> 00:04:06,100
+代理模式的实验版
+
+848
+00:04:06,100 --> 00:04:07,000
+在双子座应用程序中
+
+849
+00:04:07,000 --> 00:04:08,400
+很快就会到。
+
+850
+00:04:08,700 --> 00:04:09,866
+致订户
+
+851
+00:04:10,000 --> 00:04:12,566
+个性化将非常强大
+
+852
+00:04:13,200 --> 00:04:15,133
+我们正在努力实现这一目标
+
+853
+00:04:15,133 --> 00:04:16,366
+用我们称之为
+
+854
+00:04:16,366 --> 00:04:17,733
+个人背景
+
+855
+00:04:18,466 --> 00:04:19,733
+经您允许
+
+856
+00:04:19,766 --> 00:04:22,166
+双子座模型可以使用相关的上下文
+
+857
+00:04:22,166 --> 00:04:23,966
+在您的Google Apps中
+
+858
+00:04:24,266 --> 00:04:25,666
+以一种私人的方式
+
+859
+00:04:25,666 --> 00:04:28,266
+透明且完全在您的控制之下
+
+860
+00:04:28,400 --> 00:04:30,166
+您可能熟悉我们的AI
+
+861
+00:04:30,166 --> 00:04:32,000
+动力智能回复功能
+
+862
+00:04:32,000 --> 00:04:35,733
+现在想象一下如果这些回答听起来像你
+
+863
+00:04:36,400 --> 00:04:39,900
+这就是个性化智能回复背后的想法
+
+864
+00:04:40,200 --> 00:04:42,933
+比方说我的朋友写信给我寻求建议
+
+865
+00:04:42,933 --> 00:04:44,300
+现在如果我说实话
+
+866
+00:04:44,300 --> 00:04:47,300
+我可能会回复一些简短且无益的东西
+
+867
+00:04:47,500 --> 00:04:48,566
+抱歉Felix
+
+868
+00:04:49,466 --> 00:04:51,466
+但有个性化的智能回复
+
+869
+00:04:51,466 --> 00:04:52,800
+我可以做个更好的朋友
+
+870
+00:04:53,366 --> 00:04:55,600
+那是因为宝石和我
+
+871
+00:04:55,966 --> 00:04:58,133
+可以为我做几乎所有的工作
+
+872
+00:04:58,700 --> 00:05:00,700
+查我的笔记然后开车
+
+873
+00:05:00,933 --> 00:05:03,533
+扫描过去的电子邮件以获取预订
+
+874
+00:05:03,733 --> 00:05:06,333
+并在Google Docs中找到我的行程
+
+875
+00:05:06,566 --> 00:05:10,200
+双子座符合我过去电子邮件中的典型问候
+
+876
+00:05:10,500 --> 00:05:13,266
+抓住我的语气风格
+
+877
+00:05:13,700 --> 00:05:15,500
+和最喜欢的单词选择
+
+878
+00:05:15,600 --> 00:05:18,400
+然后它会自动生成回复
+
+879
+00:05:18,900 --> 00:05:21,666
+这将在今年夏天的Gmail中提供
+
+880
+00:05:21,666 --> 00:05:22,966
+订户
+
+881
+00:05:23,166 --> 00:05:26,600
+双子座闪电侠是我们最有效的主力机型
+
+882
+00:05:26,933 --> 00:05:28,700
+今天我很高兴地宣布
+
+883
+00:05:28,700 --> 00:05:30,700
+我们正在发布2的更新版本
+
+884
+00:05:30,733 --> 00:05:31,666
+5闪光灯
+
+885
+00:05:31,800 --> 00:05:34,900
+新的闪光灯在几乎所有方面都更好
+
+886
+00:05:35,000 --> 00:05:37,600
+改进推理的关键基准
+
+887
+00:05:37,666 --> 00:05:39,600
+代码和长上下文
+
+888
+00:05:39,900 --> 00:05:41,166
+我很兴奋地说
+
+889
+00:05:41,166 --> 00:05:44,100
+该闪光灯将在6月初普遍上市
+
+890
+00:05:44,100 --> 00:05:45,600
+不久之后使用Pro
+
+891
+00:05:45,733 --> 00:05:47,800
+但你现在可以去试试预览了
+
+892
+00:05:48,000 --> 00:05:51,400
+在AI Studio Vertex AI和双子座应用程序中
+
+893
+00:05:51,700 --> 00:05:55,766
+我们还推出了文本到语音的新预览
+
+894
+00:05:56,300 --> 00:05:58,600
+这些现在是同类产品中的第一个
+
+895
+00:05:58,600 --> 00:06:01,566
+多扬声器支持两种声音
+
+896
+00:06:01,733 --> 00:06:04,533
+基于原生音频输出
+
+897
+00:06:05,000 --> 00:06:07,666
+这意味着模型可以进行更多对话
+
+898
+00:06:07,666 --> 00:06:09,333
+表达方式
+
+899
+00:06:09,400 --> 00:06:10,800
+它可以捕捉到真正微妙的
+
+900
+00:06:10,800 --> 00:06:12,566
+我们说话方式的细微差别
+
+901
+00:06:14,300 --> 00:06:18,133
+它甚至可以无缝切换到这样的耳语
+
+902
+00:06:18,600 --> 00:06:20,000
+这在过去工作
+
+903
+00:06:20,266 --> 00:06:21,466
+24种语言
+
+904
+00:06:21,500 --> 00:06:24,900
+它甚至可以很容易地在语言之间移动
+
+905
+00:06:25,100 --> 00:06:29,166
+所以模特可以开始说英语，但是
+
+906
+00:06:30,766 --> 00:06:33,666
+印地语可以切换到任何其他语言
+
+907
+00:06:35,466 --> 00:06:38,766
+用同样的声音切换回来
+
+908
+00:06:39,466 --> 00:06:41,700
+您可以使用此文本到语音功能
+
+909
+00:06:41,700 --> 00:06:43,133
+从今天开始
+
+910
+00:06:43,133 --> 00:06:44,566
+在双子座API中
+
+911
+00:06:45,066 --> 00:06:46,133
+第二
+
+912
+00:06:46,600 --> 00:06:48,900
+我们加强了对安全威胁的保护
+
+913
+00:06:48,900 --> 00:06:51,000
+就像间接提示注射一样
+
+914
+00:06:51,000 --> 00:06:55,266
+双子座25号是目前为止最安全的型号
+
+915
+00:06:55,800 --> 00:06:57,166
+在两个中
+
+916
+00:06:57,400 --> 00:06:58,766
+5 Pro和flash
+
+917
+00:06:58,800 --> 00:07:00,766
+包括思想总结
+
+918
+00:07:00,766 --> 00:07:03,533
+通过双子座API和顶点AI
+
+919
+00:07:03,766 --> 00:07:06,966
+思维总结采用模型的原始思维
+
+920
+00:07:07,000 --> 00:07:10,400
+并将它们组织成带有标题的清晰格式
+
+921
+00:07:10,400 --> 00:07:11,566
+关键细节
+
+922
+00:07:11,566 --> 00:07:14,500
+以及有关模型操作的信息，例如工具调用
+
+923
+00:07:14,700 --> 00:07:16,533
+最后我们推出了2个
+
+924
+00:07:16,566 --> 00:07:18,600
+5闪存与思考预算
+
+925
+00:07:18,700 --> 00:07:20,466
+让您控制成本
+
+926
+00:07:20,466 --> 00:07:22,300
+延迟与质量
+
+927
+00:07:22,366 --> 00:07:25,733
+所以我们将把思考预算带到2 5 Pro
+
+928
+00:07:25,966 --> 00:07:27,900
+将在未来几周推出
+
+929
+00:07:27,900 --> 00:07:29,933
+连同我们普遍可用的型号
+
+930
+00:07:30,533 --> 00:07:32,700
+你以前见过这样的东西，对吧？
+
+931
+00:07:32,933 --> 00:07:35,800
+有人带着绝妙的想法来找你
+
+932
+00:07:35,900 --> 00:07:37,100
+在餐巾上划伤
+
+933
+00:07:37,100 --> 00:07:38,666
+我准备去
+
+934
+00:07:38,966 --> 00:07:41,600
+添加我刚刚向您展示的球体图像
+
+935
+00:07:42,066 --> 00:07:44,800
+我要添加一个提示，询问2
+
+936
+00:07:45,066 --> 00:07:47,600
+5 Pro根据图片更新我的代码
+
+937
+00:07:47,733 --> 00:07:50,400
+我要跳转到我运行的另一个选项卡
+
+938
+00:07:50,400 --> 00:07:51,366
+就在这个主题演讲之前
+
+939
+00:07:51,366 --> 00:07:52,333
+以同样的提示
+
+940
+00:07:53,000 --> 00:07:55,966
+这是双子座产生的
+
+941
+00:07:56,400 --> 00:07:57,200
+哇
+
+942
+00:07:57,600 --> 00:07:59,966
+我们从那个草图
+
+943
+00:08:00,366 --> 00:08:03,966
+直接代码更新我的多个文件
+
+944
+00:08:04,333 --> 00:08:07,333
+实际上你可以看到它思考了37秒
+
+945
+00:08:07,400 --> 00:08:09,600
+你可以看到它所经历的变化
+
+946
+00:08:09,966 --> 00:08:11,500
+然后它更新的文件
+
+947
+00:08:11,800 --> 00:08:13,800
+但是如果它说话了呢？
+
+948
+00:08:14,933 --> 00:08:17,366
+这就是双子座的原生音频的来源
+
+949
+00:08:18,066 --> 00:08:19,466
+那是只企鹅
+
+950
+00:08:19,500 --> 00:08:21,733
+它的鳞片是由角蛋白制成的
+
+951
+00:08:21,766 --> 00:08:23,400
+就像你的指甲一样
+
+952
+00:08:23,766 --> 00:08:27,500
+2 5 Pro可在您最喜欢的IDE平台上使用
+
+953
+00:08:27,933 --> 00:08:31,733
+在Android Studio等Google产品中
+
+954
+00:08:32,000 --> 00:08:33,333
+Firebase Studio
+
+955
+00:08:33,600 --> 00:08:35,066
+双子座密码协助
+
+956
+00:08:35,133 --> 00:08:38,533
+和我们的同步编码代理Jules
+
+957
+00:08:39,100 --> 00:08:41,866
+Jules可以在大型代码库中处理复杂的任务
+
+958
+00:08:41,866 --> 00:08:43,500
+过去需要几个小时
+
+959
+00:08:43,533 --> 00:08:45,466
+比如更新旧版本的Node
+
+960
+00:08:45,466 --> 00:08:46,266
+JS
+
+961
+00:08:46,666 --> 00:08:51,366
+它可以在几分钟内计划修改文件等步骤
+
+962
+00:08:51,866 --> 00:08:53,933
+所以今天我很高兴地宣布
+
+963
+00:08:53,933 --> 00:08:55,866
+朱尔斯现在处于公测阶段
+
+964
+00:08:55,866 --> 00:08:58,666
+所以任何人都可以在Jules Google注册
+
+965
+00:08:59,066 --> 00:09:00,466
+双子座扩散
+
+966
+00:09:00,466 --> 00:09:01,600
+是最先进的
+
+967
+00:09:01,600 --> 00:09:03,766
+实验文本扩散模型
+
+968
+00:09:04,100 --> 00:09:06,900
+我们今天发布的双子座扩散版本
+
+969
+00:09:07,133 --> 00:09:10,333
+生成速度甚至比2快5倍
+
+970
+00:09:10,500 --> 00:09:13,366
+0手电筒是我们迄今为止最快的型号
+
+971
+00:09:13,566 --> 00:09:15,800
+同时匹配其编码性能
+
+972
+00:09:16,133 --> 00:09:19,066
+所以准备好这个数学例子
+
+973
+00:09:19,266 --> 00:09:20,066
+走
+
+974
+00:09:21,733 --> 00:09:23,300
+如果你眨眼，你就错过了。
+
+975
+00:09:23,533 --> 00:09:24,966
+今天我们做了2个。
+
+976
+00:09:25,266 --> 00:09:28,666
+5 pro引入新模式更好
+
+977
+00:09:28,666 --> 00:09:30,400
+我们打电话给深度思考
+
+978
+00:09:31,366 --> 00:09:35,000
+它在美国莫言2025上获得了令人印象深刻的分数
+
+979
+00:09:35,100 --> 00:09:37,800
+目前最难的数学基准之一
+
+980
+00:09:38,333 --> 00:09:40,566
+我们需要一点额外的时间来指挥
+
+981
+00:09:40,566 --> 00:09:42,700
+更多前沿安全评估
+
+982
+00:09:42,700 --> 00:09:45,000
+并从安全专家那里获得进一步的意见
+
+983
+00:09:45,566 --> 00:09:46,500
+作为其中的一部分
+
+984
+00:09:46,500 --> 00:09:48,966
+我们将把它提供给值得信赖的测试人员
+
+985
+00:09:49,066 --> 00:09:50,533
+通过双子座API
+
+986
+00:09:50,766 --> 00:09:51,766
+获得他们的反馈
+
+987
+00:09:51,766 --> 00:09:53,500
+在广泛使用之前
+
+988
+00:09:53,866 --> 00:09:57,600
+双子座已经是最好的多模态基础模型
+
+989
+00:09:58,066 --> 00:09:59,966
+但我们正在努力扩展它
+
+990
+00:10:00,166 --> 00:10:02,466
+成为我们所说的世界典范
+
+991
+00:10:03,133 --> 00:10:05,900
+这是我们对双子座应用程序的最终愿景
+
+992
+00:10:06,300 --> 00:10:09,866
+将其转变为通用AI助手
+
+993
+00:10:10,400 --> 00:10:11,866
+这从能力开始
+
+994
+00:10:11,866 --> 00:10:13,533
+我们去年第一次探索
+
+995
+00:10:13,533 --> 00:10:14,533
+星际计划
+
+996
+00:10:14,933 --> 00:10:17,800
+比如视频理解屏幕共享和内存
+
+997
+00:10:18,133 --> 00:10:18,966
+例如
+
+998
+00:10:18,966 --> 00:10:21,333
+我们将语音输出升级为更自然
+
+999
+00:10:21,333 --> 00:10:22,500
+带原生音频
+
+1000
+00:10:22,866 --> 00:10:25,800
+我们改善了记忆增加了电脑控制
+
+1001
+00:10:26,133 --> 00:10:27,166
+我们一起来看看吧
+
+1002
+00:10:27,666 --> 00:10:29,600
+我想我把这个螺丝拆了
+
+1003
+00:10:29,733 --> 00:10:30,766
+你能上YouTube吗？
+
+1004
+00:10:30,766 --> 00:10:32,333
+并找到一个如何解决这个问题的视频
+
+1005
+00:10:32,800 --> 00:10:33,766
+当然
+
+1006
+00:10:33,766 --> 00:10:35,166
+我现在打开YouTube
+
+1007
+00:10:38,133 --> 00:10:39,700
+这看起来是个好视频
+
+1008
+00:10:39,766 --> 00:10:40,300
+跑动
+
+1009
+00:10:40,300 --> 00:10:43,100
+看来我需要一个备用的张力螺丝。
+
+1010
+00:10:43,533 --> 00:10:44,866
+你能打电话给最近的自行车店吗？
+
+1011
+00:10:44,866 --> 00:10:46,100
+看看他们有什么库存。
+
+1012
+00:10:46,266 --> 00:10:47,933
+是的，现在就打电话给他们。
+
+1013
+00:10:48,100 --> 00:10:50,100
+我会告诉你他们有什么库存。
+
+1014
+00:10:50,133 --> 00:10:52,066
+嘿，那个电话有什么进展吗？
+
+1015
+00:10:52,533 --> 00:10:54,900
+是的，我刚从自行车店下车。
+
+1016
+00:10:54,966 --> 00:10:57,200
+他们确认他们有你的张力螺丝库存。
+
+1017
+00:10:57,800 --> 00:10:59,166
+我们已经建立了alpha证明
+
+1018
+00:10:59,166 --> 00:11:01,066
+可以解决大规模奥林匹克问题
+
+1019
+00:11:01,066 --> 00:11:02,466
+银牌级别
+
+1020
+00:11:03,000 --> 00:11:04,166
+联合科学家
+
+1021
+00:11:04,166 --> 00:11:05,700
+可以与研究人员合作
+
+1022
+00:11:05,700 --> 00:11:08,366
+帮助他们发展和测试新的假设
+
+1023
+00:11:08,800 --> 00:11:11,133
+我们刚刚发布了Alpha Evolve
+
+1024
+00:11:11,366 --> 00:11:13,266
+可以发现新的科学知识
+
+1025
+00:11:13,266 --> 00:11:14,166
+并加速人工智能
+
+1026
+00:11:14,166 --> 00:11:15,500
+训练本身
+
+1027
+00:11:16,966 --> 00:11:19,333
+在生命科学领域我们创造了艾米
+
+1028
+00:11:19,366 --> 00:11:20,266
+研究系统
+
+1029
+00:11:20,266 --> 00:11:22,933
+可以帮助临床医生进行医学诊断
+
+1030
+00:11:23,366 --> 00:11:25,400
+Alpha Fold 3可以预测
+
+1031
+00:11:25,400 --> 00:11:27,800
+所有生命的结构和相互作用
+
+1032
+00:11:27,800 --> 00:11:30,733
+分子和同构实验室
+
+1033
+00:11:30,733 --> 00:11:32,366
+它建立在Alpha折叠的基础上
+
+1034
+00:11:32,366 --> 00:11:34,266
+彻底改变
+
+1035
+00:11:34,400 --> 00:11:36,400
+人工智能的药物发现过程
+
+1036
+00:11:37,133 --> 00:11:39,966
+有朝一日将帮助解决许多全球性疾病
+
+1037
+00:11:40,766 --> 00:11:42,866
+当人们使用AI概述时
+
+1038
+00:11:42,866 --> 00:11:45,133
+我们看到他们对自己的结果更满意
+
+1039
+00:11:45,333 --> 00:11:46,800
+他们更频繁地搜索
+
+1040
+00:11:47,133 --> 00:11:50,333
+对于那些想要端到端AI搜索体验的人
+
+1041
+00:11:50,600 --> 00:11:53,600
+我们正在引入一种全新的人工智能模式
+
+1042
+00:11:54,200 --> 00:11:56,733
+这是对搜索的彻底重新构想
+
+1043
+00:11:57,133 --> 00:11:58,766
+用更高级的推理
+
+1044
+00:11:59,200 --> 00:12:03,266
+您可以向AI询问更长、更复杂的查询
+
+1045
+00:12:03,333 --> 00:12:07,266
+事实上，用户一直在问更长的问题
+
+1046
+00:12:07,266 --> 00:12:10,133
+是传统搜索长度的两到三倍
+
+1047
+00:12:10,733 --> 00:12:13,600
+我很高兴分享人工智能模式即将到来
+
+1048
+00:12:13,600 --> 00:12:14,666
+美国的每个人
+
+1049
+00:12:14,666 --> 00:12:16,400
+s从今天开始
+
+1050
+00:12:16,800 --> 00:12:19,366
+很快AI Mode将能够做出您的回应
+
+1051
+00:12:19,366 --> 00:12:20,666
+更有帮助
+
+1052
+00:12:21,000 --> 00:12:22,766
+个性化建议
+
+1053
+00:12:22,800 --> 00:12:24,500
+根据您过去的搜索
+
+1054
+00:12:25,200 --> 00:12:27,733
+您还可以选择连接其他Google应用
+
+1055
+00:12:27,733 --> 00:12:28,966
+从Gmail开始
+
+1056
+00:12:29,600 --> 00:12:31,466
+现在这一直在你的控制之下
+
+1057
+00:12:31,733 --> 00:12:33,566
+您可以选择连接或断开它
+
+1058
+00:12:33,566 --> 00:12:34,500
+随时
+
+1059
+00:12:35,566 --> 00:12:38,266
+今年夏天，个人环境将进入人工智能模式
+
+1060
+00:12:38,766 --> 00:12:40,400
+你今天已经来搜查了
+
+1061
+00:12:40,400 --> 00:12:41,966
+真正打开一个话题
+
+1062
+00:12:42,300 --> 00:12:44,566
+但这把它带到了更深的层次
+
+1063
+00:12:45,000 --> 00:12:48,200
+以至于我们称之为深度搜索
+
+1064
+00:12:48,800 --> 00:12:49,333
+它的原因
+
+1065
+00:12:49,333 --> 00:12:52,000
+在所有这些不同的信息片段中
+
+1066
+00:12:52,333 --> 00:12:54,866
+创建专家级别的完全引用报告
+
+1067
+00:12:54,866 --> 00:12:56,200
+在短短几分钟内
+
+1068
+00:12:56,400 --> 00:12:57,366
+所以我会问
+
+1069
+00:12:57,700 --> 00:13:00,466
+显示击球率和基础百分比
+
+1070
+00:13:00,466 --> 00:13:01,166
+这个季节
+
+1071
+00:13:01,166 --> 00:13:02,000
+最后
+
+1072
+00:13:02,000 --> 00:13:05,166
+对于目前使用鱼雷球棒的著名玩家
+
+1073
+00:13:05,400 --> 00:13:07,266
+我得到了这个有用的回复
+
+1074
+00:13:07,266 --> 00:13:09,533
+包括这个易于阅读的表格
+
+1075
+00:13:09,733 --> 00:13:11,466
+我可以跟进问问
+
+1076
+00:13:11,666 --> 00:13:14,133
+这些球员本赛季打出了多少本垒打
+
+1077
+00:13:14,333 --> 00:13:15,466
+搜索发现
+
+1078
+00:13:15,466 --> 00:13:18,700
+呈现这些信息的最佳方式是图表
+
+1079
+00:13:18,733 --> 00:13:19,966
+它创造了它
+
+1080
+00:13:20,700 --> 00:13:23,133
+就像我有自己的体育分析员
+
+1081
+00:13:23,133 --> 00:13:24,566
+搜索权
+
+1082
+00:13:25,366 --> 00:13:26,600
+复杂分析
+
+1083
+00:13:26,600 --> 00:13:29,400
+今年夏天数据可视化即将到来
+
+1084
+00:13:29,400 --> 00:13:31,533
+体育和金融问题
+
+1085
+00:13:31,533 --> 00:13:34,100
+所以我很高兴分享这一点
+
+1086
+00:13:34,100 --> 00:13:37,466
+我们要把水手计划的代理能力
+
+1087
+00:13:37,466 --> 00:13:38,700
+进入AI模式
+
+1088
+00:13:38,766 --> 00:13:39,566
+我会说
+
+1089
+00:13:39,800 --> 00:13:41,600
+找两张实惠的票
+
+1090
+00:13:41,600 --> 00:13:43,300
+本周六的红军比赛
+
+1091
+00:13:43,300 --> 00:13:44,500
+在下层
+
+1092
+00:13:45,366 --> 00:13:46,533
+搜索开始查询
+
+1093
+00:13:46,533 --> 00:13:48,933
+分散寻找几个网站
+
+1094
+00:13:48,933 --> 00:13:51,766
+分析数百种潜在的机票选择
+
+1095
+00:13:51,900 --> 00:13:54,300
+搜索帮助我跳过了很多步骤
+
+1096
+00:13:54,300 --> 00:13:56,700
+链接我以完成结账
+
+1097
+00:13:57,533 --> 00:14:00,266
+我们在多模态发展上有了下一个飞跃。
+
+1098
+00:14:00,366 --> 00:14:01,966
+通过带来Project Astras
+
+1099
+00:14:02,100 --> 00:14:04,933
+实时能力进入AI模式
+
+1100
+00:14:04,933 --> 00:14:06,766
+我们称之为实时搜索
+
+1101
+00:14:07,000 --> 00:14:09,733
+这就像跳上一个有浪涌的视频通话
+
+1102
+00:14:09,900 --> 00:14:12,733
+我们正在推出一项新的试穿功能
+
+1103
+00:14:12,966 --> 00:14:16,133
+这将帮助您虚拟试穿衣服
+
+1104
+00:14:16,200 --> 00:14:17,900
+我真的很喜欢这件蓝色的。
+
+1105
+00:14:18,533 --> 00:14:20,966
+我点击这个按钮试穿
+
+1106
+00:14:20,966 --> 00:14:22,933
+它要求我上传图片
+
+1107
+00:14:23,200 --> 00:14:25,766
+这把我带到了我的相机胶卷
+
+1108
+00:14:26,300 --> 00:14:27,700
+我这里有很多照片
+
+1109
+00:14:27,700 --> 00:14:29,400
+我要选一个
+
+1110
+00:14:29,400 --> 00:14:31,966
+全身和清晰的视野
+
+1111
+00:14:32,066 --> 00:14:34,666
+我们构建了一个自定义图像生成
+
+1112
+00:14:34,666 --> 00:14:37,200
+专门为时尚训练的模特
+
+1113
+00:14:38,000 --> 00:14:39,400
+哇，它回来了。
+
+1114
+00:14:41,000 --> 00:14:43,100
+AI模型能够显示
+
+1115
+00:14:43,100 --> 00:14:47,333
+这种材料将如何折叠、拉伸和悬垂
+
+1116
+00:14:47,333 --> 00:14:50,300
+让我们假设价格现在下降了
+
+1117
+00:14:51,166 --> 00:14:52,500
+当这种情况发生时
+
+1118
+00:14:53,266 --> 00:14:55,800
+我收到这样的通知
+
+1119
+00:14:56,000 --> 00:14:57,366
+如果我想买
+
+1120
+00:14:57,566 --> 00:14:58,966
+我的收银员
+
+1121
+00:14:59,100 --> 00:15:02,133
+会将合适的尺寸和颜色添加到我的购物车中
+
+1122
+00:15:02,333 --> 00:15:04,466
+我可以选择查看我所有的付款。
+
+1123
+00:15:04,466 --> 00:15:05,800
+物流信息
+
+1124
+00:15:06,166 --> 00:15:08,900
+或者让代理商帮我买。
+
+1125
+00:15:09,266 --> 00:15:10,766
+只需轻轻一按
+
+1126
+00:15:11,100 --> 00:15:14,500
+搜索安全地用Google Pay为我购买它
+
+1127
+00:15:14,500 --> 00:15:17,333
+当然，这一切都是在我的指导下发生的。
+
+1128
+00:15:18,066 --> 00:15:18,933
+我们的新视觉
+
+1129
+00:15:18,933 --> 00:15:20,133
+购物和代理
+
+1130
+00:15:20,133 --> 00:15:23,133
+结账功能将在未来几个月推出
+
+1131
+00:15:23,300 --> 00:15:26,800
+你可以开始在实验室试穿
+
+1132
+00:15:26,900 --> 00:15:27,900
+从今天开始
+
+1133
+00:15:28,500 --> 00:15:30,300
+我们今天要推出5件东西
+
+1134
+00:15:30,700 --> 00:15:33,733
+首先让我们现在谈谈双子座直播
+
+1135
+00:15:33,733 --> 00:15:34,666
+正如Sundar提到的
+
+1136
+00:15:34,666 --> 00:15:37,866
+双子座直播现在包括相机和屏幕共享
+
+1137
+00:15:38,133 --> 00:15:39,600
+两者都令人难以置信
+
+1138
+00:15:39,866 --> 00:15:41,900
+所有这些都是免费推出的。
+
+1139
+00:15:41,900 --> 00:15:42,800
+在双子座应用程序中
+
+1140
+00:15:42,800 --> 00:15:44,766
+在Android和iOS今天
+
+1141
+00:15:45,333 --> 00:15:46,400
+在接下来的几周里
+
+1142
+00:15:46,400 --> 00:15:47,333
+你将能够连接
+
+1143
+00:15:47,333 --> 00:15:49,700
+Jim和我直播了一些你最喜欢的应用程序
+
+1144
+00:15:49,700 --> 00:15:51,200
+比如日历地图
+
+1145
+00:15:51,200 --> 00:15:55,133
+保持任务如此之快，您只需将相机对准即可
+
+1146
+00:15:55,166 --> 00:15:57,933
+并要求它在您的日历中添加邀请
+
+1147
+00:15:57,933 --> 00:15:58,900
+它会完成的
+
+1148
+00:15:59,133 --> 00:16:00,466
+从今天开始
+
+1149
+00:16:00,466 --> 00:16:03,900
+深入研究现在可以让您上传自己的文件
+
+1150
+00:16:03,900 --> 00:16:05,466
+指导研究代理
+
+1151
+00:16:05,466 --> 00:16:08,766
+假设你有一份难以置信的详细报告
+
+1152
+00:16:08,866 --> 00:16:10,700
+你是如何获得所有这些才华的？
+
+1153
+00:16:10,866 --> 00:16:14,166
+浓缩成一种可消化的吸引人的东西
+
+1154
+00:16:14,400 --> 00:16:16,166
+这就是帆布的用武之地
+
+1155
+00:16:16,200 --> 00:16:19,333
+画布现在可以让您转换该报告
+
+1156
+00:16:19,333 --> 00:16:22,533
+一键进入各种新事物
+
+1157
+00:16:22,600 --> 00:16:26,466
+就像一个动态网页一个信息图一个有用的测验
+
+1158
+00:16:26,566 --> 00:16:29,466
+甚至是45种语言的自定义播客
+
+1159
+00:16:29,866 --> 00:16:31,566
+但如果你想更进一步
+
+1160
+00:16:31,800 --> 00:16:35,300
+你可以在画布上编写各种令人惊叹的东西。
+
+1161
+00:16:35,300 --> 00:16:37,300
+你想来回多少就来回多少
+
+1162
+00:16:37,766 --> 00:16:40,133
+我们要介绍双子座和Chrome
+
+1163
+00:16:41,100 --> 00:16:43,800
+最神奇的是你可以使用这个和它
+
+1164
+00:16:43,800 --> 00:16:45,300
+理解语境
+
+1165
+00:16:45,300 --> 00:16:46,800
+你所在的页面
+
+1166
+00:16:46,900 --> 00:16:47,900
+自动
+
+1167
+00:16:48,200 --> 00:16:49,600
+所以如果你有问题
+
+1168
+00:16:49,800 --> 00:16:50,766
+可以回答
+
+1169
+00:16:51,200 --> 00:16:54,166
+我们这周开始推出双子座和Chrome
+
+1170
+00:16:54,200 --> 00:16:56,533
+致美国的双子座订阅者
+
+1171
+00:16:56,533 --> 00:16:57,700
+从今天开始
+
+1172
+00:16:58,066 --> 00:17:00,566
+我们将带来最新最有能力的
+
+1173
+00:17:00,566 --> 00:17:02,300
+图像生成模型
+
+1174
+00:17:02,500 --> 00:17:03,900
+进入双子座应用程序
+
+1175
+00:17:04,500 --> 00:17:06,300
+这叫做想象
+
+1176
+00:17:06,533 --> 00:17:09,466
+想象一下，我更擅长发短信。
+
+1177
+00:17:09,466 --> 00:17:10,666
+和排版
+
+1178
+00:17:11,100 --> 00:17:11,766
+过去
+
+1179
+00:17:11,766 --> 00:17:14,266
+你可能创造了一些看起来不错的东西
+
+1180
+00:17:14,400 --> 00:17:17,800
+但是添加单词并不总是正确的。
+
+1181
+00:17:18,066 --> 00:17:19,333
+所以看看这个
+
+1182
+00:17:19,533 --> 00:17:22,300
+也许我想为音乐节制作一张海报
+
+1183
+00:17:22,366 --> 00:17:24,733
+我们会让铬恐龙成为大头条新闻
+
+1184
+00:17:25,100 --> 00:17:28,533
+想象一下4不仅让文本和拼写正确
+
+1185
+00:17:28,700 --> 00:17:31,300
+它实际上是在做创造性的选择。
+
+1186
+00:17:31,466 --> 00:17:34,000
+比如在字体中使用恐龙骨头
+
+1187
+00:17:34,300 --> 00:17:35,933
+或者算出行间距
+
+1188
+00:17:35,933 --> 00:17:36,766
+字体大小
+
+1189
+00:17:36,766 --> 00:17:39,500
+使它看起来像这张很棒的海报的布局
+
+1190
+00:17:39,566 --> 00:17:42,766
+比我们之前的型号快10倍
+
+1191
+00:17:42,866 --> 00:17:45,533
+所以你可以快速迭代许多想法
+
+1192
+00:17:46,500 --> 00:17:47,966
+图像令人难以置信
+
+1193
+00:17:48,266 --> 00:17:51,466
+但有时你需要动作和声音
+
+1194
+00:17:51,766 --> 00:17:52,733
+今天
+
+1195
+00:17:52,933 --> 00:17:56,533
+我很高兴地宣布我们最先进的新模型
+
+1196
+00:17:56,966 --> 00:17:57,766
+VO3
+
+1197
+00:17:59,066 --> 00:18:02,733
+VO3带有原生音频生成
+
+1198
+00:18:03,066 --> 00:18:06,800
+这意味着vo3可以产生音效
+
+1199
+00:18:07,066 --> 00:18:09,866
+背景声音和对话
+
+1200
+00:18:10,666 --> 00:18:13,866
+现在你提示它，你的角色就可以说话了
+
+1201
+00:18:14,000 --> 00:18:14,900
+听一听
+
+1202
+00:18:20,000 --> 00:18:22,600
+他们今天留下了一个球
+
+1203
+00:18:22,600 --> 00:18:24,733
+它弹得比我跳得高
+
+1204
+00:18:25,566 --> 00:18:27,900
+这是什么魔法？
+
+1205
+00:18:34,466 --> 00:18:35,400
+很酷吧？
+
+1206
+00:18:35,500 --> 00:18:38,133
+VI不仅添加了森林的声音
+
+1207
+00:18:38,133 --> 00:18:39,600
+还有对话
+
+1208
+00:18:40,100 --> 00:18:44,100
+这海洋是一种力量，一种野性的力量
+
+1209
+00:18:44,800 --> 00:18:48,133
+她让你敬畏每一盏破灯
+
+1210
+00:18:48,500 --> 00:18:49,666
+从今天开始
+
+1211
+00:18:49,766 --> 00:18:52,066
+双子座直播功能是免费的
+
+1212
+00:18:52,200 --> 00:18:54,866
+并在安卓和iOS
+
+1213
+00:18:55,466 --> 00:18:57,366
+我们最近推出了Lyria 2
+
+1214
+00:18:57,366 --> 00:18:59,366
+可以产生高保真的音乐
+
+1215
+00:18:59,366 --> 00:19:00,866
+和专业级音频
+
+1216
+00:19:01,333 --> 00:19:05,533
+音乐悠扬，独唱和合唱
+
+1217
+00:19:06,200 --> 00:19:09,133
+正如你所听到的，它能创作出富有表现力和丰富的音乐
+
+1218
+00:19:20,866 --> 00:19:23,500
+Lirio今天可用于企业
+
+1219
+00:19:23,500 --> 00:19:25,600
+YouTube创作者和音乐家
+
+1220
+00:19:26,100 --> 00:19:26,900
+现在
+
+1221
+00:19:26,900 --> 00:19:29,900
+个人或组织都不容易察觉
+
+1222
+00:19:29,900 --> 00:19:31,400
+AI生成的图像
+
+1223
+00:19:31,766 --> 00:19:34,100
+两年前，我们开创了Synth ID
+
+1224
+00:19:34,166 --> 00:19:37,400
+它将不可见的水印嵌入到生成的媒体中
+
+1225
+00:19:38,000 --> 00:19:41,200
+我们新的Synth ID检测器可以识别图像是否
+
+1226
+00:19:41,200 --> 00:19:44,533
+音轨文本或视频中包含Synth ID
+
+1227
+00:19:44,600 --> 00:19:47,466
+不管是整个作品还是只是一部分
+
+1228
+00:19:47,733 --> 00:19:50,400
+我们今天开始向早期测试者推出这个。
+
+1229
+00:19:50,900 --> 00:19:53,700
+我们与富有远见的导演达伦·阿罗诺夫斯基合作
+
+1230
+00:19:53,766 --> 00:19:56,500
+和他的新故事冒险原生汤
+
+1231
+00:19:56,800 --> 00:19:57,333
+一起
+
+1232
+00:19:57,333 --> 00:20:00,000
+我们正在将世界上最好的视频生成模型
+
+1233
+00:20:00,000 --> 00:20:01,800
+落入顶级电影制作人手中
+
+1234
+00:20:01,800 --> 00:20:04,466
+合作伙伴关系三部短片中的第一部
+
+1235
+00:20:04,466 --> 00:20:07,266
+是导演伊莉莎·麦克尼茨和塞斯特拉
+
+1236
+00:20:08,000 --> 00:20:10,866
+我们拍摄了非常情绪化的表演
+
+1237
+00:20:10,866 --> 00:20:12,933
+但随后生成了视频
+
+1238
+00:20:12,933 --> 00:20:15,400
+否则我们永远无法捕捉到
+
+1239
+00:20:16,733 --> 00:20:19,966
+我想让宝宝握着妈妈的手指
+
+1240
+00:20:20,466 --> 00:20:21,900
+只是他们两个的幸福
+
+1241
+00:20:21,900 --> 00:20:22,700
+是呀
+
+1242
+00:20:24,333 --> 00:20:26,866
+对于你之前的每一个生物
+
+1243
+00:20:28,266 --> 00:20:30,400
+从每一颗死去的星星
+
+1244
+00:20:30,733 --> 00:20:32,566
+这样你就可以成为
+
+1245
+00:20:33,066 --> 00:20:35,800
+所以当你制作视频时，它会使用成分。
+
+1246
+00:20:35,800 --> 00:20:36,600
+你给它
+
+1247
+00:20:36,933 --> 00:20:41,066
+角色场景或风格并保持一致
+
+1248
+00:20:41,600 --> 00:20:43,333
+或者你可以直接
+
+1249
+00:20:43,333 --> 00:20:45,466
+给它精确的相机说明
+
+1250
+00:20:45,466 --> 00:20:47,700
+让它沿着特定的路径射击
+
+1251
+00:20:47,800 --> 00:20:50,066
+我们一直在构建一个新的人工智能
+
+1252
+00:20:50,066 --> 00:20:52,266
+创意人员的电影制作工具
+
+1253
+00:20:52,666 --> 00:20:54,266
+我们称之为流动
+
+1254
+00:20:54,500 --> 00:20:55,933
+它今天发布。
+
+1255
+00:20:56,366 --> 00:20:58,533
+让我们进入我正在做的一个项目
+
+1256
+00:20:58,666 --> 00:21:00,666
+我们的英雄爷爷
+
+1257
+00:21:00,666 --> 00:21:01,966
+正在制造一辆会飞的汽车
+
+1258
+00:21:01,966 --> 00:21:03,800
+在羽毛朋友的帮助下
+
+1259
+00:21:04,366 --> 00:21:05,800
+这些是我的配料
+
+1260
+00:21:05,933 --> 00:21:07,933
+老人和他的车
+
+1261
+00:21:08,466 --> 00:21:11,566
+我们可以轻松地将您自己的图像上传到工具中
+
+1262
+00:21:11,766 --> 00:21:14,566
+或者你可以使用想象在飞行中生成它们
+
+1263
+00:21:14,566 --> 00:21:15,866
+这是内置的
+
+1264
+00:21:16,333 --> 00:21:18,866
+如果我想捕捉下一个场景的镜头
+
+1265
+00:21:19,166 --> 00:21:22,333
+我只要按下加号就可以拍摄下一张照片
+
+1266
+00:21:22,900 --> 00:21:25,500
+我可以描述我接下来想发生什么
+
+1267
+00:21:25,733 --> 00:21:28,500
+比如在后座加一只10英尺高的鸡
+
+1268
+00:21:28,866 --> 00:21:30,366
+剩下的就交给心流吧
+
+1269
+00:21:30,866 --> 00:21:34,166
+人物一致性场景一致性
+
+1270
+00:21:34,166 --> 00:21:35,333
+它只是有效
+
+1271
+00:21:35,533 --> 00:21:37,966
+如果有什么地方不对劲
+
+1272
+00:21:38,133 --> 00:21:39,066
+没问题。
+
+1273
+00:21:39,266 --> 00:21:42,300
+您可以像任何其他视频工具一样返回
+
+1274
+00:21:42,366 --> 00:21:44,866
+如果不适合你就修剪一下
+
+1275
+00:21:45,333 --> 00:21:48,400
+但心流在另一个方向也起作用
+
+1276
+00:21:48,666 --> 00:21:51,200
+它也可以让你延长一个夹子。
+
+1277
+00:21:51,700 --> 00:21:53,533
+这样我才能得到完美的结局
+
+1278
+00:21:53,533 --> 00:21:55,100
+我一直在努力
+
+1279
+00:21:55,800 --> 00:21:57,500
+一旦我得到了我需要的所有剪辑
+
+1280
+00:21:57,500 --> 00:21:59,300
+我可以下载文件
+
+1281
+00:21:59,400 --> 00:22:02,366
+我可以把它们放到我最喜欢的编辑软件里
+
+1282
+00:22:02,366 --> 00:22:04,266
+添加一些Lyria的音乐
+
+1283
+00:22:04,400 --> 00:22:08,700
+现在老人终于有了他的飞车
+
+1284
+00:22:27,200 --> 00:22:30,200
+所以我很高兴地分享我们正在升级
+
+1285
+00:22:30,400 --> 00:22:33,200
+今天还有两个AI订阅计划
+
+1286
+00:22:33,466 --> 00:22:35,566
+我们将拥有Google AI Pro
+
+1287
+00:22:35,900 --> 00:22:38,366
+以及全新的Google AI Ultra
+
+1288
+00:22:39,366 --> 00:22:40,800
+使用Pro计划
+
+1289
+00:22:40,800 --> 00:22:42,733
+这将在全球范围内提供
+
+1290
+00:22:42,733 --> 00:22:45,200
+您将获得全套AI产品
+
+1291
+00:22:45,200 --> 00:22:47,900
+具有更高的速率限制和特殊功能
+
+1292
+00:22:47,900 --> 00:22:49,466
+与免费版本相比
+
+1293
+00:22:49,733 --> 00:22:51,700
+然后是奥特拉计划
+
+1294
+00:22:52,100 --> 00:22:55,166
+该计划附带最高费率限制
+
+1295
+00:22:55,333 --> 00:22:57,500
+最早获得新功能
+
+1296
+00:22:57,500 --> 00:22:59,533
+和来自整个谷歌的产品
+
+1297
+00:22:59,933 --> 00:23:02,166
+今天在美国有售
+
+1298
+00:23:02,400 --> 00:23:04,666
+并将很快在全球推广
+
+1299
+00:23:05,000 --> 00:23:07,333
+因此，如果您是Ultra订阅者
+
+1300
+00:23:07,500 --> 00:23:10,800
+您将获得巨大的费率限制和访问权限2
+
+1301
+00:23:11,166 --> 00:23:13,600
+健身房和眼部应用程序中的5 pro深度思考模式
+
+1302
+00:23:13,600 --> 00:23:14,500
+准备好的时候
+
+1303
+00:23:15,100 --> 00:23:17,800
+您将获得带有VO3的flow访问权限
+
+1304
+00:23:18,366 --> 00:23:19,700
+今天可用
+
+1305
+00:23:20,200 --> 00:23:22,466
+它还附带YouTube Premium
+
+1306
+00:23:22,466 --> 00:23:24,533
+和大量的存储空间
+
+1307
+00:23:24,700 --> 00:23:26,166
+在未来的几个月里
+
+1308
+00:23:26,466 --> 00:23:28,800
+我们要把双子座带到你的手表上
+
+1309
+00:23:29,333 --> 00:23:31,100
+你的汽车仪表板
+
+1310
+00:23:31,366 --> 00:23:32,900
+甚至你的电视
+
+1311
+00:23:33,300 --> 00:23:35,900
+但是新兴的外形呢？
+
+1312
+00:23:35,933 --> 00:23:38,200
+可以让你体验人工智能
+
+1313
+00:23:38,200 --> 00:23:40,600
+以新的方式辅助
+
+1314
+00:23:40,966 --> 00:23:44,566
+这正是我们构建Android XR的原因
+
+1315
+00:23:46,300 --> 00:23:48,733
+从耳机到眼镜
+
+1316
+00:23:48,766 --> 00:23:50,566
+以及介于两者之间的一切
+
+1317
+00:23:51,300 --> 00:23:54,333
+我们相信XR没有一刀切的尺寸
+
+1318
+00:23:54,500 --> 00:23:57,400
+你将在一天中使用不同的设备
+
+1319
+00:23:57,966 --> 00:23:59,066
+例如
+
+1320
+00:23:59,200 --> 00:24:03,333
+看电影玩游戏或完成工作
+
+1321
+00:24:03,466 --> 00:24:05,733
+你会想要一个身临其境的耳机
+
+1322
+00:24:06,400 --> 00:24:08,333
+但当你忙碌的时候
+
+1323
+00:24:08,333 --> 00:24:10,200
+你会想要轻便的眼镜
+
+1324
+00:24:10,333 --> 00:24:12,366
+可以给你及时的信息
+
+1325
+00:24:12,400 --> 00:24:14,066
+不伸手拿手机
+
+1326
+00:24:15,066 --> 00:24:18,866
+我们与三星作为一个团队共同构建了Android XR
+
+1327
+00:24:19,100 --> 00:24:22,100
+并与高通针对Snapdragon进行了优化
+
+1328
+00:24:22,533 --> 00:24:25,200
+让我们从Jem和我的耳机开始
+
+1329
+00:24:25,566 --> 00:24:28,200
+这是三星的Project Muhan
+
+1330
+00:24:28,366 --> 00:24:31,133
+第一款Android XR设备
+
+1331
+00:24:31,133 --> 00:24:32,333
+Muhan给你一个
+
+1332
+00:24:32,333 --> 00:24:35,000
+无限屏幕探索您的应用程序
+
+1333
+00:24:35,133 --> 00:24:36,966
+双子座在你身边
+
+1334
+00:24:37,466 --> 00:24:39,300
+使用XR中的谷歌地图
+
+1335
+00:24:39,366 --> 00:24:41,733
+你可以瞬移到世界任何地方
+
+1336
+00:24:41,766 --> 00:24:44,733
+只要让双子座带你去那里
+
+1337
+00:24:45,500 --> 00:24:47,866
+您可以与您的AI助手交谈
+
+1338
+00:24:47,966 --> 00:24:49,600
+关于你看到的任何东西
+
+1339
+00:24:49,800 --> 00:24:51,533
+并让它调出视频
+
+1340
+00:24:51,533 --> 00:24:54,133
+以及关于您正在探索的内容的网站
+
+1341
+00:24:54,466 --> 00:24:57,366
+想象一下在MLB应用程序中观看他们比赛
+
+1342
+00:24:57,366 --> 00:25:00,100
+就好像你就在体育场里一样
+
+1343
+00:25:00,500 --> 00:25:04,333
+在与双子座谈论玩家和游戏统计数据时
+
+1344
+00:25:05,133 --> 00:25:06,933
+三星的Project Muhan
+
+1345
+00:25:06,966 --> 00:25:10,166
+将于今年晚些时候上市
+
+1346
+00:25:10,800 --> 00:25:14,066
+让我们把注意力转向眼镜
+
+1347
+00:25:14,066 --> 00:25:16,166
+带Android XR的眼镜
+
+1348
+00:25:16,266 --> 00:25:19,100
+重量轻，专为全天穿着而设计
+
+1349
+00:25:19,200 --> 00:25:21,933
+即使它们充满了技术
+
+1350
+00:25:22,766 --> 00:25:24,900
+相机和麦克风
+
+1351
+00:25:24,966 --> 00:25:28,700
+赋予双子座看世界、听世界的能力
+
+1352
+00:25:29,133 --> 00:25:31,200
+扬声器让你聆听AI
+
+1353
+00:25:31,266 --> 00:25:33,533
+播放音乐或接听电话
+
+1354
+00:25:33,966 --> 00:25:36,133
+和可选的镜头显示
+
+1355
+00:25:36,266 --> 00:25:38,933
+私下向您展示有用的信息
+
+1356
+00:25:39,000 --> 00:25:40,333
+就在你需要的时候
+
+1357
+00:25:41,300 --> 00:25:43,200
+这些眼镜适用于您的手机
+
+1358
+00:25:43,200 --> 00:25:45,100
+让您访问您的应用程序
+
+1359
+00:25:45,100 --> 00:25:46,866
+同时保持双手自由
+
+1360
+00:25:47,666 --> 00:25:51,866
+所有这些都使眼镜成为人工智能的自然外形因素
+
+1361
+00:25:51,966 --> 00:25:55,500
+让我们看看他们是如何在最繁忙的
+
+1362
+00:25:55,733 --> 00:25:59,466
+环境现在可能在Io后台
+
+1363
+00:26:01,766 --> 00:26:03,100
+嘿各位
+
+1364
+00:26:03,333 --> 00:26:06,533
+现在你看到的应该和我看到的一模一样
+
+1365
+00:26:06,533 --> 00:26:09,100
+通过我的Android XR眼镜的镜头
+
+1366
+00:26:09,266 --> 00:26:11,366
+就像我美味的咖啡一样
+
+1367
+00:26:11,366 --> 00:26:13,533
+还有刚刚收到的莎伦的短信
+
+1368
+00:26:13,533 --> 00:26:14,566
+让我们看看他怎么说
+
+1369
+00:26:16,766 --> 00:26:18,766
+好吧，绝对是表演时间。
+
+1370
+00:26:18,766 --> 00:26:21,400
+所以我要启动双子座让我们继续前进
+
+1371
+00:26:22,666 --> 00:26:24,800
+给莎伦发短信说我要开始了
+
+1372
+00:26:24,800 --> 00:26:27,133
+请将我的通知静音。
+
+1373
+00:26:29,533 --> 00:26:31,500
+好的，我已经把那条消息发给他了。
+
+1374
+00:26:31,566 --> 00:26:35,366
+并完美静音您的所有通知
+
+1375
+00:26:36,333 --> 00:26:37,100
+哦嘿Mr.
+
+1376
+00:26:37,100 --> 00:26:37,933
+嘿Deeder
+
+1377
+00:26:37,933 --> 00:26:39,566
+我看到你眼镜上的灯亮了
+
+1378
+00:26:39,566 --> 00:26:41,733
+所以我想可以肯定地说我们现在正在直播
+
+1379
+00:26:41,733 --> 00:26:44,533
+是的，我们正式和木卫一船员在一起
+
+1380
+00:26:44,633 --> 00:26:45,166
+嘿各位
+
+1381
+00:26:45,166 --> 00:26:47,366
+从这个角度看木卫一真是太棒了
+
+1382
+00:26:47,400 --> 00:26:48,366
+Nishtha你答应过我的
+
+1383
+00:26:48,366 --> 00:26:50,600
+我可以买一副自己的安卓XR眼镜。
+
+1384
+00:26:50,600 --> 00:26:52,000
+如果我在这里帮忙
+
+1385
+00:26:52,000 --> 00:26:53,600
+那你怎么说
+
+1386
+00:26:53,600 --> 00:26:55,566
+当然我们喝完咖啡吧
+
+1387
+00:26:55,566 --> 00:26:56,966
+我会把那些眼镜带给你，太棒了。
+
+1388
+00:26:56,966 --> 00:26:57,600
+我们到时候见
+
+1389
+00:26:57,600 --> 00:26:59,066
+祝你好运谢谢
+
+1390
+00:26:59,300 --> 00:27:03,066
+正如你们所看到的，后台有很多事情要做。
+
+1391
+00:27:03,066 --> 00:27:04,000
+那是
+
+1392
+00:27:04,000 --> 00:27:06,866
+职业篮球运动员扬尼斯戴着我们的眼镜
+
+1393
+00:27:07,366 --> 00:27:08,300
+我爱他们
+
+1394
+00:27:08,766 --> 00:27:11,000
+它解放了我的双手来击掌
+
+1395
+00:27:11,900 --> 00:27:13,066
+很好
+
+1396
+00:27:13,533 --> 00:27:16,000
+让我继续向你们展示这些眼镜的功能
+
+1397
+00:27:16,466 --> 00:27:19,466
+我一整天都对这面照片墙很好奇
+
+1398
+00:27:19,600 --> 00:27:21,133
+比如呢？
+
+1399
+00:27:21,133 --> 00:27:24,300
+乐队是这个，他们是如何连接到这个地方的？
+
+1400
+00:27:31,000 --> 00:27:32,300
+传说中的岩石
+
+1401
+00:27:32,933 --> 00:27:33,733
+乐队
+
+1402
+00:27:34,566 --> 00:27:35,866
+海岸线圆形剧场的演出
+
+1403
+00:27:35,866 --> 00:27:38,733
+通常被视为乐队的返校节表演
+
+1404
+00:27:39,000 --> 00:27:42,266
+双子座杯子上的咖啡店叫什么名字
+
+1405
+00:27:42,266 --> 00:27:43,266
+我之前有过
+
+1406
+00:27:45,733 --> 00:27:47,466
+嗯，那可能是布鲁姆日。
+
+1407
+00:27:47,500 --> 00:27:48,533
+据我所知
+
+1408
+00:27:48,533 --> 00:27:51,000
+卡斯特罗大街上一家充满活力的咖啡店
+
+1409
+00:27:51,100 --> 00:27:52,566
+伟大的记忆
+
+1410
+00:27:53,766 --> 00:27:56,066
+你能给我看看那家咖啡馆的照片吗？
+
+1411
+00:27:56,066 --> 00:27:57,600
+我想看看气氛
+
+1412
+00:28:00,133 --> 00:28:03,066
+这些地图上的照片肯定有帮助吗？
+
+1413
+00:28:03,500 --> 00:28:04,566
+哦我知道那个地方
+
+1414
+00:28:04,566 --> 00:28:06,666
+这是一家花店也是一家咖啡店
+
+1415
+00:28:06,666 --> 00:28:07,900
+但它是市中心
+
+1416
+00:28:07,900 --> 00:28:08,533
+嗯···
+
+1417
+00:28:08,533 --> 00:28:11,700
+好吧，杰姆和我告诉我走在这里需要什么
+
+1418
+00:28:14,866 --> 00:28:16,500
+现在得到那些方向
+
+1419
+00:28:17,266 --> 00:28:18,933
+大约一个小时.
+
+1420
+00:28:19,166 --> 00:28:20,266
+好吧
+
+1421
+00:28:20,933 --> 00:28:22,300
+我可以得到一些步骤
+
+1422
+00:28:22,300 --> 00:28:24,866
+这些抬头的方向和一个完整的
+
+1423
+00:28:24,866 --> 00:28:27,366
+3D地图应该会让它变得超级简单
+
+1424
+00:28:30,566 --> 00:28:32,500
+继续发送抖动和
+
+1425
+00:28:32,500 --> 00:28:36,166
+邀请去那家咖啡馆，今天下午3点喝咖啡
+
+1426
+00:28:39,733 --> 00:28:42,466
+我现在就发出邀请，享受咖啡吧。
+
+1427
+00:28:43,200 --> 00:28:47,000
+正如你所看到的，杰姆和我帮助妮莎搜索她所看到的
+
+1428
+00:28:47,066 --> 00:28:50,466
+记住像咖啡咖啡杯这样的细节
+
+1429
+00:28:50,733 --> 00:28:53,966
+预订活动甚至导航所有没有
+
+1430
+00:28:53,966 --> 00:28:56,500
+从口袋里拿出手机
+
+1431
+00:28:56,966 --> 00:28:59,300
+我现在还戴着眼镜呢
+
+1432
+00:28:59,566 --> 00:29:01,900
+他们是我的他们是我的私人提词器
+
+1433
+00:29:02,066 --> 00:29:04,666
+我有处方镜片，所以我可以看到你们所有人
+
+1434
+00:29:05,466 --> 00:29:08,100
+好吧，妮莎，这是戴眼镜的重要时刻
+
+1435
+00:29:08,100 --> 00:29:09,000
+让我们抓住它
+
+1436
+00:29:09,166 --> 00:29:11,733
+是的，每个人都准备好快速拍照。
+
+1437
+00:29:11,733 --> 00:29:13,966
+让我们请出我们的明星
+
+1438
+00:29:15,866 --> 00:29:17,100
+FINTA来了
+
+1439
+00:29:19,866 --> 00:29:21,066
+好吧，哑巴和我
+
+1440
+00:29:22,400 --> 00:29:23,966
+给我拍张照片
+
+1441
+00:29:32,900 --> 00:29:35,000
+好吧，哑巴，我给自己拍张照片。
+
+1442
+00:29:35,000 --> 00:29:36,600
+并将其添加到我的收藏夹中
+
+1443
+00:29:44,133 --> 00:29:45,733
+看起来棒极了。
+
+1444
+00:29:46,466 --> 00:29:49,066
+辛迪展示了直播的可能性
+
+1445
+00:29:49,066 --> 00:29:50,700
+提前翻译
+
+1446
+00:29:51,000 --> 00:29:53,800
+让我们看看眼镜上是什么样的
+
+1447
+00:29:54,200 --> 00:29:56,400
+这是一个非常冒险的演示
+
+1448
+00:29:56,400 --> 00:29:57,733
+但我们要试一试
+
+1449
+00:29:59,666 --> 00:30:00,666
+尼什特和我
+
+1450
+00:30:00,666 --> 00:30:03,366
+会用我们的母语互相交谈
+
+1451
+00:30:03,600 --> 00:30:05,166
+Nishter会说印地语
+
+1452
+00:30:05,466 --> 00:30:08,266
+我会把波斯语说得很差
+
+1453
+00:30:08,600 --> 00:30:10,066
+你会看到提要
+
+1454
+00:30:10,133 --> 00:30:12,466
+从我们两个的杯子里
+
+1455
+00:30:12,766 --> 00:30:14,566
+所以你们都可以跟着去
+
+1456
+00:30:14,900 --> 00:30:17,900
+我们将实时显示英文翻译
+
+1457
+00:30:18,366 --> 00:30:20,733
+好吧，让我们试一试。
+
+1458
+00:30:21,266 --> 00:30:22,466
+祝你好运
+
+1459
+00:30:23,566 --> 00:30:24,900
+篮筐
+
+1460
+00:30:25,466 --> 00:30:26,800
+哈拉米图尼贝贝尼
+
+1461
+00:30:26,933 --> 00:30:30,966
+让消防员泰尔·乔米山找到了法奇·比吉利奇
+
+1462
+00:30:36,100 --> 00:30:37,400
+是的绝对是
+
+1463
+00:30:37,900 --> 00:30:40,266
+现在我的整个世界都是完整的
+
+1464
+00:30:40,300 --> 00:30:42,800
+而Masub能从Asani那里明白一些事情
+
+1465
+00:30:45,800 --> 00:30:49,733
+Allahumma其他Baha'ma'adama和donya sawat Bush
+
+1466
+00:30:50,400 --> 00:30:53,933
+爸爸Ram妈妈和爸爸爸爸爸爸爸爸爸爸爸爸爸爸
+
+1467
+00:31:01,300 --> 00:31:03,800
+让我们看看我们说过这是一个有风险的演示
+
+1468
+00:31:06,166 --> 00:31:06,966
+让我们
+
+1469
+00:31:08,500 --> 00:31:10,900
+我们正在与三星合作
+
+1470
+00:31:10,900 --> 00:31:12,300
+更上一层楼
+
+1471
+00:31:12,366 --> 00:31:15,933
+通过将Android XR扩展到耳机之外
+
+1472
+00:31:15,933 --> 00:31:18,066
+戴上眼镜
+
+1473
+00:31:18,066 --> 00:31:21,400
+原型已经被值得信赖的测试人员使用
+
+1474
+00:31:21,500 --> 00:31:24,700
+你就可以开始开发眼镜了
+
+1475
+00:31:24,700 --> 00:31:25,966
+今年晚些时候
+
+1476
+00:31:26,266 --> 00:31:29,266
+温柔的怪物和沃比·帕克
+
+1477
+00:31:29,366 --> 00:31:31,000
+将是第一个眼镜
+
+1478
+00:31:31,000 --> 00:31:33,966
+合作伙伴使用Android XR制造眼镜
+
+1479
+00:31:34,600 --> 00:31:37,066
+今天你们听到了很多关于Eloscores的故事
+
+1480
+00:31:37,366 --> 00:31:40,166
+基准测试和最先进的性能
+
+1481
+00:31:40,600 --> 00:31:42,133
+但我知道有一个指标
+
+1482
+00:31:42,133 --> 00:31:43,666
+你们都在等待
+
+1483
+00:31:43,933 --> 00:31:45,566
+我们的AI计数器
+
+1484
+00:31:46,100 --> 00:31:48,933
+让我们来看看最后一个排行榜
+
+1485
+00:31:50,566 --> 00:31:54,366
+看来我们有了新成员
+
+1486
+00:31:54,900 --> 00:31:58,000
+双子座队领先
+
+1487
+00:31:58,666 --> 00:31:59,500
+95
+
+1488
+00:32:00,200 --> 00:32:01,500
+更严肃地说
+
+1489
+00:32:01,500 --> 00:32:03,666
+这是我们今天宣布的所有内容
+
+1490
+00:32:04,000 --> 00:32:07,100
+来自新发布和产品扩展
+
+1491
+00:32:07,366 --> 00:32:09,200
+为了即将到来的微光
+
+1492
+00:32:09,800 --> 00:32:13,700
+人工智能的机会真的非常大
+
+1493
+00:32:14,133 --> 00:32:16,600
+我迫不及待地想看看有什么惊人的事情
+
+1494
+00:32:16,600 --> 00:32:18,766
+我们接下来会一起建造，谢谢。
+

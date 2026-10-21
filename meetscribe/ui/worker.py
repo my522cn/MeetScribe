@@ -316,23 +316,32 @@ class CaptureWorker(QObject):
 
     # ---------- 大模型纠错 ----------
     def _start_llm(self) -> None:
-        """启用时每 25 秒用本地小模型把最近几句过一遍，改同音错字。"""
+        """启用时每 25 秒用本地小模型把最近几句过一遍，改同音错字。
+
+        纠错与纪要是两个开关：实测本机模型做"上下文纠错"净收益为负（26 句样本
+        改好 4 改坏 5），所以 fix_enabled 默认关闭，纪要不受影响。
+        """
         self._llm_stop = threading.Event()
         self._corrector = None
         if not self.settings.get("llm.enabled", False):
+            return
+        if not self.settings.get("llm.fix_enabled", False):
             return
         try:
             from ..llm import Corrector, OllamaClient
         except Exception:  # noqa: BLE001
             return
         base = str(self.settings.get("llm.base_url", "http://127.0.0.1:11434"))
-        model = str(self.settings.get("llm.fix_model", "qwen3:4b"))
+        model = str(self.settings.get("llm.fix_model", "qwen2.5:7b-instruct"))
         hotwords = []
         hw_file = self.settings.path.parent / "hotwords.txt"
         if hw_file.exists():
             hotwords = [ln.strip() for ln in hw_file.read_text(encoding="utf-8").splitlines() if ln.strip()]
         self._corrector = Corrector(
-            OllamaClient(base, timeout=float(self.settings.get("llm.timeout", 90))), model, hotwords
+            OllamaClient(base, timeout=float(self.settings.get("llm.timeout", 90))), model, hotwords,
+            batch=int(self.settings.get("llm.fix_batch", 3)),
+            think_off=bool(self.settings.get("llm.think_off", True)),
+            min_similar=float(self.settings.get("llm.fix_min_similar", 0.97)),
         )
         self._llm_wake = threading.Event()
         threading.Thread(target=self._prepare_llm, name="llmprep", daemon=True).start()

@@ -21,3 +21,10 @@ assets/app.png
 phase3/diar_eval/*.m4a
 phase3/diar_eval/*.mp4
 phase3/diar_eval/scan_out.txt
+
+# 评测语料中的音视频（体积大且是第三方内容，不入仓库）
+bench/corpus/*.m4a
+bench/corpus/*.mp4
+bench/corpus/*.part
+bench/corpus/*.wav
+bench/*.log

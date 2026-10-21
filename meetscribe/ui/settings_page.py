@@ -340,7 +340,7 @@ class SettingsPage(QWidget):
         self.cmb_refine.setMinimumContentsLength(16)
         self.cmb_refine.addItem("自动（推荐：离线 Paraformer）", "auto")
         self.cmb_refine.addItem("强制离线 Paraformer", "paraformer")
-        self.cmb_refine.addItem("SenseVoice（多语种，英文术语较弱）", "sense_voice")
+        self.cmb_refine.addItem("SenseVoice（多语种；实测带背景音乐/多人抢话时会明显变差）", "sense_voice")
         self.cmb_refine.addItem("关闭精修（省内存）", "off")
         self.cmb_refine.setMaximumWidth(430)
         lay.addWidget(_row("精修模型", self.cmb_refine, stretch=False))
@@ -360,7 +360,9 @@ class SettingsPage(QWidget):
         self.spin_endpoint.setSingleStep(0.1)
         self.spin_endpoint.setSuffix(" 秒")
         self.spin_endpoint.setFixedWidth(150)
-        lay.addWidget(_row("断句静音", self.spin_endpoint, "越小断句越碎，越大整段越长", stretch=False))
+        lay.addWidget(_row("断句静音", self.spin_endpoint,
+                           "越小断句越碎、越大整段越长；多人抢话/快节奏建议 0.6~0.8，安静会议 1.2",
+                           stretch=False))
         return card
 
     def _build_test(self) -> QFrame:
@@ -419,14 +421,39 @@ class SettingsPage(QWidget):
         self.cmb_sum_model = NoWheelComboBox()
         self.cmb_sum_model.setEditable(True)
         for box, items in (
-            (self.cmb_fix_model, ["qwen2.5:3b-instruct", "qwen2.5:7b-instruct", "qwen3:4b"]),
-            (self.cmb_sum_model, ["qwen2.5:7b-instruct", "qwen2.5:3b-instruct", "qwen3:8b"]),
+            (self.cmb_fix_model, ["qwen2.5:7b-instruct", "qwen2.5:3b-instruct"]),
+            (self.cmb_sum_model, ["qwen2.5:7b-instruct", "qwen2.5:3b-instruct"]),
         ):
             box.addItems(items)
         for box in (self.cmb_fix_model, self.cmb_sum_model):
             box.setFixedWidth(260)
         lay.addWidget(_row("纠错模型", self.cmb_fix_model, stretch=False))
         lay.addWidget(_row("纪要模型", self.cmb_sum_model, stretch=False))
+
+        self.chk_fix_enabled = QCheckBox(
+            "启用上下文纠错（实测：本机模型改好 4 句同时改坏 5 句，净收益为负，默认关闭；"
+            "有明显同音错字困扰再开）")
+        lay.addWidget(self.chk_fix_enabled)
+
+        self.spin_fix_batch = NoWheelSpinBox()
+        self.spin_fix_batch.setRange(1, 8)
+        self.spin_fix_batch.setSingleStep(1)
+        self.spin_fix_batch.setSuffix(" 句/批")
+        self.spin_fix_batch.setFixedWidth(140)
+        lay.addWidget(_row("纠错批量", self.spin_fix_batch,
+                           "实测：一次给 8 句会让小模型崩塌（整批改成一个样甚至改坏）；3 句最稳",
+                           stretch=False))
+
+        self.spin_fix_sim = NoWheelDoubleSpinBox()
+        self.spin_fix_sim.setRange(0.70, 1.00)
+        self.spin_fix_sim.setSingleStep(0.01)
+        self.spin_fix_sim.setFixedWidth(120)
+        lay.addWidget(_row("纠错严格度", self.spin_fix_sim,
+                           "改后与原文的相似度下限：0.97=只改一两字（实测零伤害），调低=改得更多但可能改坏",
+                           stretch=False))
+
+        self.chk_think_off = QCheckBox("压制模型思考链（部分 qwen3 版本会把分析过程当正文吐出来）")
+        lay.addWidget(self.chk_think_off)
 
         self.btn_llm_test = QPushButton("检测连接与模型")
         self.btn_llm_test.setObjectName("Ghost")
@@ -478,8 +505,12 @@ class SettingsPage(QWidget):
         self.edit_root.setText(str(s.get("storage.session_root", "data/sessions")))
         self.chk_llm.setChecked(bool(s.get("llm.enabled", False)))
         self.edit_llm_url.setText(str(s.get("llm.base_url", "http://127.0.0.1:11434")))
-        self.cmb_fix_model.setCurrentText(str(s.get("llm.fix_model", "qwen3:4b")))
-        self.cmb_sum_model.setCurrentText(str(s.get("llm.summary_model", "qwen3:8b")))
+        self.cmb_fix_model.setCurrentText(str(s.get("llm.fix_model", "qwen2.5:7b-instruct")))
+        self.cmb_sum_model.setCurrentText(str(s.get("llm.summary_model", "qwen2.5:7b-instruct")))
+        self.chk_fix_enabled.setChecked(bool(s.get("llm.fix_enabled", False)))
+        self.spin_fix_batch.setValue(int(s.get("llm.fix_batch", 3)))
+        self.chk_think_off.setChecked(bool(s.get("llm.think_off", True)))
+        self.spin_fix_sim.setValue(float(s.get("llm.fix_min_similar", 0.97)))
 
     def refresh_devices(self) -> None:
         self.cmb_mic.blockSignals(True)
@@ -679,6 +710,10 @@ class SettingsPage(QWidget):
         s.set("llm.base_url", self.edit_llm_url.text().strip() or "http://127.0.0.1:11434")
         s.set("llm.fix_model", self.cmb_fix_model.currentText().strip())
         s.set("llm.summary_model", self.cmb_sum_model.currentText().strip())
+        s.set("llm.fix_enabled", self.chk_fix_enabled.isChecked())
+        s.set("llm.fix_batch", self.spin_fix_batch.value())
+        s.set("llm.think_off", self.chk_think_off.isChecked())
+        s.set("llm.fix_min_similar", round(self.spin_fix_sim.value(), 2))
 
         mic_name = self.cmb_mic.currentData() or ""
         s.set("audio.mic_name", mic_name)

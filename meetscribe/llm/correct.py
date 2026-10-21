@@ -19,7 +19,11 @@ SYSTEM = """你是中文会议转写的校稿员。输入是语音识别（ASR�
 2. 禁止润色、改写、调整语序、增删标点以外的内容；句子意思不许变。
 3. 不确定的一律不动。宁可漏改，也不要改错。
 4. 术语表里出现过的写法必须照抄术语表。
-5. 输出格式：每行一条，`编号|改好的句子`，条数与编号必须和输入完全一致，不要解释。"""
+5. 输出格式：每行一条，`编号|改好的句子`，条数与编号必须和输入完全一致。
+6. 严禁输出分析、思路、解释、前言后语；第一行必须就是 `1|...`，不要复述规则，不要把多条句子改成一样的内容。"""
+
+# 部分 qwen3 版本不听 think:false，把思维过程写进正文；用 <arg_key:6124c78e> 指令硬压一次
+NO_THINK = "<arg_key:6124c78e> 不要输出思考过程。直接按格式输出结果。\n"
 
 
 @dataclass
@@ -42,43 +46,53 @@ def _similar(a: str, b: str) -> float:
     return SequenceMatcher(None, na, nb).ratio()
 
 
-def _accept(old: str, new: str) -> bool:
+# 接受守卫：只放行"几乎一样、只动了极少字"的修正。
+# 实测（26 句真实样本，qwen2.5:7b）：
+#   相似度≥0.75 → 采纳 12 条、改好 4 改坏 5，净收益为负；
+#   相似度≥0.97 → 采纳 5 条、改好 4 改坏 0，零伤害（只修正长句里的一两字）；
+#   按"改了几个字"判定 → 会放进更多坏修改，反而更差。
+# 所以默认取最保守档，用户可在设置里调低"纠错严格度"换取更多修正。
+FIX_MIN_SIMILAR = 0.97
+
+
+def _accept(old: str, new: str, min_similar: float = FIX_MIN_SIMILAR) -> bool:
     a, b = _norm(old), _norm(new)
     if not b:
         return False
     if len(b) < 0.7 * len(a) or len(b) > 1.3 * len(a):
         return False
-    return _similar(old, new) >= 0.75
+    return _similar(old, new) >= min_similar
 
 
 class Corrector:
-    def __init__(self, client: OllamaClient, model: str, hotwords: list[str] | None = None) -> None:
+    def __init__(
+        self,
+        client: OllamaClient,
+        model: str,
+        hotwords: list[str] | None = None,
+        batch: int = 3,
+        think_off: bool = True,
+        min_similar: float = FIX_MIN_SIMILAR,
+    ) -> None:
         self.client = client
         self.model = model
         self.hotwords = [w for w in (hotwords or []) if w.strip()]
+        self.batch = max(1, min(8, int(batch)))
+        self.think_off = think_off
+        self.min_similar = min_similar
         self.last_stats: dict[str, float] = {}
+        self.rejected = 0   # 被"退化输出"守卫拦下的批次数，便于诊断
 
     def _glossary(self) -> str:
         if not self.hotwords:
             return ""
         return "\n术语表（正确写法）：" + "、".join(self.hotwords[:80])
 
-    def fix(self, items: list[FixRequest]) -> dict[tuple[str, int], str]:
-        """批量纠错，返回 {key: 新文本}，只包含真正被修正的条目。"""
-        if not items:
-            return {}
-        lines = [f"{i+1}|{it.text}" for i, it in enumerate(items)]
-        user = self._glossary() + "\n\n待校稿句子：\n" + "\n".join(lines)
-        try:
-            res = self.client.chat(
-                self.model, SYSTEM, user,
-                temperature=0.0, num_predict=64 * len(items) + 128,
-            )
-        except OllamaError:
-            return {}
-        out: dict[tuple[str, int], str] = {}
-        for raw in res.text.splitlines():
-            raw = raw.strip()
+    def _parse(self, text: str, items: list[FixRequest]) -> dict[int, str]:
+        """解析模型输出：容忍思考前言、markdown 代码块；识别"退化"输出（全批相同）。"""
+        got: dict[int, str] = {}
+        for raw in text.splitlines():
+            raw = raw.strip().strip("`").strip()
             if not raw or "|" not in raw:
                 continue
             head, _, body = raw.partition("|")
@@ -89,14 +103,50 @@ class Corrector:
             if not 0 <= i < len(items):
                 continue
             body = body.strip().strip("`").strip()
-            old = items[i].text
-            if body and body != old and _accept(old, body):
-                out[items[i].key] = body
+            if body:
+                got.setdefault(i, body)
+
+        # 退化守卫：多条输入却只给出一种结果（小模型常见崩塌）→ 整批作废
+        if len(items) > 1 and len(got) > 1 and len({v for v in got.values()}) == 1:
+            self.rejected += 1
+            return {}
+        return got
+
+    def fix(self, items: list[FixRequest]) -> dict[tuple[str, int], str]:
+        """批量纠错，返回 {key: 新文本}，只包含真正被修正的条目。
+
+        实测：一次喂 8 句会让小模型崩塌（把整批改成一个样、甚至改坏），
+        所以内部按 self.batch（默认 3）切片，逐批请求。
+        """
+        if not items:
+            return {}
+        out: dict[tuple[str, int], str] = {}
+        seconds = prompt_tok = eval_tok = 0.0
+        for start in range(0, len(items), self.batch):
+            chunk = items[start:start + self.batch]
+            lines = [f"{i+1}|{it.text}" for i, it in enumerate(chunk)]
+            user = self._glossary() + "\n\n待校稿句子：\n" + "\n".join(lines)
+            if self.think_off:
+                user = NO_THINK + user
+            try:
+                res = self.client.chat(
+                    self.model, SYSTEM, user,
+                    temperature=0.0, num_predict=64 * len(chunk) + 128,
+                )
+            except OllamaError:
+                continue
+            seconds += res.seconds
+            prompt_tok += res.prompt_tokens
+            eval_tok += res.eval_tokens
+            for i, body in self._parse(res.text, chunk).items():
+                old = chunk[i].text
+                if body != old and _accept(old, body, self.min_similar):
+                    out[chunk[i].key] = body
         self.last_stats = {
             "sent": len(items),
             "fixed": len(out),
-            "seconds": res.seconds,
-            "prompt_tokens": res.prompt_tokens,
-            "eval_tokens": res.eval_tokens,
+            "seconds": seconds,
+            "prompt_tokens": prompt_tok,
+            "eval_tokens": eval_tok,
         }
         return out
