@@ -111,8 +111,21 @@ def stage_runtime_files() -> None:
     shutil.copytree(ROOT / "config", dst_cfg)
     print("已复制 config/")
 
-    # 会话目录留空，首次录音自动创建
-    (APP_DIR / "data" / "sessions").mkdir(parents=True, exist_ok=True)
+    # 会话目录：随包带历史会话（存在才复制，不存在则留空首次录音自动创建）
+    dst_sessions = APP_DIR / "data" / "sessions"
+    dst_sessions.mkdir(parents=True, exist_ok=True)
+    src_sessions = ROOT / "data" / "sessions"
+    if src_sessions.exists():
+        n = 0
+        for child in src_sessions.iterdir():
+            target = dst_sessions / child.name
+            if not target.exists():
+                if child.is_dir():
+                    shutil.copytree(child, target)
+                else:
+                    shutil.copy2(child, target)
+                n += 1
+        print(f"已随包复制 {n} 个历史会话")
 
 
 def make_shortcut(exe: Path) -> Path:
