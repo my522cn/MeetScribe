@@ -8,6 +8,7 @@ from pathlib import Path
 from PySide6.QtCore import QObject, Signal
 
 from ..asr.engine import ASRConfig, StreamingASR
+from ..asr.diarize import EMB_ASSIGN_THRESHOLD as EMB_THRESHOLD_DEFAULT
 from ..asr.diarize import SpeakerRegistry, sentence_features
 from ..asr.pipeline import Caption, LivePipeline
 from ..asr.refine import RefineJob, RefineService
@@ -109,23 +110,26 @@ class CaptureWorker(QObject):
         if self.recorder is not None:
             return
         self.mode = mode
-        # 线下模式对麦克风轨做说话人区分：有声纹模型用嵌入聚类，没有就退回 F0+质心
+        # 麦克风轨做说话人区分（线上线下都启用）：有声纹模型用嵌入聚类，没有就退回 F0+质心
         self.diarizer = None
         self._emb_profiles: dict[str, list[float]] = {}
-        if mode == "offline":
-            from ..asr.diarize import EmbeddingSpeakerRegistry, SpeakerRegistry, embedding_model_path
+        from ..asr.diarize import EmbeddingSpeakerRegistry, SpeakerRegistry, embedding_model_path
 
-            model_path = embedding_model_path(self._models_root)
-            if model_path is not None:
-                try:
-                    self.diarizer = EmbeddingSpeakerRegistry(model_path)
-                except Exception:  # noqa: BLE001
-                    self.diarizer = None
-            if self.diarizer is None:
-                self.diarizer = SpeakerRegistry()
-                self._seed_f0_profiles()
-            else:
-                self._seed_emb_profiles()
+        model_path = embedding_model_path(self._models_root)
+        if model_path is not None:
+            try:
+                self.diarizer = EmbeddingSpeakerRegistry(
+                    model_path,
+                    threshold=float(self.settings.get("asr.speaker_threshold", EMB_THRESHOLD_DEFAULT)),
+                    max_speakers=int(s.get("asr.speaker_max", 4)),
+                )
+            except Exception:  # noqa: BLE001
+                self.diarizer = None
+        if self.diarizer is None:
+            self.diarizer = SpeakerRegistry()
+            self._seed_f0_profiles()
+        else:
+            self._seed_emb_profiles()
         self._diarize_log = None  # 特征调试日志（写入会话目录 diarize.log）
         s = self.settings
         try:
@@ -236,10 +240,10 @@ class CaptureWorker(QObject):
     def set_mode(self, mode: str) -> None:
         """录音中热切换线上线下。
 
-        双轨（mic+loop）本来就一直在录，切换只改变“之后的句子怎么标注说话人”：
-        - 切到线下：临时建声纹聚类器（带长期档案预置），麦克风轨开始分说话人A/B/C/D
-        - 切到线上：恢复 我/对方 按轨标注；聚类器保留，再切回线下可继续沿用本场结果
-        已写盘的历史句子不改标注——转写里能看出模式切换的“分界线”。
+        双轨（mic+loop）本来就一直在录，切换只改变"之后的句子怎么标注说话人"：
+        - 两种模式下麦克风轨都按声纹聚类拆成说话人A/B/C/D（聚类器 start() 时已建好）
+        - 线上：扬声器回采标"对方"；线下：回采轨标"本地回声"语义由 SPEAKER_OFFLINE 决定
+        已写盘的历史句子不改标注——转写里能看出模式切换的"分界线"。
         """
         if mode == self.mode:
             return
@@ -247,7 +251,7 @@ class CaptureWorker(QObject):
         if self.recorder is None:
             return  # 未在录音：下次 start() 会按新参数初始化
         self.recorder.manifest.mode = mode  # 管理页按最终使用的模式显示
-        if mode == "offline" and self.diarizer is None:
+        if self.diarizer is None:
             self.diarizer = SpeakerRegistry()
             try:
                 from ..session_tools import load_global_profiles
@@ -256,7 +260,7 @@ class CaptureWorker(QObject):
                     self.diarizer.seed(name, feat)
             except Exception:  # noqa: BLE001
                 pass
-        if mode == "offline" and self.recorder is not None and getattr(self, "_diarize_log", None) is None:
+        if self.recorder is not None and getattr(self, "_diarize_log", None) is None:
             try:
                 self._diarize_log = open(  # noqa: SIM115
                     self.recorder.session_dir / "diarize.log", "a", encoding="utf-8"
@@ -383,8 +387,9 @@ class CaptureWorker(QObject):
         base = SPEAKER_ONLINE if self.mode == "online" else SPEAKER_OFFLINE
         speaker = base.get(cap.track, cap.track)
         mixed = 0.0
-        # 线下模式：麦克风轨不分"本地"，按声纹聚类拆成说话人A/B/C/D
-        if self.mode == "offline" and cap.track == "mic" and self.diarizer is not None:
+        # 麦克风轨不分"本地/我"，按声纹聚类拆成说话人A/B/C/D（线上线下都启用）；
+        # 扬声器回采轨保持"对方"（远端一路，无需拆分）
+        if cap.track == "mic" and self.diarizer is not None:
             if getattr(self.diarizer, "assign_sentence", None) is not None:
                 # 嵌入版：滑窗投票，能识别"一句里两个人抢话"并给出比例
                 speaker, mixed = self.diarizer.assign_sentence(cap.audio)

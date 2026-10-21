@@ -15,7 +15,9 @@
     "endpoint_silence": 1.2,
     "live_refine": true,
     "live_refine_after": 6.0,
-    "live_refine_every": 2.5
+    "live_refine_every": 2.5,
+    "speaker_threshold": 0.38,
+    "speaker_max": 4
   },
   "storage": {
     "session_root": "data/sessions"

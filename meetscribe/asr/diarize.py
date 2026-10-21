@@ -26,12 +26,13 @@ SCALE_CENT = 900.0
 NEW_SPEAKER_THRESHOLD = 1.15   # 归一化距离超过它就认为是新说话人
 MAX_SPEAKERS = 4
 
-# 嵌入版默认参数（阈值来自 diar_eval 在真实语料上的扫描）
+# 嵌入版默认参数（阈值来自 diar_eval 在真实语料上的扫描；可被 settings 覆盖）
 EMB_MODEL_REL = "campplus_zh/campplus_zh.onnx"
-EMB_ASSIGN_THRESHOLD = 0.45
+EMB_ASSIGN_THRESHOLD = 0.38
 EMB_WIN_SEC = 1.0
 EMB_HOP_SEC = 0.5
 EMB_WIN_RMS = 0.008   # 窗口能量门限（AGC 之后正常说话远高于它）
+EMB_MIN_NEW_WINDOWS = 2  # 一句里至少这么多个"不匹配"窗口才允许立新说话人（防噪声单窗立簇）
 
 LABELS = ["说话人A", "说话人B", "说话人C", "说话人D"]
 
@@ -169,6 +170,7 @@ class EmbeddingSpeakerRegistry:
         max_speakers: int = MAX_SPEAKERS,
         win_sec: float = EMB_WIN_SEC,
         hop_sec: float = EMB_HOP_SEC,
+        min_new_windows: int = EMB_MIN_NEW_WINDOWS,
     ) -> None:
         import sherpa_onnx
 
@@ -178,6 +180,7 @@ class EmbeddingSpeakerRegistry:
         self._ext = sherpa_onnx.SpeakerEmbeddingExtractor(cfg)
         self.threshold = threshold
         self.max_speakers = max_speakers
+        self.min_new_windows = max(1, min_new_windows)
         self._win = int(win_sec * SR)
         self._hop = int(hop_sec * SR)
         self._cents: list[np.ndarray] = []
@@ -235,25 +238,40 @@ class EmbeddingSpeakerRegistry:
             embs.append(np.asarray(self._ext.compute(stream), dtype=np.float32))
 
         votes: list[int] = []
-        for e in embs:
-            if not self._cents:
-                self._cents.append(e)
-                self._counts.append(1)
-                self._names.append(LABELS[0])
-                votes.append(0)
-                continue
-            sims = [_cos(e, c) for c in self._cents]
-            best = int(np.argmax(sims))
-            if sims[best] >= self.threshold or len(self._cents) >= self.max_speakers:
-                votes.append(best)
+        if not self._cents:
+            # 首句：直接建第一个说话人
+            self._cents.append(np.mean(embs, axis=0))
+            self._counts.append(len(embs))
+            self._names.append(LABELS[0])
+            return self._names[0], 0.0
+
+        # 第一遍：逐窗找最像的质心；低于阈值的是"孤儿"（可能是新人/噪声）
+        sims = [[_cos(e, c) for c in self._cents] for e in embs]
+        best = [int(np.argmax(s)) for s in sims]
+        best_sim = [sims[k][best[k]] for k in range(len(embs))]
+        orphans = [k for k in range(len(embs)) if best_sim[k] < self.threshold]
+
+        # 第二遍：立新说话人需要满足其一（防止信道噪声随机立簇）——
+        #   a) 孤儿构成多数且 >= min_new_windows（整句基本是新人）
+        #   b) 全部窗口都是孤儿、且最高相似度显著低于阈值（-0.10 余量）：
+        #      短句（1s 单窗）也允许立簇，但要求"明显不像"而不是"差一点不像"
+        new_idx = -1
+        if len(self._cents) < self.max_speakers and orphans:
+            majority = len(orphans) >= self.min_new_windows and len(orphans) * 2 > len(embs)
+            all_orphan = len(orphans) == len(embs) and max(
+                best_sim[k] for k in orphans
+            ) < self.threshold - 0.10
+            if majority or all_orphan:
+                self._cents.append(np.mean([embs[k] for k in orphans], axis=0))
+                self._counts.append(0)
+                self._names.append(LABELS[len(self._cents) - 1])
+                new_idx = len(self._cents) - 1
+
+        for k in range(len(embs)):
+            if new_idx >= 0 and k in orphans:
+                votes.append(new_idx)
             else:
-                if len(self._cents) < self.max_speakers:
-                    self._cents.append(e)
-                    self._counts.append(0)
-                    self._names.append(LABELS[len(self._cents) - 1])
-                    votes.append(len(self._cents) - 1)
-                else:
-                    votes.append(best)
+                votes.append(best[k])
 
         counts = np.bincount(votes, minlength=len(self._cents))
         winner = int(np.argmax(counts))
