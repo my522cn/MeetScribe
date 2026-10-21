@@ -1,0 +1,129 @@
+426 INFO: PyInstaller: 6.22.3, contrib hooks: 2026.9
+427 INFO: Python: 3.13.14
+467 INFO: Platform: Windows-11-10.0.26300-SP0
+468 INFO: Python environment: C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\.venv
+473 INFO: wrote C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\build\MeetScribe.spec
+491 INFO: Removing temporary files and cleaning cache in C:\Users\my522\AppData\Local\pyinstaller
+13089 INFO: Module search paths (PYTHONPATH):
+['C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Scripts\\pyinstaller.exe',
+ 'C:\\Users\\my522\\AppData\\Local\\Programs\\WorkBuddy\\resources\\app.asar.unpacked\\cli\\vendor\\shim',
+ 'C:\\Users\\my522\\.workbuddy\\binaries\\python\\versions\\3.13.12\\python313.zip',
+ 'C:\\Users\\my522\\.workbuddy\\binaries\\python\\versions\\3.13.12\\DLLs',
+ 'C:\\Users\\my522\\.workbuddy\\binaries\\python\\versions\\3.13.12\\Lib',
+ 'C:\\Users\\my522\\.workbuddy\\binaries\\python\\versions\\3.13.12',
+ 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv',
+ 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages',
+ 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe']
+15536 INFO: Appending 'binaries' from .spec
+15537 INFO: Appending 'datas' from .spec
+15544 INFO: checking Analysis
+15544 INFO: Building Analysis because Analysis-00.toc is non existent
+15544 INFO: Looking for Python shared library...
+15544 INFO: Using Python shared library: C:\Users\my522\.workbuddy\binaries\python\versions\3.13.12\python313.dll
+15544 INFO: Running Analysis Analysis-00.toc
+15544 INFO: Target bytecode optimization level: 0
+15544 INFO: Initializing module dependency graph...
+15548 INFO: Initializing module graph hook caches...
+15571 INFO: Analyzing modules for base_library.zip ...
+19127 INFO: Processing standard module hook 'hook-encodings.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+21292 INFO: Processing standard module hook 'hook-math.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+21588 INFO: Processing standard module hook 'hook-heapq.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+23049 INFO: Processing standard module hook 'hook-pickle.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+24659 INFO: Caching module dependency graph...
+24705 INFO: Analyzing C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\run_app.py
+24722 INFO: Processing standard module hook 'hook-PySide6.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+25639 INFO: Processing standard module hook 'hook-shiboken6.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+25794 INFO: Processing standard module hook 'hook-PySide6.QtNetwork.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+30030 INFO: Processing standard module hook 'hook-PySide6.QtCore.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+36385 INFO: Processing standard module hook 'hook-PySide6.QtGui.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+66924 INFO: Processing standard module hook 'hook-PySide6.QtWidgets.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+72933 INFO: Processing standard module hook 'hook-sounddevice.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+72964 INFO: Processing standard module hook 'hook-platform.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+73008 INFO: Processing standard module hook 'hook-sysconfig.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+73015 INFO: Processing standard module hook 'hook-_ctypes.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+73086 INFO: Processing standard module hook 'hook-numpy.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+73513 INFO: Processing pre-safe-import-module hook 'hook-typing_extensions.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+73518 INFO: SetuptoolsInfo: initializing cached setuptools info...
+75730 INFO: Processing standard module hook 'hook-multiprocessing.util.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+75900 INFO: Processing standard module hook 'hook-xml.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+77094 INFO: Processing standard module hook 'hook-webbrowser.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+78342 INFO: Processing standard module hook 'hook-difflib.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+78862 INFO: Processing standard module hook 'hook-psutil.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+79476 INFO: Processing standard module hook 'hook-soundcard.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\soundcard\\__pyinstaller'
+79635 INFO: Processing standard module hook 'hook-pycparser.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+79794 INFO: Processing standard module hook 'hook-setuptools.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+79811 INFO: Processing pre-safe-import-module hook 'hook-distutils.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+79843 INFO: Processing pre-safe-import-module hook 'hook-jaraco.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+79845 INFO: Setuptools: 'jaraco' appears to be a full setuptools-vendored copy - creating alias to 'setuptools._vendor.jaraco'!
+79858 INFO: Processing pre-safe-import-module hook 'hook-more_itertools.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+79861 INFO: Setuptools: 'more_itertools' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.more_itertools'!
+79993 INFO: Processing standard module hook 'hook-_osx_support.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+80010 INFO: Processing pre-safe-import-module hook 'hook-packaging.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+80281 INFO: Processing standard module hook 'hook-setuptools._vendor.jaraco.text.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+80285 INFO: Processing pre-safe-import-module hook 'hook-importlib_resources.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+80299 INFO: Processing pre-safe-import-module hook 'hook-backports.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+80301 INFO: Setuptools: 'backports' appears to be a full setuptools-vendored copy - creating alias to 'setuptools._vendor.backports'!
+80811 INFO: Processing pre-safe-import-module hook 'hook-tomli.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+80813 INFO: Setuptools: 'tomli' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.tomli'!
+81426 INFO: Processing pre-safe-import-module hook 'hook-wheel.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_safe_import_module'
+81428 INFO: Setuptools: 'wheel' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.wheel'!
+82280 INFO: Processing standard module hook 'hook-comtypes.client.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+82745 INFO: Processing standard module hook 'hook-soundfile.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+82933 INFO: Processing standard module hook 'hook-pypinyin.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\pypinyin\\__pyinstaller'
+83215 INFO: Analyzing hidden import 'onnxruntime'
+83228 INFO: Processing standard module hook 'hook-onnxruntime.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\stdhooks'
+83349 INFO: Processing pre-safe-import-module hook 'hook-tensorflow.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\_pyinstaller_hooks_contrib\\pre_safe_import_module'
+83356 INFO: Analyzing hidden import 'sherpa_onnx.__main__'
+83361 INFO: Analyzing hidden import 'sherpa_onnx.cli'
+83367 INFO: Processing module hooks (post-graph stage)...
+83377 WARNING: Hidden import "pycparser.lextab" not found!
+83377 WARNING: Hidden import "pycparser.yacctab" not found!
+83474 INFO: Performing binary vs. data reclassification (210 entries)
+83636 INFO: Looking for ctypes DLLs
+83827 INFO: Analyzing run-time hooks ...
+83831 INFO: Including run-time hook 'pyi_rth_inspect.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+83834 INFO: Including run-time hook 'pyi_rth_pkgutil.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+83837 INFO: Including run-time hook 'pyi_rth_multiprocessing.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+83840 INFO: Including run-time hook 'pyi_rth_setuptools.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+83842 INFO: Including run-time hook 'pyi_rth_pyside6.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks'
+83844 INFO: Processing pre-find-module-path hook 'hook-_pyi_rth_utils.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks\\pre_find_module_path'
+83849 INFO: Processing standard module hook 'hook-_pyi_rth_utils.py' from 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PyInstaller\\hooks'
+83863 INFO: Creating base_library.zip...
+83882 INFO: Looking for dynamic libraries
+87288 INFO: Extra DLL search directories (AddDllDirectory): ['C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\shiboken6', 'C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\numpy.libs']
+87288 INFO: Extra DLL search directories (PATH): ['C:\\Users\\my522\\WorkBuddy\\2026-10-20-00-20-40\\MeetScribe\\.venv\\Lib\\site-packages\\PySide6']
+91558 INFO: Warnings written to C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\build\pyi\MeetScribe\warn-MeetScribe.txt
+91628 INFO: Graph cross-reference written to C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\build\pyi\MeetScribe\xref-MeetScribe.html
+91670 INFO: checking PYZ
+91670 INFO: Building PYZ because PYZ-00.toc is non existent
+91670 INFO: Building PYZ (ZlibArchive) C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\build\pyi\MeetScribe\PYZ-00.pyz
+92308 INFO: Building PYZ (ZlibArchive) C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\build\pyi\MeetScribe\PYZ-00.pyz completed successfully.
+92371 INFO: checking PKG
+92372 INFO: Building PKG because PKG-00.toc is non existent
+92372 INFO: Building PKG (CArchive) MeetScribe.pkg
+92416 INFO: Building PKG (CArchive) MeetScribe.pkg completed successfully.
+92418 INFO: Bootloader C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\.venv\Lib\site-packages\PyInstaller\bootloader\Windows-64bit-intel\runw.exe
+92418 INFO: checking EXE
+92418 INFO: Building EXE because EXE-00.toc is non existent
+92418 INFO: Building EXE from EXE-00.toc
+92419 INFO: Copying bootloader EXE to C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\build\pyi\MeetScribe\MeetScribe.exe
+92580 INFO: Copying icon to EXE
+92723 INFO: Copying 0 resources to EXE
+92723 INFO: Embedding manifest in EXE
+92823 INFO: Appending PKG archive to EXE
+92982 INFO: Fixing EXE headers
+93425 INFO: Building EXE from EXE-00.toc completed successfully.
+93431 INFO: checking COLLECT
+93431 INFO: Building COLLECT because COLLECT-00.toc is non existent
+93433 INFO: Building COLLECT COLLECT-00.toc
+94974 INFO: Building COLLECT COLLECT-00.toc completed successfully.
+94981 INFO: Build complete! The results are available in: C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\release
+上一版已留档：release/MeetScribe_prev/
+$ C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\.venv\Scripts\pyinstaller.exe --noconfirm --clean --onedir --windowed --name MeetScribe --distpath C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\release --workpath C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\build\pyi --specpath C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\build --icon C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\assets\app.ico --add-data C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\assets;assets --collect-all sherpa_onnx --collect-binaries soundcard --hidden-import sounddevice --hidden-import soundfile --hidden-import soundcard --hidden-import cffi --hidden-import onnxruntime --exclude-module tkinter --exclude-module matplotlib --exclude-module scipy --exclude-module pandas --exclude-module IPython --exclude-module pytest --exclude-module PySide6.QtWebEngineCore --exclude-module PySide6.QtWebEngineWidgets --exclude-module PySide6.Qt3DCore --exclude-module PySide6.QtMultimedia --exclude-module PySide6.QtQuick --exclude-module PySide6.QtQml --exclude-module PySide6.QtDesigner C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\run_app.py
+复制模型（约 790MB）…
+已复制 config/
+已随包复制 32 个历史会话
+
+打包完成：C:\Users\my522\WorkBuddy\2026-10-20-00-20-40\MeetScribe\release\MeetScribe\MeetScribe.exe
+目录体积：1.01 GB　耗时 111s
+created: C:\Users\my522\OneDrive\Desktop\����תд����.lnk

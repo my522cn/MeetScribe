@@ -121,7 +121,7 @@ class CaptureWorker(QObject):
                 self.diarizer = EmbeddingSpeakerRegistry(
                     model_path,
                     threshold=float(self.settings.get("asr.speaker_threshold", EMB_THRESHOLD_DEFAULT)),
-                    max_speakers=int(s.get("asr.speaker_max", 4)),
+                    max_speakers=max(1, min(26, int(self.settings.get("asr.speaker_max", 4)))),
                 )
             except Exception:  # noqa: BLE001
                 self.diarizer = None
@@ -380,10 +380,38 @@ class CaptureWorker(QObject):
                 self.refined.emit(track, start, new)
 
     # ---------- 内部 ----------
+    def _is_echo_of_loop(self, track: str, start_ms: int, end_ms: int, text: str) -> bool:
+        """扬声器播放声被麦克风重新拾音（声学回声）会整句复刻回采轨内容。
+
+        判定：与某条回采轨句子时间重叠（±1.5s）且文本高度相似 → 这句是回声，
+        丢弃，避免同一段话被标成两个人。只在麦克风轨上做（回声只会从喇叭进麦克风）。
+        """
+        if track != "mic":
+            return False
+        import difflib
+
+        with self._lock:
+            loop_rows = [
+                r for r in self._records
+                if r["track"] == "loop" and r["start_ms"] < end_ms + 1500 and start_ms < r["end_ms"] + 1500
+            ]
+        a = _normalize(text)
+        if not a:
+            return False
+        for r in loop_rows:
+            b = _normalize(r["text"])
+            if not b:
+                continue
+            if difflib.SequenceMatcher(None, a, b).ratio() >= 0.6:
+                return True
+        return False
+
     def _on_final(self, cap: Caption) -> None:
         text = self.post.process(cap.text)
         if not text:
             return
+        if self._is_echo_of_loop(cap.track, cap.start_ms, cap.end_ms, text):
+            return  # 扬声器回声：回采轨已有这句，麦克风拾到的副本不重复入库
         base = SPEAKER_ONLINE if self.mode == "online" else SPEAKER_OFFLINE
         speaker = base.get(cap.track, cap.track)
         mixed = 0.0

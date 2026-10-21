@@ -94,6 +94,35 @@ def build() -> Path:
     return exe
 
 
+def _merge_user_settings(defaults_path, user_path) -> None:
+    """把开发侧 settings.json 的"新增键"合并进用户的 settings.json。
+
+    规则：同名键一律保留用户值（用户调过的参数不许被打包重置）；
+    用户没有的键（新版本新增参数）从默认值补进来。
+    """
+    import json
+
+    if not defaults_path.exists():
+        return
+    defaults = json.loads(defaults_path.read_text(encoding="utf-8"))
+    if user_path.exists():
+        user = json.loads(user_path.read_text(encoding="utf-8"))
+    else:
+        user = {}
+
+    def merge(dst: dict, src: dict) -> None:
+        for k, v in src.items():
+            if k not in dst:
+                dst[k] = v
+            elif isinstance(v, dict) and isinstance(dst[k], dict):
+                merge(dst[k], v)
+
+    merge(user, defaults)
+    tmp = user_path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(user, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp.replace(user_path)
+
+
 def stage_runtime_files() -> None:
     """把运行时资源放到 exe 旁边：models / config / data。"""
     # 模型（约 790MB）：首次复制后不再重复，节省时间
@@ -105,17 +134,28 @@ def stage_runtime_files() -> None:
         print("模型已存在，跳过复制")
 
     # 配置（hotwords / replacements / settings）
+    # settings.json 做"深合并"：release 里用户改过的键保留用户值，开发侧新增的键补进来。
+    # 直接 rmtree+copytree 会把用户调好的参数（如 speaker_max）每次打包都重置掉。
     dst_cfg = APP_DIR / "config"
     if dst_cfg.exists():
-        shutil.rmtree(dst_cfg)
-    shutil.copytree(ROOT / "config", dst_cfg)
-    print("已复制 config/")
+        _merge_user_settings(ROOT / "config" / "settings.json", dst_cfg / "settings.json")
+        for name in ("hotwords.txt", "replacements.txt"):
+            src = ROOT / "config" / name
+            if src.exists():
+                shutil.copy2(src, dst_cfg / name)
+        print("已合并 config/（用户设置保留）")
+    else:
+        shutil.copytree(ROOT / "config", dst_cfg)
+        print("已复制 config/")
 
-    # 会话目录：随包带历史会话（存在才复制，不存在则留空首次录音自动创建）
+    # 会话目录：只在 release 还没有任何会话时做"首次带样"复制；
+    # 之后绝不合并——用户在应用里删掉的记录，开发目录的残留副本不允许再复活。
     dst_sessions = APP_DIR / "data" / "sessions"
     dst_sessions.mkdir(parents=True, exist_ok=True)
     src_sessions = ROOT / "data" / "sessions"
-    if src_sessions.exists():
+    if any(dst_sessions.iterdir()):
+        print("会话目录非空，跳过复制（保护用户删除操作）")
+    elif src_sessions.exists():
         n = 0
         for child in src_sessions.iterdir():
             target = dst_sessions / child.name

@@ -34,7 +34,7 @@ EMB_HOP_SEC = 0.5
 EMB_WIN_RMS = 0.008   # 窗口能量门限（AGC 之后正常说话远高于它）
 EMB_MIN_NEW_WINDOWS = 2  # 一句里至少这么多个"不匹配"窗口才允许立新说话人（防噪声单窗立簇）
 
-LABELS = ["说话人A", "说话人B", "说话人C", "说话人D"]
+LABELS = [f"说话人{chr(65 + i)}" for i in range(26)]  # A..Z，max_speakers 上限由此决定
 
 
 def sentence_features(audio: np.ndarray, sr: int = SR) -> tuple[float, float] | None:
