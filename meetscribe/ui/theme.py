@@ -127,6 +127,11 @@ QToolTip { background: #23262D; color: #FFFFFF; border: none; padding: 5px 9px; 
 
 /* ---------- 设置页 ---------- */
 QLabel#PageTitle { font-size: 20px; font-weight: 600; }
+/* 版本号：标题旁的小标签，等宽字体弱化处理，鼠标悬停看版本规则 */
+QLabel#VersionTag {
+    font-family: "Cascadia Mono", Consolas, monospace; font-size: 12px; color: #8A9099;
+    background: #F2F3F5; border-radius: 6px; padding: 3px 8px;
+}
 QLabel#SectionTitle { font-size: 13px; font-weight: 600; color: #40464F; }
 QLabel#FieldLabel { color: #646A73; }
 QLabel#Mono { font-family: "Cascadia Mono", Consolas, monospace; font-size: 12px; color: #5A6068; }

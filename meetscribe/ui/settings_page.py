@@ -18,6 +18,10 @@ from PySide6.QtWidgets import (
     QSpinBox, QTextEdit, QVBoxLayout, QWidget,
 )
 
+from .. import (
+    RECOMMEND_FIX_MODEL, RECOMMEND_FIX_REASON, RECOMMEND_SUMMARY_MODEL,
+    RECOMMEND_SUMMARY_REASON, __version__,
+)
 from ..audio import probe
 from ..audio.devices import list_input_devices, list_speakers
 from ..config import PROJECT_ROOT, Settings
@@ -192,6 +196,10 @@ class SettingsPage(QWidget):
         title = QLabel("设置")
         title.setObjectName("PageTitle")
         head.addWidget(title)
+        ver = QLabel(f"v{__version__}")
+        ver.setObjectName("VersionTag")
+        ver.setToolTip("版本号规则：大版本.小版本.修订版.日期（月日），每次更新递增")
+        head.addWidget(ver)
         head.addStretch(1)
         # 一键检测 + 推荐设置：检测硬件后直接把推荐参数填进来（放在"恢复默认"前面）
         self.btn_auto = QPushButton("一键检测 · 推荐设置")
@@ -413,6 +421,22 @@ class SettingsPage(QWidget):
         self.chk_llm = QCheckBox("启用本地大模型（需要本机运行 Ollama）")
         lay.addWidget(self.chk_llm)
 
+        # 推荐模型：实测结论直接摆出来，点"应用推荐"一键填入两个下拉
+        rec_w = QWidget()
+        rh = QHBoxLayout(rec_w)
+        rh.setContentsMargins(0, 0, 0, 0)
+        rh.setSpacing(10)
+        self.rec_text = QLabel()
+        self.rec_text.setObjectName("Hint")
+        self.rec_text.setWordWrap(True)
+        rh.addWidget(self.rec_text, 1)
+        self.btn_rec_apply = QPushButton("应用推荐")
+        self.btn_rec_apply.setObjectName("Ghost")
+        self.btn_rec_apply.setFixedWidth(96)
+        self.btn_rec_apply.clicked.connect(self._apply_recommend)
+        rh.addWidget(self.btn_rec_apply, 0, Qt.AlignmentFlag.AlignVCenter)
+        lay.addWidget(_row("推荐模型", rec_w))
+
         self.edit_llm_url = QLineEdit()
         lay.addWidget(_row("Ollama 地址", self.edit_llm_url))
 
@@ -429,10 +453,10 @@ class SettingsPage(QWidget):
             box.addItems(items)
         for box in (self.cmb_fix_model, self.cmb_sum_model):
             box.setFixedWidth(260)
-        lay.addWidget(_row("纠错模型", self.cmb_fix_model,
-                           "1.5b 实测零伤害且最快，推荐", stretch=False))
-        lay.addWidget(_row("纪要模型", self.cmb_sum_model,
-                           "14b 覆盖度最高，推荐；小内存可改 7b", stretch=False))
+        lay.addWidget(_row("纠错模型", self.cmb_fix_model, "越快越好，1.5b 就够",
+                           stretch=False))
+        lay.addWidget(_row("纪要模型", self.cmb_sum_model, "越大越全，但更慢更占内存",
+                           stretch=False))
 
         self.chk_fix_enabled = QCheckBox(
             "启用上下文纠错（1.5b 实测零伤害，每 25 秒过一遍最近几句的同音错字；"
@@ -483,6 +507,8 @@ class SettingsPage(QWidget):
         self.btn_test_loop.clicked.connect(lambda: self._test_device("loop"))
         self.btn_speak_test.clicked.connect(self._test_speak)
         self.btn_llm_test.clicked.connect(self._test_llm)
+        self.cmb_fix_model.currentTextChanged.connect(lambda _t: self._refresh_recommend())
+        self.cmb_sum_model.currentTextChanged.connect(lambda _t: self._refresh_recommend())
         self.probe.level.connect(self._on_level)
         self.probe.finished.connect(self._on_probe_done)
         self.probe.recognized.connect(self._on_recognized)
@@ -515,6 +541,7 @@ class SettingsPage(QWidget):
         self.spin_fix_batch.setValue(int(s.get("llm.fix_batch", 3)))
         self.chk_think_off.setChecked(bool(s.get("llm.think_off", True)))
         self.spin_fix_sim.setValue(float(s.get("llm.fix_min_similar", 0.97)))
+        self._refresh_recommend()
 
     def refresh_devices(self) -> None:
         self.cmb_mic.blockSignals(True)
@@ -753,6 +780,28 @@ class SettingsPage(QWidget):
         subprocess.Popen(["explorer", str(p)], shell=False)  # noqa: S603,S607
 
     # ---------- 大模型 ----------
+    def _refresh_recommend(self) -> None:
+        """刷新"推荐模型"行：列出实测最优组合，并标出当前选择是否一致。"""
+        if self.rec_text is None:
+            return
+        fix_now = self.cmb_fix_model.currentText().strip()
+        sum_now = self.cmb_sum_model.currentText().strip()
+        same = fix_now == RECOMMEND_FIX_MODEL and sum_now == RECOMMEND_SUMMARY_MODEL
+        tail = "当前已是推荐配置" if same else "当前与推荐不一致，可点『应用推荐』"
+        self.rec_text.setText(
+            f"纠错 {RECOMMEND_FIX_MODEL}：{RECOMMEND_FIX_REASON}\n"
+            f"纪要 {RECOMMEND_SUMMARY_MODEL}：{RECOMMEND_SUMMARY_REASON}\n"
+            f"{tail}"
+        )
+        self.btn_rec_apply.setEnabled(not same)
+
+    def _apply_recommend(self) -> None:
+        """一键填入实测最优的两个模型（还需点『保存配置』才生效）。"""
+        self.cmb_fix_model.setCurrentText(RECOMMEND_FIX_MODEL)
+        self.cmb_sum_model.setCurrentText(RECOMMEND_SUMMARY_MODEL)
+        self.llm_status.setText("已填入推荐模型，点右上角『保存配置』生效")
+        self._refresh_recommend()
+
     def _test_llm(self) -> None:
         self.llm_status.setText("检测中…")
 

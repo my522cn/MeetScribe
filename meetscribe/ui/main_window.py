@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QMessageBox, QPushButton, QStackedWidget, QSystemTrayIcon, QVBoxLayout, QWidget,
 )
 
+from .. import __version__, app_title
 from ..audio.devices import default_input_device, find_loopback_source
 from ..config import Settings
 from ..system.detect import MeetingDetector, capability
@@ -47,7 +48,7 @@ def make_icon() -> QIcon:
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("会议转写助手")
+        self.setWindowTitle(app_title())
         self.setWindowIcon(make_icon())
         self.resize(1180, 780)
         self.setMinimumSize(980, 640)
@@ -93,8 +94,12 @@ class MainWindow(QMainWindow):
         sl.setSpacing(6)
 
         brand = QLabel("会议转写助手")
-        brand.setStyleSheet("font-size:14px; font-weight:500; padding:0 8px 10px 8px;")
+        brand.setStyleSheet("font-size:14px; font-weight:500; padding:0 8px 0 8px;")
         sl.addWidget(brand)
+        # 侧边栏副标题：一眼看出当前跑的是哪个版本
+        ver = QLabel(f"v{__version__}")
+        ver.setStyleSheet("font-size:11px; color:#8A9099; padding:0 8px 10px 8px;")
+        sl.addWidget(ver)
 
         self.nav_group = QButtonGroup(self)
         self.btn_record = self._nav_button("录音")
@@ -146,7 +151,7 @@ class MainWindow(QMainWindow):
 
     def _build_tray(self) -> None:
         self.tray = QSystemTrayIcon(make_icon(), self)
-        self.tray.setToolTip("会议转写助手")
+        self.tray.setToolTip(app_title())
         menu = QMenu()
         self.act_show = QAction("显示主窗口", self)
         self.act_show.triggered.connect(self._restore)

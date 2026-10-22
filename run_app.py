@@ -65,7 +65,9 @@ def selftest() -> int:
             ok = False
             lines.append(f"[FAIL] {name}　{exc!r}")
 
-    lines.append(f"frozen={getattr(sys, 'frozen', False)} root={root}")
+    from meetscribe import __version__
+
+    lines.append(f"version=v{__version__} frozen={getattr(sys, 'frozen', False)} root={root}")
 
     def models() -> str:
         need = [

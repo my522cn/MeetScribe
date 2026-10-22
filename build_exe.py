@@ -196,8 +196,10 @@ def main() -> int:
     exe = build()
     stage_runtime_files()
     size = sum(p.stat().st_size for p in APP_DIR.rglob("*") if p.is_file()) / (1024 ** 3)
+    from meetscribe import __version__
+
     print(f"\n打包完成：{exe}")
-    print(f"目录体积：{size:.2f} GB　耗时 {time.time() - t0:.0f}s")
+    print(f"版本：v{__version__}　目录体积：{size:.2f} GB　耗时 {time.time() - t0:.0f}s")
     if "--no-link" not in sys.argv:
         make_shortcut(exe)
     return 0
