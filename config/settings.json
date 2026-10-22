@@ -33,7 +33,12 @@
     "fix_enabled": true,
     "fix_batch": 3,
     "think_off": true,
-    "fix_min_similar": 0.97
+    "fix_min_similar": 0.97,
+    "cloud_enabled": false,
+    "cloud_preset": "deepseek",
+    "cloud_base_url": "https://api.deepseek.com/v1",
+    "cloud_model": "deepseek-chat",
+    "cloud_api_key": ""
   },
   "ui": {
     "float_margin": 24,

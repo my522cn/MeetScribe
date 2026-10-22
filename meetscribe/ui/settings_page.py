@@ -19,9 +19,10 @@ from PySide6.QtWidgets import (
 )
 
 from .. import (
-    RECOMMEND_FIX_MODEL, RECOMMEND_FIX_REASON, RECOMMEND_SUMMARY_MODEL,
-    RECOMMEND_SUMMARY_REASON, __version__,
+    DEEP_SUMMARY_MODEL, DEEP_SUMMARY_REASON, RECOMMEND_FIX_MODEL, RECOMMEND_FIX_REASON,
+    RECOMMEND_SUMMARY_MODEL, RECOMMEND_SUMMARY_REASON, __version__,
 )
+from ..llm.cloud import PRESETS
 from ..audio import probe
 from ..audio.devices import list_input_devices, list_speakers
 from ..config import PROJECT_ROOT, Settings
@@ -460,8 +461,8 @@ class SettingsPage(QWidget):
         for box, items in (
             (self.cmb_fix_model, ["qwen2.5:1.5b-instruct", "qwen2.5:3b-instruct",
                                   "qwen2.5:7b-instruct"]),
-            (self.cmb_sum_model, ["qwen2.5:14b-instruct", "qwen2.5:7b-instruct",
-                                  "qwen2.5:3b-instruct"]),
+            (self.cmb_sum_model, ["qwen2.5:14b-instruct", "deepseek-r1:7b",
+                                  "qwen2.5:7b-instruct", "qwen2.5:3b-instruct"]),
         ):
             box.addItems(items)
         for box in (self.cmb_fix_model, self.cmb_sum_model):
@@ -496,6 +497,32 @@ class SettingsPage(QWidget):
         self.chk_think_off = QCheckBox("压制模型思考链（部分 qwen3 版本会把分析过程当正文吐出来）")
         lay.addWidget(self.chk_think_off)
 
+        # ---------- 云端（可选，默认关闭）----------
+        self.chk_cloud = QCheckBox(
+            "启用云端纪要与纠错：把转写内容上传到云端模型（更快、长会议不截断；"
+            "代价是内容离开本机，默认关闭）")
+        lay.addWidget(self.chk_cloud)
+
+        self.cmb_cloud = NoWheelComboBox()
+        for name, (_url, _model, tip) in PRESETS.items():
+            self.cmb_cloud.addItem(f"{name}　{tip}", name)
+        self.cmb_cloud.setFixedWidth(430)
+        lay.addWidget(_row("服务商", self.cmb_cloud, stretch=False))
+
+        self.edit_cloud_url = QLineEdit()
+        self.edit_cloud_url.setPlaceholderText("https://api.deepseek.com/v1")
+        lay.addWidget(_row("接口地址", self.edit_cloud_url))
+
+        self.edit_cloud_model = QLineEdit()
+        self.edit_cloud_model.setPlaceholderText("deepseek-chat")
+        self.edit_cloud_model.setFixedWidth(260)
+        lay.addWidget(_row("云端模型", self.edit_cloud_model, stretch=False))
+
+        self.edit_cloud_key = QLineEdit()
+        self.edit_cloud_key.setEchoMode(QLineEdit.EchoMode.Password)
+        self.edit_cloud_key.setPlaceholderText("sk-…（只存在本机 settings.json）")
+        lay.addWidget(_row("API Key", self.edit_cloud_key))
+
         self.btn_llm_test = QPushButton("检测连接与模型")
         self.btn_llm_test.setObjectName("Ghost")
         self.llm_status = QLabel("未检测")
@@ -520,6 +547,7 @@ class SettingsPage(QWidget):
         self.btn_test_loop.clicked.connect(lambda: self._test_device("loop"))
         self.btn_speak_test.clicked.connect(self._test_speak)
         self.btn_llm_test.clicked.connect(self._test_llm)
+        self.cmb_cloud.currentIndexChanged.connect(self._on_cloud_preset)
         self.cmb_fix_model.currentTextChanged.connect(lambda _t: self._refresh_recommend())
         self.cmb_sum_model.currentTextChanged.connect(lambda _t: self._refresh_recommend())
         self.probe.level.connect(self._on_level)
@@ -547,6 +575,12 @@ class SettingsPage(QWidget):
         self.spin_endpoint.setValue(float(s.get("asr.endpoint_silence", 1.2)))
         self.spin_gap_cut.setValue(int(s.get("asr.gap_cut_ms", 400)))
         self.chk_split.setChecked(bool(s.get("asr.split_enabled", True)))
+        self.chk_cloud.setChecked(bool(s.get("llm.cloud_enabled", False)))
+        idx = max(0, self.cmb_cloud.findData(str(s.get("llm.cloud_preset", "deepseek"))))
+        self.cmb_cloud.setCurrentIndex(idx)
+        self.edit_cloud_url.setText(str(s.get("llm.cloud_base_url", "")))
+        self.edit_cloud_model.setText(str(s.get("llm.cloud_model", "")))
+        self.edit_cloud_key.setText(str(s.get("llm.cloud_api_key", "")))
         self.edit_root.setText(str(s.get("storage.session_root", "data/sessions")))
         self.chk_llm.setChecked(bool(s.get("llm.enabled", False)))
         self.edit_llm_url.setText(str(s.get("llm.base_url", "http://127.0.0.1:11434")))
@@ -755,6 +789,11 @@ class SettingsPage(QWidget):
         s.set("asr.endpoint_silence", self.spin_endpoint.value())
         s.set("asr.gap_cut_ms", int(self.spin_gap_cut.value()))
         s.set("asr.split_enabled", self.chk_split.isChecked())
+        s.set("llm.cloud_enabled", self.chk_cloud.isChecked())
+        s.set("llm.cloud_preset", str(self.cmb_cloud.currentData() or "deepseek"))
+        s.set("llm.cloud_base_url", self.edit_cloud_url.text().strip())
+        s.set("llm.cloud_model", self.edit_cloud_model.text().strip())
+        s.set("llm.cloud_api_key", self.edit_cloud_key.text().strip())
         s.set("storage.session_root", self.edit_root.text().strip() or "data/sessions")
         s.set("llm.enabled", self.chk_llm.isChecked())
         s.set("llm.base_url", self.edit_llm_url.text().strip() or "http://127.0.0.1:11434")
@@ -799,6 +838,15 @@ class SettingsPage(QWidget):
         subprocess.Popen(["explorer", str(p)], shell=False)  # noqa: S603,S607
 
     # ---------- 大模型 ----------
+    def _on_cloud_preset(self, _idx: int = 0) -> None:
+        """选服务商就把它的官方端点和默认模型填进去（自定义除外）。"""
+        name = str(self.cmb_cloud.currentData() or "")
+        url, model, _tip = PRESETS.get(name, ("", "", ""))
+        if not url:
+            return  # 自定义：别覆盖用户自己填的
+        self.edit_cloud_url.setText(url)
+        self.edit_cloud_model.setText(model)
+
     def _refresh_recommend(self) -> None:
         """刷新"推荐模型"行：列出实测最优组合，并标出当前选择是否一致。"""
         if self.rec_text is None:
@@ -810,6 +858,7 @@ class SettingsPage(QWidget):
         self.rec_text.setText(
             f"纠错 {RECOMMEND_FIX_MODEL}：{RECOMMEND_FIX_REASON}\n"
             f"纪要 {RECOMMEND_SUMMARY_MODEL}：{RECOMMEND_SUMMARY_REASON}\n"
+            f"纪要（更全更慢）{DEEP_SUMMARY_MODEL}：{DEEP_SUMMARY_REASON}\n"
             f"{tail}"
         )
         self.btn_rec_apply.setEnabled(not same)

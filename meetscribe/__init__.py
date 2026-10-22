@@ -11,7 +11,7 @@
 APP_NAME = "会议转写助手"
 
 # 大版本.小版本.修订版.日期（月日）
-__version__ = "1.1.0.1022"
+__version__ = "1.2.0.1022"
 
 # ---------------------------------------------------------------- 推荐模型
 # 实测结论（26 句纠错样本 + 1626 字纪要稿，纯 CPU）：
@@ -21,6 +21,9 @@ RECOMMEND_FIX_MODEL = "qwen2.5:1.5b-instruct"
 RECOMMEND_SUMMARY_MODEL = "qwen2.5:14b-instruct"
 RECOMMEND_FIX_REASON = "实测 26 句改好 2 改坏 0，零伤害且最快（0.8s/句）"
 RECOMMEND_SUMMARY_REASON = "纪要覆盖度 0.07 为 7b 两倍，耗时相近（约 2 分钟）"
+# 更全但更慢的备选：覆盖度 0.10（最高），代价是慢 2.4 倍（约 5 分钟）
+DEEP_SUMMARY_MODEL = "deepseek-r1:7b"
+DEEP_SUMMARY_REASON = "覆盖度 0.10 全场最高，但 327s（14b 的 2.4 倍），适合不赶时间的深度纪要"
 
 
 def app_title() -> str:

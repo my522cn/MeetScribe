@@ -1,18 +1,18 @@
 [
  {
-  "model": "qwen2.5:14b-instruct",
+  "model": "deepseek-r1:7b",
   "n": 26,
   "cer_before": 0.3679,
   "cer_after": 0.3679,
-  "gain": -0.0,
-  "fixed": 6,
-  "fix_rate": 0.231,
+  "gain": 0.0,
+  "fixed": 0,
+  "fix_rate": 0.0,
   "improved": 0,
   "worsened": 0,
   "unchanged": 26,
   "think_pollution": 0,
-  "seconds_total": 182.3,
-  "sec_per_item": 7.01,
+  "seconds_total": 394.4,
+  "sec_per_item": 15.17,
   "batches": 9
  }
 ]

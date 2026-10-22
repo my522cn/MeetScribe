@@ -434,20 +434,35 @@ class ManagePage(QWidget):
 
         path = str(info.path)
         try:
-            base = str(self.settings.get("llm.base_url", "http://127.0.0.1:11434"))
-            model = str(self.settings.get("llm.summary_model", "qwen2.5:14b-instruct"))
-            client = OllamaClient(base, timeout=float(self.settings.get("llm.timeout", 90)))
-            if not client.alive():
-                self.minute_progress.emit(path, "正在启动 Ollama 服务…")
-                if not client.ensure_server():
-                    raise RuntimeError("连不上 Ollama，请确认已安装并运行后再试")
-            # 配置里的模型可能已被卸载，回退到本机已装的同类模型（纪要要质量，取大的）
-            picked = client.pick_model(model, prefer="large")
-            if not picked:
-                raise RuntimeError("本机没有可用的 Ollama 模型，请在设置里选择或先拉取模型")
-            if picked != model:
-                self.minute_progress.emit(path, f"模型 {model} 不可用，改用 {picked}")
-            model = picked
+            # 云端优先（如果用户开了）：长会议整场丢进去，比本地快一个量级
+            client, model = None, ""
+            if self.settings.get("llm.cloud_enabled", False):
+                from ..llm import CloudClient
+
+                key = str(self.settings.get("llm.cloud_api_key", "")).strip()
+                if key:
+                    client = CloudClient(
+                        str(self.settings.get("llm.cloud_base_url", "")), key,
+                        str(self.settings.get("llm.cloud_model", "")),
+                        timeout=float(self.settings.get("llm.timeout", 90)) * 3,
+                    )
+                    model = str(self.settings.get("llm.cloud_model", ""))
+                    self.minute_progress.emit(path, f"云端纪要：{model}（内容将上传至该服务商）")
+            if client is None:
+                base = str(self.settings.get("llm.base_url", "http://127.0.0.1:11434"))
+                model = str(self.settings.get("llm.summary_model", "qwen2.5:14b-instruct"))
+                client = OllamaClient(base, timeout=float(self.settings.get("llm.timeout", 90)))
+                if not client.alive():
+                    self.minute_progress.emit(path, "正在启动 Ollama 服务…")
+                    if not client.ensure_server():
+                        raise RuntimeError("连不上 Ollama，请确认已安装并运行后再试")
+                # 配置里的模型可能已被卸载，回退到本机已装的同类模型（纪要要质量，取大的）
+                picked = client.pick_model(model, prefer="large")
+                if not picked:
+                    raise RuntimeError("本机没有可用的 Ollama 模型，请在设置里选择或先拉取模型")
+                if picked != model:
+                    self.minute_progress.emit(path, f"模型 {model} 不可用，改用 {picked}")
+                model = picked
             transcript = self._load_transcript(info)
             result = summarize(
                 client, model, info.title, transcript,
