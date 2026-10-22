@@ -421,18 +421,22 @@ class SettingsPage(QWidget):
         self.cmb_sum_model = NoWheelComboBox()
         self.cmb_sum_model.setEditable(True)
         for box, items in (
-            (self.cmb_fix_model, ["qwen2.5:7b-instruct", "qwen2.5:3b-instruct"]),
-            (self.cmb_sum_model, ["qwen2.5:7b-instruct", "qwen2.5:3b-instruct"]),
+            (self.cmb_fix_model, ["qwen2.5:1.5b-instruct", "qwen2.5:3b-instruct",
+                                  "qwen2.5:7b-instruct"]),
+            (self.cmb_sum_model, ["qwen2.5:14b-instruct", "qwen2.5:7b-instruct",
+                                  "qwen2.5:3b-instruct"]),
         ):
             box.addItems(items)
         for box in (self.cmb_fix_model, self.cmb_sum_model):
             box.setFixedWidth(260)
-        lay.addWidget(_row("纠错模型", self.cmb_fix_model, stretch=False))
-        lay.addWidget(_row("纪要模型", self.cmb_sum_model, stretch=False))
+        lay.addWidget(_row("纠错模型", self.cmb_fix_model,
+                           "1.5b 实测零伤害且最快，推荐", stretch=False))
+        lay.addWidget(_row("纪要模型", self.cmb_sum_model,
+                           "14b 覆盖度最高，推荐；小内存可改 7b", stretch=False))
 
         self.chk_fix_enabled = QCheckBox(
-            "启用上下文纠错（实测：本机模型改好 4 句同时改坏 5 句，净收益为负，默认关闭；"
-            "有明显同音错字困扰再开）")
+            "启用上下文纠错（1.5b 实测零伤害，每 25 秒过一遍最近几句的同音错字；"
+            "不装 Ollama 时自动跳过）")
         lay.addWidget(self.chk_fix_enabled)
 
         self.spin_fix_batch = NoWheelSpinBox()
@@ -505,9 +509,9 @@ class SettingsPage(QWidget):
         self.edit_root.setText(str(s.get("storage.session_root", "data/sessions")))
         self.chk_llm.setChecked(bool(s.get("llm.enabled", False)))
         self.edit_llm_url.setText(str(s.get("llm.base_url", "http://127.0.0.1:11434")))
-        self.cmb_fix_model.setCurrentText(str(s.get("llm.fix_model", "qwen2.5:7b-instruct")))
-        self.cmb_sum_model.setCurrentText(str(s.get("llm.summary_model", "qwen2.5:7b-instruct")))
-        self.chk_fix_enabled.setChecked(bool(s.get("llm.fix_enabled", False)))
+        self.cmb_fix_model.setCurrentText(str(s.get("llm.fix_model", "qwen2.5:1.5b-instruct")))
+        self.cmb_sum_model.setCurrentText(str(s.get("llm.summary_model", "qwen2.5:14b-instruct")))
+        self.chk_fix_enabled.setChecked(bool(s.get("llm.fix_enabled", True)))
         self.spin_fix_batch.setValue(int(s.get("llm.fix_batch", 3)))
         self.chk_think_off.setChecked(bool(s.get("llm.think_off", True)))
         self.spin_fix_sim.setValue(float(s.get("llm.fix_min_similar", 0.97)))

@@ -46,10 +46,11 @@ DEFAULTS: dict[str, Any] = {
         # 默认开启：只做"纠错"这一件事，服务没装/没开时自动跳过，不会影响录音
         "enabled": True,
         "base_url": "http://127.0.0.1:11434",
-        # 纠错要快：qwen2.5:3b-instruct 不做思考链，8 句约 9 秒，实测 0 误改
-        "fix_model": "qwen2.5:3b-instruct",
-        # 纪要要质量：7b 能压住长会议，CPU 上一份纪要 1~2 分钟，后台跑不抢实时资源
-        "summary_model": "qwen2.5:7b-instruct",
+        # 纠错要快要稳：1.5b 实测 26 句改好 2 改坏 0（唯一零伤害），0.8s/条
+        "fix_model": "qwen2.5:1.5b-instruct",
+        # 纪要要质量：14b 实测覆盖度 0.07（7b 的两倍）且耗时相近，CPU 上一份
+        # 纪要 2~3 分钟，后台跑不抢实时资源
+        "summary_model": "qwen2.5:14b-instruct",
         "timeout": 90,
     },
     "ui": {

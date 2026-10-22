@@ -25,10 +25,10 @@
   "llm": {
     "enabled": true,
     "base_url": "http://127.0.0.1:11434",
-    "fix_model": "qwen2.5:7b-instruct",
-    "summary_model": "qwen2.5:7b-instruct",
+    "fix_model": "qwen2.5:1.5b-instruct",
+    "summary_model": "qwen2.5:14b-instruct",
     "timeout": 90,
-    "fix_enabled": false,
+    "fix_enabled": true,
     "fix_batch": 3,
     "think_off": true,
     "fix_min_similar": 0.97

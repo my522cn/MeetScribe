@@ -104,9 +104,15 @@ def main() -> int:
                 return ["qwen2.5:7b-instruct", "qwen2.5:3b-instruct"]
 
         c = FakeTags()
-        check("已卸载模型回退到同类", c.pick_model("qwen3:4b") == "qwen2.5:7b-instruct",
+        check("已卸载模型回退到同类(小)", c.pick_model("qwen3:4b") == "qwen2.5:3b-instruct",
               f"-> {c.pick_model('qwen3:4b')}")
+        check("已卸载模型回退到同类(大)",
+              c.pick_model("qwen3:4b", prefer="large") == "qwen2.5:7b-instruct",
+              f"-> {c.pick_model('qwen3:4b', prefer='large')}")
         check("已装模型原样返回", c.pick_model("qwen2.5:3b-instruct") == "qwen2.5:3b-instruct", "")
+        check("无同族回退到任意已装(小)",
+              c.pick_model("llama3:8b", fallback_hint="llama") in
+              ("qwen2.5:3b-instruct", "qwen2.5:7b-instruct"), "")
     except Exception as exc:  # noqa: BLE001
         check("模型回退", False, repr(exc))
 

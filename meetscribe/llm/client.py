@@ -41,9 +41,20 @@ class OllamaClient:
         data = self._get("/api/tags")
         return [m.get("name", "") for m in data.get("models", [])]
 
-    def pick_model(self, wanted: str, fallback_hint: str = "qwen2.5") -> str:
-        """配置里的模型可能已被卸载/改名：本机没有就回退到一个已装的同名族模型。
+    @staticmethod
+    def _size_b(name: str) -> float:
+        """从模型名里解析参数规模（qwen2.5:7b-instruct → 7.0），解析不出返回 0。"""
+        import re
 
+        m = re.search(r":(\d+(?:\.\d+)?)b", name.lower())
+        return float(m.group(1)) if m else 0.0
+
+    def pick_model(self, wanted: str, fallback_hint: str = "qwen2.5",
+                   prefer: str = "small") -> str:
+        """配置里的模型可能已被卸载/改名：本机没有就回退到一个已装的同族模型。
+
+        prefer="small"：回退到同族里最小的（纠错要快，1.5b 好过 14b）；
+        prefer="large"：回退到同族里最大的（纪要要质量，14b 好过 1.5b）。
         返回空串表示本机一个可用模型都没有（调用方应关掉 LLM 功能）。
         """
         try:
@@ -55,7 +66,9 @@ class OllamaClient:
         if wanted in installed:
             return wanted
         same_family = [m for m in installed if fallback_hint in m]
-        return same_family[0] if same_family else installed[0]
+        pool = same_family or installed
+        key = self._size_b
+        return min(pool, key=key) if prefer == "small" else max(pool, key=key)
 
     def alive(self) -> bool:
         try:

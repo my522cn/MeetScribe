@@ -70,6 +70,7 @@ class CaptureWorker(QObject):
         self.manifest: SessionManifest | None = None
         self._segment_total = 0
         self._transcript = None
+        self._transcript_path = None
         self._records: list[dict] = []
         self._lock = threading.Lock()
         self._corrector = None
@@ -164,8 +165,9 @@ class CaptureWorker(QObject):
             self._start_llm()
             # 目录由 recorder.start() 创建，转写文件必须在之后再打开
             self._records = []
+            self._transcript_path = self.recorder.session_dir / "transcript.jsonl"
             self._transcript = open(  # noqa: SIM115
-                self.recorder.session_dir / "transcript.jsonl", "a", encoding="utf-8"
+                self._transcript_path, "a", encoding="utf-8"
             )
             if self.diarizer is not None:
                 self._diarize_log = open(  # noqa: SIM115
@@ -297,6 +299,10 @@ class CaptureWorker(QObject):
 
     def _finish_session(self) -> None:
         """所有精修完成后的收尾：把最终结果刷盘、关闭文件、释放精修线程。"""
+        # 等 LLM 纠错收尾一轮跑完（停止时未纠完的句子补纠），最多等 20 秒
+        done = getattr(self, "_llm_done", None)
+        if done is not None:
+            done.wait(20)
         with self._lock:
             self._flush_transcript()
         if self._transcript is not None:
@@ -318,8 +324,8 @@ class CaptureWorker(QObject):
     def _start_llm(self) -> None:
         """启用时每 25 秒用本地小模型把最近几句过一遍，改同音错字。
 
-        纠错与纪要是两个开关：实测本机模型做"上下文纠错"净收益为负（26 句样本
-        改好 4 改坏 5），所以 fix_enabled 默认关闭，纪要不受影响。
+        纠错与纪要是两个开关。实测（26 句真实样本）：qwen2.5:1.5b 改好 2 改坏 0、
+        0.8s/条——唯一零伤害且最快的档，因此默认开启；7b 改好 4 改坏 5 净收益为负。
         """
         self._llm_stop = threading.Event()
         self._corrector = None
@@ -335,9 +341,9 @@ class CaptureWorker(QObject):
         # 配置里的模型可能已经被卸载，本机没有就回退到已装的同类模型
         try:
             probe = OllamaClient(base, timeout=5)
-            model = probe.pick_model(str(self.settings.get("llm.fix_model", "qwen2.5:7b-instruct")))
+            model = probe.pick_model(str(self.settings.get("llm.fix_model", "qwen2.5:1.5b-instruct")))
         except Exception:  # noqa: BLE001
-            model = str(self.settings.get("llm.fix_model", "qwen2.5:7b-instruct"))
+            model = str(self.settings.get("llm.fix_model", "qwen2.5:1.5b-instruct"))
         if not model:
             return
         hotwords = []
@@ -350,50 +356,78 @@ class CaptureWorker(QObject):
             think_off=bool(self.settings.get("llm.think_off", True)),
             min_similar=float(self.settings.get("llm.fix_min_similar", 0.97)),
         )
-        self._llm_wake = threading.Event()
-        threading.Thread(target=self._prepare_llm, name="llmprep", daemon=True).start()
+        # 会话代数令牌：新会话 start() 时 +1。老线程（可能还堵在一次 chat 请求里）
+        # 醒来后发现代数对不上就退出，绝不允许把上一场的纠错写进新会话
+        self._llm_gen = getattr(self, "_llm_gen", 0) + 1
+        stop_ev, wake_ev, done_ev = threading.Event(), threading.Event(), threading.Event()
+        self._llm_stop, self._llm_wake, self._llm_done = stop_ev, wake_ev, done_ev
+        gen = self._llm_gen
+        threading.Thread(target=self._prepare_llm, args=(stop_ev, wake_ev, done_ev, gen),
+                         name="llmprep", daemon=True).start()
 
-    def _prepare_llm(self) -> None:
+    def _prepare_llm(self, stop_ev, wake_ev, done_ev, gen) -> None:
         """后台确认服务可用（必要时拉起 ollama serve），再开始周期纠错。"""
         try:
             self._corrector.client.ensure_server()
         except Exception:  # noqa: BLE001
             pass
-        self._llm_loop()
+        self._llm_loop(stop_ev, wake_ev, done_ev, gen)
 
     def _stop_llm(self) -> None:
         ev = getattr(self, "_llm_stop", None)
         if ev is not None:
             ev.set()
+            # 同时唤醒可能在 25 秒休眠里的线程，让它立刻看到停止信号去跑收尾轮
+            wake = getattr(self, "_llm_wake", None)
+            if wake is not None:
+                wake.set()
 
-    def _llm_loop(self) -> None:
+    def _llm_loop(self, stop_ev, wake_ev, done_ev, gen) -> None:
+        while True:
+            if self._llm_gen != gen:   # 已换场：先查再等，避免白睡 25 秒
+                break
+            if stop_ev.is_set():
+                break
+            wake_ev.wait(25)  # 录音中每 25 秒一轮；暂停/新句定稿会被提前唤醒
+            if stop_ev.is_set() or self._llm_gen != gen:
+                break
+            wake_ev.clear()
+            if not self._llm_round(gen):
+                break
+        # 收尾：停止后把还没纠错的句子补完，结果能写进本场转写再退出
+        if self._llm_gen == gen:
+            self._llm_round(gen)
+        done_ev.set()
+
+    def _llm_round(self, gen) -> bool:
+        """跑一轮纠错（最多 8 句）。返回 False = 代数已过期，结果已丢弃、线程应退出。"""
         from ..llm import FixRequest
 
-        while True:
-            self._llm_wake.wait(25)  # 录音中每 25 秒一轮；暂停/新句定稿会被提前唤醒
-            if self._llm_stop.is_set():
-                return
-            self._llm_wake.clear()
-            with self._lock:
-                pending = [
-                    r for r in self._records
-                    if not r.get("llm") and len(_normalize(r["text"])) >= 4
-                ][:8]  # 按时间顺序处理，保证早晚能追上
-            if not pending or self._corrector is None:
-                continue
-            items = [FixRequest((r["track"], r["start_ms"]), r["text"]) for r in pending]
-            fixed = self._corrector.fix(items)
-            with self._lock:
-                for r in pending:
-                    r["llm"] = True
-                for rec in self._records:
-                    key = (rec["track"], rec["start_ms"])
-                    if key in fixed:
-                        rec["llm_from"] = rec["text"]
-                        rec["text"] = fixed[key]
-                self._flush_transcript()
-            for (track, start), new in fixed.items():
-                self.refined.emit(track, start, new)
+        with self._lock:
+            pending = [
+                r for r in self._records
+                if not r.get("llm") and len(_normalize(r["text"])) >= 4
+            ][:8]  # 按时间顺序处理，保证早晚能追上
+        if not pending or self._corrector is None:
+            return self._llm_gen == gen
+        items = [FixRequest((r["track"], r["start_ms"]), r["text"]) for r in pending]
+        fixed = self._corrector.fix(items)
+        # 请求期间可能已经换场（停止/新会话）：过期线程的结果一律丢弃，
+        # 否则上一场的修正会被写进新会话的转写、界面也会收到旧句的 refined 信号
+        if self._llm_gen != gen:
+            return False
+        with self._lock:
+            for r in pending:
+                r["llm"] = True
+            for rec in self._records:
+                key = (rec["track"], rec["start_ms"])
+                if key in fixed:
+                    rec["llm_from"] = rec["text"]
+                    rec["text"] = fixed[key]
+            self._flush_transcript()
+        for (track, start), new in fixed.items():
+            self.refined.emit(track, start, new)
+        return True
 
     # ---------- 内部 ----------
     def _is_echo_of_loop(self, track: str, start_ms: int, end_ms: int, text: str) -> bool:
@@ -529,8 +563,19 @@ class CaptureWorker(QObject):
         return SequenceMatcher(None, a, b).ratio() >= 0.55
 
     def _flush_transcript(self) -> None:
+        reopened = False
         if self._transcript is None:
-            return
+            # 收尾轮可能在 _finish_session 关闭文件之后才跑完（CPU 上大模型
+            # 一批纠错就可能超过 20 秒等待上限）：按保存的路径重新打开补写，
+            # 纠错结果不能只改了内存、却永远不落盘
+            path = getattr(self, "_transcript_path", None)
+            if path is None or not Path(path).exists():
+                return
+            try:
+                self._transcript = open(path, "a", encoding="utf-8")  # noqa: SIM115
+                reopened = True
+            except Exception:  # noqa: BLE001
+                return
         try:
             self._transcript.seek(0)
             self._transcript.truncate()
@@ -541,6 +586,13 @@ class CaptureWorker(QObject):
             self._transcript.flush()
         except Exception:  # noqa: BLE001
             pass
+        finally:
+            if reopened:
+                try:
+                    self._transcript.close()
+                except Exception:  # noqa: BLE001
+                    pass
+                self._transcript = None
 
     def _on_segment(self, seg) -> None:
         self._segment_total += 1
