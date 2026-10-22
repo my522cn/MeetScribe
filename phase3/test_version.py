@@ -53,6 +53,9 @@ def main() -> int:
     from meetscribe.ui.main_window import MainWindow
 
     win = MainWindow()
+    # 测试只关心版本展示：停掉会议检测轮询，避免它在后台误触发自动录音
+    win.detect_timer.stop()
+    win.auto_record = False
     check("主窗口标题带版本", __version__ in win.windowTitle(), win.windowTitle())
     check("托盘提示带版本", __version__ in win.tray.toolTip(), win.tray.toolTip())
     from PySide6.QtWidgets import QLabel

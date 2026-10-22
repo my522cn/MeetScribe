@@ -296,14 +296,14 @@ class MainWindow(QMainWindow):
         self.detect_label.setText(f"会议检测\n{capability()}\n最近: {app.app_name}")
         if not self.auto_record or self.worker.is_active:
             return
-        has_audio_api = not capability().startswith("仅进程")
-        if app.audio_active or not has_audio_api:
-            self._start("online", source=app.process.replace(".exe", ""), title=f"{app.app_name} 会议")
-            self.tray.showMessage(
-                "已开始自动录音",
-                f"检测到 {app.app_name} 正在进行语音通话",
-                QSystemTrayIcon.MessageIcon.Information, 4000,
-            )
+        # poll() 只在"通话状态从无到有"时返回，这里不再重复判 audio_active：
+        # 微信这类常驻软件进程一直在，判进程等于永不触发（这就是之前漏录的原因）
+        self._start("online", source=app.process.replace(".exe", ""), title=f"{app.app_name} 会议")
+        self.tray.showMessage(
+            "已开始自动录音",
+            f"检测到 {app.app_name} 正在进行语音通话",
+            QSystemTrayIcon.MessageIcon.Information, 4000,
+        )
 
     def _set_auto_record(self, on: bool) -> None:
         self.auto_record = on
@@ -352,6 +352,10 @@ class MainWindow(QMainWindow):
                 self.tray.showMessage("仍在录音", "程序已最小化到托盘", QSystemTrayIcon.MessageIcon.Information, 2500)
                 return
             self._stop()
+        # 真退出时停掉轮询：否则定时器还会在窗口已经关掉后触发一次
+        # 会议检测（进而去调用已经失效的界面对象）
+        self.detect_timer.stop()
+        self.ui_timer.stop()
         event.accept()
 
     def _quit(self) -> None:
