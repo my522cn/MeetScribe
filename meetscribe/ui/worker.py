@@ -36,6 +36,8 @@ class CaptureWorker(QObject):
     final = Signal(str, str, int, int, str, bool)  # track, text, start_ms, end_ms, speaker, 疑似多人
     refined = Signal(str, int, str)          # track, start_ms, 精修后文本
     live_refined = Signal(str, int, str)     # track, start_ms, 句中滑窗校正文本
+    # 精修时检出"句内换人"：原句后半段单独成句（track, text, start_ms, end_ms, speaker）
+    split_added = Signal(str, str, int, int, str)
     overlap = Signal(bool)
     state_changed = Signal(str)              # recording / paused / stopped
     error = Signal(str)
@@ -89,6 +91,7 @@ class CaptureWorker(QObject):
                 return RefineService(
                     d, on_result=self._on_refined, kind=kind,
                     num_threads=int(self.settings.get("asr.refine_threads", 2)),
+                    splitter=self._find_switch, on_split=self._on_refined_split,
                 )
         return RefineService(self._models_root / "paraformer_offline", on_result=self._on_refined)
 
@@ -143,6 +146,7 @@ class CaptureWorker(QObject):
                 on_overlap=lambda b: self.overlap.emit(b),
                 on_live_job=self._on_live_job if live_refine else None,
                 live_refine_after=float(s.get("asr.live_refine_after", 6.0)),
+                gap_cut_ms=float(s.get("asr.gap_cut_ms", 400)),
             )
             self._segment_total = 0
             mic_name = str(s.get("audio.mic_name", "") or "")
@@ -519,6 +523,70 @@ class CaptureWorker(QObject):
                 RefineJob(track=cap.track, audio=cap.audio, raw_text=cap.text,
                           start_ms=cap.start_ms, end_ms=cap.end_ms)
             )
+
+    def _find_switch(self, audio: np.ndarray) -> int | None:
+        """精修切分用的回调：句子里有没有换人，换在哪（返回采样点）。"""
+        if not self.settings.get("asr.split_enabled", True):
+            return None
+        if self.diarizer is None or not hasattr(self.diarizer, "find_switch"):
+            return None
+        try:
+            return self.diarizer.find_switch(audio)
+        except Exception:  # noqa: BLE001
+            return None
+
+    def _on_refined_split(self, job: RefineJob, text1: str, text2: str,
+                          split_ms: int) -> None:
+        """精修检出句内换人：把一句拆成两句，各自重新判说话人。
+
+        前半句沿用原记录（缩短结束时间），后半句作为新记录插在后面。
+        """
+        t1 = self.post.process(text1, punctuate=not has_punctuation(text1))
+        t2 = self.post.process(text2, punctuate=not has_punctuation(text2))
+        if not t1 or not t2:
+            return
+        split_n = int(split_ms / 1000 * 16000)
+        a1, a2 = job.audio[:split_n], job.audio[split_n:]
+        sp1 = sp2 = None
+        if self.diarizer is not None and job.track == "mic":
+            if hasattr(self.diarizer, "assign_sentence"):
+                sp1, _ = self.diarizer.assign_sentence(a1)
+                sp2, _ = self.diarizer.assign_sentence(a2)
+        if sp1 is None or sp2 is None or sp1 == sp2:
+            # 两段判出来还是同一个人，就别拆了，按整句精修处理
+            self._on_refined(job, text1 + " " + text2)
+            return
+
+        start2 = job.start_ms + split_ms
+        with self._lock:
+            idx = None
+            for i in range(len(self._records) - 1, -1, -1):
+                r = self._records[i]
+                if r["track"] == job.track and r["start_ms"] == job.start_ms:
+                    idx = i
+                    break
+            if idx is None:
+                return
+            rec = self._records[idx]
+            rec["text"] = t1
+            rec["end_ms"] = start2
+            rec["speaker"] = sp1
+            rec["refined"] = True
+            rec["refine_from"] = rec.get("raw", "")
+            self._records.insert(idx + 1, {
+                "track": job.track,
+                "speaker": sp2,
+                "start_ms": start2,
+                "end_ms": job.end_ms,
+                "text": t2,
+                "refined": True,
+                "raw": text2,
+                "mixed": 0.0,
+            })
+            self._flush_transcript()
+            final1, final2 = rec["text"], self._records[idx + 1]["text"]
+        self.refined.emit(job.track, job.start_ms, final1)
+        self.split_added.emit(job.track, final2, start2, job.end_ms, sp2)
 
     def _on_live_job(self, job: RefineJob) -> None:
         """句中滑窗预校正：结果只更新临时字幕，不进转写记录（定稿时还会再精修一次）。"""

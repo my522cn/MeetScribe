@@ -16,6 +16,8 @@
     "live_refine": true,
     "live_refine_after": 6.0,
     "live_refine_every": 2.5,
+    "gap_cut_ms": 400,
+    "split_enabled": true,
     "speaker_threshold": 0.38,
     "speaker_max": 4
   },

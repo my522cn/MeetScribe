@@ -213,16 +213,70 @@ class EmbeddingSpeakerRegistry:
         return {self._names[i]: self._cents[i].tolist() for i in range(len(self._cents))}
 
     def _windows(self, audio: np.ndarray) -> list[np.ndarray]:
+        return [seg for _, seg in self._windows_pos(audio)]
+
+    def _windows_pos(self, audio: np.ndarray) -> list[tuple[int, np.ndarray]]:
+        """带起始采样位置的滑窗（跳过静音窗，所以必须把位置一起返回）。"""
         x = np.asarray(audio, dtype=np.float32)
         if x.ndim > 1:
             x = x.mean(axis=1)
-        out = []
+        out: list[tuple[int, np.ndarray]] = []
         for start in range(0, len(x) - self._win + 1, self._hop):
             seg = x[start:start + self._win]
             if float(np.sqrt(np.mean(seg ** 2))) < EMB_WIN_RMS:
                 continue
-            out.append(seg)
+            out.append((start, seg))
         return out
+
+    def _embs(self, audio: np.ndarray) -> list[tuple[int, np.ndarray]]:
+        """(窗口起始采样点, 该窗嵌入)，按时间顺序。"""
+        out = []
+        for start, seg in self._windows_pos(audio):
+            stream = self._ext.create_stream()
+            stream.accept_waveform(SR, seg)
+            stream.input_finished()
+            out.append((start, np.asarray(self._ext.compute(stream), dtype=np.float32)))
+        return out
+
+    def find_switch(self, audio: np.ndarray | None,
+                    min_side_sec: float = 0.8) -> int | None:
+        """找"句内换人"的切点：返回切分处的采样点，没有换人返回 None。
+
+        场景：A 说完 B 立刻接，端点检测没切开，整句被判成一个人。这里用滑窗
+        嵌入找一个切点，使得前半段像甲、后半段像乙，且两段彼此不像：
+          - 两段各自的平均嵌入都要能匹配上某个已注册说话人（相似度 ≥ 阈值）
+          - 两段匹配到的不是同一个人
+          - 两段彼此的相似度低于阈值（确实是两个人在说）
+          - 两段都够长（默认各 ≥0.8s），避免把句首句尾的噪声当换人
+        """
+        if audio is None or len(self._cents) < 2:
+            return None  # 还没认识两个人，无从判断"换成了谁"
+        items = self._embs(audio)
+        n = len(items)
+        if n < 3:
+            return None
+        margin = int(min_side_sec * SR)
+        best_at, best_score = None, 0.0
+        for k in range(1, n):
+            split_at = items[k][0]
+            if split_at < margin or len(audio) - split_at < margin:
+                continue
+            left = np.mean([e for _, e in items[:k]], axis=0)
+            right = np.mean([e for _, e in items[k:]], axis=0)
+            sims_l = [_cos(left, c) for c in self._cents]
+            sims_r = [_cos(right, c) for c in self._cents]
+            i_l = int(np.argmax(sims_l))
+            i_r = int(np.argmax(sims_r))
+            if i_l == i_r:
+                continue  # 两段是同一个人，不算换人
+            if _cos(left, right) >= self.threshold:
+                continue  # 两段彼此仍很像，多半是同一个人换个语气
+            if sims_l[i_l] < self.threshold or sims_r[i_r] < self.threshold:
+                continue  # 至少有一段认不出是谁，别乱切
+            score = sims_l[i_l] + sims_r[i_r]
+            if score > best_score:
+                best_score, best_at = score, split_at
+        return best_at
 
     def assign_sentence(self, audio: np.ndarray | None) -> tuple[str, float]:
         """整句标注。返回 (说话人, 疑似多人比例 0~1)。"""

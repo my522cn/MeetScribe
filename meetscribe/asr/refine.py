@@ -42,11 +42,19 @@ class RefineService:
         on_result: Callable[[RefineJob, str], None],
         num_threads: int = 2,
         kind: str = "paraformer",
+        splitter: Callable[[np.ndarray], int | None] | None = None,
+        on_split: Callable[[RefineJob, str, str, int], None] | None = None,
+        min_split_sec: float = 2.4,
     ) -> None:
         self.model_dir = Path(model_dir)
         self.on_result = on_result
         self.num_threads = num_threads
         self.kind = kind
+        # 句内换人切分：splitter 给出切点（采样点），命中就把音频切成两段
+        # 各识别一遍，通过 on_split 回调（同一句变成两句、各自标说话人）
+        self.splitter = splitter
+        self.on_split = on_split
+        self.min_split_samples = int(min_split_sec * 16000)
         self._queue: queue.Queue[RefineJob | None] = queue.Queue(maxsize=200)
         self._thread: threading.Thread | None = None
         self._running = False
@@ -148,6 +156,31 @@ class RefineService:
             except Exception:  # noqa: BLE001
                 self.failed += 1
                 continue
+
+            # 第二遍才做换人切分：滑窗预校正（live）不动定稿记录，没必要切
+            if (
+                self.splitter is not None and self.on_split is not None
+                and not job.live and len(job.audio) >= self.min_split_samples
+            ):
+                try:
+                    split_at = self.splitter(job.audio)
+                except Exception:  # noqa: BLE001
+                    split_at = None
+                if split_at and self.min_split_samples // 3 < split_at < len(job.audio) - self.min_split_samples // 3:
+                    try:
+                        t1 = self._asr.transcribe(job.audio[:split_at])
+                        t2 = self._asr.transcribe(job.audio[split_at:])
+                    except Exception:  # noqa: BLE001
+                        t1 = t2 = ""
+                    if t1.strip() and t2.strip():
+                        self.done += 1
+                        try:
+                            self.on_split(job, t1.strip(), t2.strip(),
+                                          int(split_at / 16000 * 1000))
+                        except Exception:  # noqa: BLE001
+                            pass
+                        continue
+
             if text and text.strip():
                 self.done += 1
                 try:

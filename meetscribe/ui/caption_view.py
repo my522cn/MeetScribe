@@ -176,6 +176,25 @@ class CaptionView(QScrollArea):
         self._finals[(track, start_ms)] = row
         self._after_change()
 
+    def insert_final_after(self, track: str, text: str, start_ms: int, end_ms: int,
+                           speaker: str, after_start_ms: int) -> None:
+        """精修检出句内换人：后半句单独成行，插在原句后面（不是追加到末尾）。"""
+        anchor = self._finals.get((track, after_start_ms))
+        row = self._new_row(track, start_ms)
+        row.set_text(text, final=True)
+        row.time.setText(fmt_ms(start_ms)[3:])
+        if speaker:
+            row.set_speaker(speaker, _speaker_chip(speaker))
+        row.set_refined()
+        if anchor is not None:
+            idx = self._layout.indexOf(anchor)
+            if idx >= 0:
+                self._layout.removeWidget(row)
+                self._layout.insertWidget(idx + 1, row)
+        self._finals[(track, start_ms)] = row
+        self.refined_count += 1
+        self._after_change()
+
     def update_final_text(self, track: str, start_ms: int, text: str) -> None:
         """离线精修回来后原地替换该句文字。"""
         row = self._finals.get((track, start_ms))

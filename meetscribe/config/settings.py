@@ -38,6 +38,14 @@ DEFAULTS: dict[str, Any] = {
         "live_refine": True,         # 长句滑窗预校正（说话中途就纠错）
         "live_refine_after": 6.0,    # 本句持续多少秒后开始滑窗校正
         "live_refine_every": 2.5,    # 滑窗间隔
+        # 换人提前断句：句里出现这么长的静音、后面又有人接话，就先定稿上一句。
+        # 端点检测默认要等 1.2s，A 说完 B 马上接会被并成一句、只标成一个人。
+        # 400ms 能切开快节奏对话，又不至于把正常换气（200~300ms）切碎；0=关闭
+        "gap_cut_ms": 400,
+        # 精修时检出"句内换人"就把一句拆成两句、各自标说话人（第二遍兜底）
+        "split_enabled": True,
+        "speaker_threshold": 0.38,   # 声纹判定同一人的相似度门槛
+        "speaker_max": 4,            # 最多切分出几个说话人
     },
     "storage": {
         "session_root": "data/sessions",

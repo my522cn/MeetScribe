@@ -187,6 +187,7 @@ class MainWindow(QMainWindow):
         self.worker.partial.connect(rp.captions.update_partial)
         self.worker.final.connect(rp.captions.finalize)
         self.worker.refined.connect(rp.captions.update_final_text)
+        self.worker.split_added.connect(rp.captions.insert_final_after)
         self.worker.live_refined.connect(rp.captions.update_live_text)
         self.worker.overlap.connect(rp.captions.set_overlap)
         self.worker.state_changed.connect(self._on_state)

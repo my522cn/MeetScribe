@@ -28,6 +28,11 @@ SPEECH_RATIO = 1.8
 SILENCE_HANGOVER_MS = 2500
 # 句中滑窗预校正：停顿达到这个时长就触发一次离线重识别（在端点断句之前）
 LIVE_PAUSE_MS = 600
+# 换人提前断句：一句里出现这个长度的静音间隙、而且后面又有人接话，
+# 就先把前一句定稿。A 说完 B 立刻接时，端点检测（默认 1.2s）等不到，
+# 两个人会被并成一句、只标一个说话人；这里按间隙先行切开。
+GAP_CUT_MS = 400
+GAP_MIN_SPEAK_MS = 1000
 
 
 @dataclass
@@ -52,6 +57,7 @@ class LivePipeline:
         live_refine_after: float = 6.0,
         samplerate: int = 16000,
         max_queue: int = 200,
+        gap_cut_ms: float = GAP_CUT_MS,
     ) -> None:
         self.engine = engine
         self.on_partial = on_partial
@@ -59,6 +65,8 @@ class LivePipeline:
         self.on_overlap = on_overlap
         self.on_live_job = on_live_job
         self.live_after_ms = int(live_refine_after * 1000)
+        # 换人提前断句：0 = 关闭（只看端点检测）
+        self.gap_cut_ms = float(gap_cut_ms)
         self.samplerate = samplerate
         self._queues = {t: queue.Queue(maxsize=max_queue) for t in TRACKS}
         self._consumed = {t: 0 for t in TRACKS}      # 已消费样本数（= 会议时间）
@@ -73,6 +81,7 @@ class LivePipeline:
         self._max_cache_samples = 180 * samplerate
         self._spoken = {t: 0 for t in TRACKS}        # 本句已送入的有声块数
         self._silence_start = {t: 0 for t in TRACKS}  # 本段静音从何时开始（0=在说话）
+        self._last_speech_end_sample = {t: 0 for t in TRACKS}  # 上一块语音结束在哪个采样点
         self._live_done = {t: False for t in TRACKS}  # 本句已做过滑窗预校正
         self._last_final = {t: "" for t in TRACKS}
         self._running = False
@@ -148,6 +157,22 @@ class LivePipeline:
         threshold = max(NOISE_FLOOR_MIN, floor * SPEECH_RATIO)
         speaking = rms > threshold
 
+        # 换人提前断句：上一句已说够久、中间空了够长、现在又有人接话 → 先定稿上一句。
+        # 间隙要量准：一块是 100ms，直接用块边界会低估约 1~2 个块（350ms 的真实
+        # 空隙只量出 200ms），所以在块内再用 10ms 窗找语音的真正起止点。
+        if (
+            speaking
+            and self.gap_cut_ms > 0
+            and self._sentence_start[track] is not None
+            and self._spoken[track] >= 4
+            and now_ms - self._sentence_start[track] >= GAP_MIN_SPEAK_MS
+            and self._last_speech_end_sample[track] > 0
+        ):
+            onset_sample = start_sample + self._speech_edges(block, threshold)[0]
+            gap_ms = (onset_sample - self._last_speech_end_sample[track]) / self.samplerate * 1000
+            if gap_ms >= self.gap_cut_ms:
+                self._cut_pending_sentence(track, self._last_speech_end_sample[track])
+
         if speaking:
             self._last_speech_ms[track] = now_ms
             self._silence_start[track] = 0
@@ -157,6 +182,9 @@ class LivePipeline:
                 self._sentence_start[track] = max(0, int(start_sample / self.samplerate * 1000))
                 self._sentence_sample[track] = max(0, start_sample - int(0.2 * self.samplerate))
             self._spoken[track] += 1
+            self._last_speech_end_sample[track] = (
+                start_sample + self._speech_edges(block, threshold)[1]
+            )
             # 噪声底线只向下慢速跟随，避免把持续人声算进底噪
             if rms < floor:
                 self._noise[track] = 0.9 * floor + 0.1 * rms
@@ -213,6 +241,40 @@ class LivePipeline:
                               start_ms=self._sentence_start[track], end_ms=now_ms, live=True)
                 )
 
+    @staticmethod
+    def _speech_edges(block: np.ndarray, threshold: float) -> tuple[int, int]:
+        """块内语音的首/尾采样点（10ms 窗扫描）。没语音时返回 (len, len)。"""
+        n = len(block)
+        step = 160  # 10ms
+        x = np.asarray(block, dtype=np.float64)
+        first, last, found = n, 0, False
+        for i in range(0, max(1, n - step + 1), step):
+            seg = x[i:i + step]
+            if float(np.sqrt(np.mean(seg ** 2) + 1e-12)) > threshold:
+                if not found:
+                    first, found = i, True
+                last = i + step
+        return (first, last) if found else (n, n)
+
+    def _cut_pending_sentence(self, track: str, cut_sample: int) -> None:
+        """把上一句立即定稿：间隙已够长、又有人接话，说明换人了。
+
+        结束时间取上一块语音的结束处（+0.15s 尾巴，别把尾音切掉），音频也切到那里，
+        这样下一句不会把上一句的尾巴一起拿去做声纹，避免又被判成同一个人。
+        """
+        if self._sentence_start[track] is None:
+            return
+        end_sample = min(cut_sample + int(0.15 * self.samplerate), self._consumed[track])
+        audio = self._slice_audio(track, self._sentence_sample[track], end_sample)
+        final = self.engine.finish_sentence(track)
+        end_ms = int(cut_sample / self.samplerate * 1000)
+        if self._spoken[track] >= 4 and final.strip():
+            self._emit_final(track, final.strip(), audio, self._sentence_start[track], end_ms)
+        self._sentence_start[track] = None
+        self.last_text[track] = ""
+        self._spoken[track] = 0
+        self._live_done[track] = False
+
     def _remember_audio(self, track: str, start_sample: int, block: np.ndarray) -> None:
         self._audio_buf[track].append((start_sample, block))
         self._audio_samples[track] += len(block)
@@ -236,11 +298,12 @@ class LivePipeline:
         return np.concatenate(picked).astype(np.float32, copy=False)
 
     def _emit_final(self, track: str, text: str, audio: np.ndarray | None = None,
-                    start_ms: int | None = None) -> None:
+                    start_ms: int | None = None, end_ms: int | None = None) -> None:
         if not text or text == self._last_final[track]:
             return
         self._last_final[track] = text
-        end_ms = int(self._consumed[track] / self.samplerate * 1000)
+        if end_ms is None:
+            end_ms = int(self._consumed[track] / self.samplerate * 1000)
         start = start_ms if start_ms is not None else (self._sentence_start[track] or max(0, end_ms - 3000))
         if self.on_final:
             self.on_final(Caption(track, text, start, end_ms, True, audio))

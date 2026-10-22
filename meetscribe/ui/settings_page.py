@@ -371,6 +371,19 @@ class SettingsPage(QWidget):
         lay.addWidget(_row("断句静音", self.spin_endpoint,
                            "越小断句越碎、越大整段越长；多人抢话/快节奏建议 0.6~0.8，安静会议 1.2",
                            stretch=False))
+
+        self.spin_gap_cut = NoWheelSpinBox()
+        self.spin_gap_cut.setRange(0, 1200)
+        self.spin_gap_cut.setSingleStep(50)
+        self.spin_gap_cut.setSuffix(" 毫秒")
+        self.spin_gap_cut.setFixedWidth(150)
+        lay.addWidget(_row("换人间隙", self.spin_gap_cut,
+                           "句里出现这么长的静音、又有人接话，就先把上一句定稿（0=只看断句静音）",
+                           stretch=False))
+
+        self.chk_split = QCheckBox(
+            "精修时复查换人：一句里前后是两个人，就拆成两句各自标说话人")
+        lay.addWidget(self.chk_split)
         return card
 
     def _build_test(self) -> QFrame:
@@ -532,6 +545,8 @@ class SettingsPage(QWidget):
         self.chk_live_refine.setChecked(bool(s.get("asr.live_refine", True)))
         self.spin_live_after.setValue(float(s.get("asr.live_refine_after", 6.0)))
         self.spin_endpoint.setValue(float(s.get("asr.endpoint_silence", 1.2)))
+        self.spin_gap_cut.setValue(int(s.get("asr.gap_cut_ms", 400)))
+        self.chk_split.setChecked(bool(s.get("asr.split_enabled", True)))
         self.edit_root.setText(str(s.get("storage.session_root", "data/sessions")))
         self.chk_llm.setChecked(bool(s.get("llm.enabled", False)))
         self.edit_llm_url.setText(str(s.get("llm.base_url", "http://127.0.0.1:11434")))
@@ -631,6 +646,8 @@ class SettingsPage(QWidget):
         self.chk_live_refine.setChecked(hw.can_live_refine and hw.can_two_pass)
         self.spin_live_after.setValue(6.0 if hw.can_live_refine else 8.0)
         self.spin_endpoint.setValue(1.2)
+        self.spin_gap_cut.setValue(400 if hw.can_two_pass else 0)
+        self.chk_split.setChecked(hw.can_two_pass)
         self.level_status.setObjectName("Good" if hw.can_two_pass else "Warn")
         self.level_status.style().unpolish(self.level_status)
         self.level_status.style().polish(self.level_status)
@@ -736,6 +753,8 @@ class SettingsPage(QWidget):
         s.set("asr.live_refine", self.chk_live_refine.isChecked())
         s.set("asr.live_refine_after", self.spin_live_after.value())
         s.set("asr.endpoint_silence", self.spin_endpoint.value())
+        s.set("asr.gap_cut_ms", int(self.spin_gap_cut.value()))
+        s.set("asr.split_enabled", self.chk_split.isChecked())
         s.set("storage.session_root", self.edit_root.text().strip() or "data/sessions")
         s.set("llm.enabled", self.chk_llm.isChecked())
         s.set("llm.base_url", self.edit_llm_url.text().strip() or "http://127.0.0.1:11434")
